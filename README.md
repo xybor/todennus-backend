@@ -17,13 +17,13 @@ Strictly follow Clean Architecture and DDD.
 ### Features
 
 - OAuth2 Provider with:
- + Authorization Code Flow.
- + Authorization Code Flow With PKCE.
- + Implicit Flow.
- + Resource Owner Password Credentials Flow (**Completed**).
- + Client Credentials Flow.
- + Refresh Token Flow.
- + Device Flow (low priority).
+  + Authorization Code Flow.
+  + Authorization Code Flow With PKCE.
+  + Implicit Flow.
+  + Resource Owner Password Credentials Flow (**Completed**).
+  + Client Credentials Flow.
+  + Refresh Token Flow.
+  + Device Flow (low priority).
 
 - Support registering by OAuth2.
 
