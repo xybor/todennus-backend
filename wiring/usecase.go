@@ -21,7 +21,12 @@ func InitializeUsecases(
 	uc := Usecases{}
 	uc.UserUsecase = usecase.NewUserUsecase(repositories.UserRepository, domains.UserDomain)
 	uc.OAuth2Usecase = usecase.NewOAuth2Usecase(
-		infras.TokenEngine, domains.UserDomain, domains.OAuth2Domain, repositories.UserRepository)
+		infras.TokenEngine,
+		domains.UserDomain,
+		domains.OAuth2Domain,
+		repositories.UserRepository,
+		repositories.RefreshTokenRepository,
+	)
 
 	return uc, nil
 }
