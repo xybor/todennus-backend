@@ -1,9 +1,9 @@
 package dto
 
 import (
-	"errors"
 	"net/http"
 
+	"github.com/xybor/todennus-backend/pkg/xerror"
 	"github.com/xybor/todennus-backend/usecase"
 	"github.com/xybor/todennus-backend/usecase/dto"
 )
@@ -71,14 +71,19 @@ func OAuth2TokenResponseFrom(resp dto.OAuth2TokenResponse) OAuth2TokenResponseDT
 
 func OAuth2TokenErrorResponseFrom(err error) (int, OAuth2TokenErrorResponseDTO) {
 	switch {
-	case errors.Is(err, usecase.ErrInvalidGrantType):
+	case xerror.Is(err, usecase.ErrInvalidGrantType):
 		return http.StatusBadRequest, OAuth2TokenErrorResponseDTO{
 			Error:            "unsupported_grant_type",
 			ErrorDescription: err.Error(),
 		}
 
-	case errors.Is(err, usecase.ErrUsernamePasswordInvalid):
-		return http.StatusBadRequest, OAuth2TokenErrorResponseDTO{
+	case xerror.Is(
+		err,
+		usecase.ErrInvalidRefreshToken,
+		usecase.ErrStolenRefreshToken,
+		usecase.ErrUsernamePasswordInvalid,
+	):
+		return http.StatusUnauthorized, OAuth2TokenErrorResponseDTO{
 			Error:            "invalid_grant",
 			ErrorDescription: err.Error(),
 		}

@@ -15,7 +15,7 @@ type UserModel struct {
 	UpdatedAt   time.Time `gorm:"updated_at"`
 }
 
-func (*UserModel) TableName() string {
+func (UserModel) TableName() string {
 	return "users"
 }
 

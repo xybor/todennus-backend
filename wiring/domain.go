@@ -21,11 +21,11 @@ func InitializeDomains(ctx context.Context, config config.Config, infras Infras)
 	var finalErr error
 	var err error
 
-	domains.UserDomain, err = domain.NewUserDomain(infras.Snowflake)
+	domains.UserDomain, err = domain.NewUserDomain(infras.NewSnowflakeNode())
 	finalErr = errors.Join(finalErr, err)
 
 	domains.OAuth2Domain, err = domain.NewOAuth2Domain(
-		infras.Snowflake,
+		infras.NewSnowflakeNode(),
 		config.Variable.Authentication.TokenIssuer,
 		time.Duration(config.Variable.Authentication.AccessTokenExpiration)*time.Second,
 		time.Duration(config.Variable.Authentication.RefreshTokenExpiration)*time.Second,

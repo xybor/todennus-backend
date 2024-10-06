@@ -11,24 +11,19 @@ import (
 )
 
 type Infras struct {
-	Logger      logging.Logger
-	Snowflake   *snowflake.Node
-	TokenEngine token.Engine
+	Logger        logging.Logger
+	SnowflakeNode int64
+	TokenEngine   token.Engine
 }
 
 func InitializeInfras(config config.Config) (Infras, error) {
-	ctxConfig := Infras{}
-
-	var err error
+	infras := Infras{}
 
 	// Logger
-	ctxConfig.Logger = logging.NewSLogger(logging.Level(config.Server.LogLevel))
+	infras.Logger = logging.NewSLogger(logging.Level(config.Server.LogLevel))
 
 	// Snowflake node
-	ctxConfig.Snowflake, err = snowflake.NewNode(int64(config.Server.NodeID))
-	if err != nil {
-		return ctxConfig, err
-	}
+	infras.SnowflakeNode = int64(config.Server.NodeID)
 
 	// Token engine
 	tokenEngine := token.NewJWTEngine()
@@ -37,22 +32,30 @@ func InitializeInfras(config config.Config) (Infras, error) {
 	if authSecrets.TokenRSAPrivateKey != "" && authSecrets.TokenRSAPublicKey != "" {
 		err := tokenEngine.WithRSA(authSecrets.TokenRSAPrivateKey, authSecrets.TokenRSAPublicKey)
 		if err != nil {
-			return ctxConfig, err
+			return infras, err
 		}
 	}
 
 	if authSecrets.TokenHMACSecretKey != "" {
 		if err := tokenEngine.WithHMAC(authSecrets.TokenHMACSecretKey); err != nil {
-			return ctxConfig, err
+			return infras, err
 		}
 	}
 
-	ctxConfig.TokenEngine = tokenEngine
+	infras.TokenEngine = tokenEngine
 
-	return ctxConfig, nil
+	return infras, nil
 }
 
 func WithInfras(ctx context.Context, infras Infras) context.Context {
 	ctx = xcontext.WithLogger(ctx, infras.Logger)
 	return ctx
+}
+
+func (infras *Infras) NewSnowflakeNode() *snowflake.Node {
+	result, err := snowflake.NewNode(infras.SnowflakeNode)
+	if err != nil {
+		panic(err)
+	}
+	return result
 }

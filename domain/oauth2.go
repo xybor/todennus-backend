@@ -14,7 +14,7 @@ type OAuth2TokenMedata struct {
 	ExpiresAt int
 	NotBefore int
 
-	// Not include in AccessToken
+	// Not included in AccessToken
 	ExpiresIn int
 }
 
@@ -76,6 +76,7 @@ func (domain *OAuth2Domain) NextRefreshToken(current OAuth2RefreshToken) (OAuth2
 		return OAuth2RefreshToken{}, err
 	}
 
+	next.Metadata.Id = current.Metadata.Id
 	next.SequenceNumber = current.SequenceNumber + 1
 	return next, nil
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/xybor/todennus-backend/pkg/xcontext"
 )
 
 var _ Engine = (*JWTEngine)(nil)
@@ -74,7 +75,8 @@ func (engine *JWTEngine) Generate(ctx context.Context, claims Claims) (string, e
 func (engine *JWTEngine) Validate(ctx context.Context, token string, claims Claims) (bool, error) {
 	parsedToken, err := jwt.ParseWithClaims(token, claims, engine.publicKeyFunc)
 	if err != nil {
-		return false, err
+		xcontext.Logger(ctx).Debug("failed to parse token", "err", err)
+		return false, nil
 	}
 
 	_, ok := parsedToken.Claims.(Claims)
