@@ -10,6 +10,7 @@ import (
 type Usecases struct {
 	abstraction.UserUsecase
 	abstraction.OAuth2Usecase
+	abstraction.OAuth2ClientUsecase
 }
 
 func InitializeUsecases(
@@ -26,6 +27,11 @@ func InitializeUsecases(
 		domains.OAuth2Domain,
 		repositories.UserRepository,
 		repositories.RefreshTokenRepository,
+		repositories.OAuth2ClientRepository,
+	)
+	uc.OAuth2ClientUsecase = usecase.NewOAuth2ClientUsecase(
+		domains.OAuth2Domain,
+		repositories.OAuth2ClientRepository,
 	)
 
 	return uc, nil

@@ -81,7 +81,8 @@ func (err ServiceError) WithMessage(msg string, a ...any) ServiceError {
 	}
 
 	return ServiceError{
-		Err:     err.Err,
-		Message: msg,
+		Err:       err.Err,
+		Serverity: err.Serverity,
+		Message:   msg,
 	}
 }

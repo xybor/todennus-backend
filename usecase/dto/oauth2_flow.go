@@ -140,10 +140,10 @@ func (token *OAuth2IDToken) To() domain.OAuth2IDToken {
 	}
 }
 
-type OAuth2TokenRequest struct {
+type OAuth2TokenRequestDTO struct {
 	GrantType string
 
-	ClientID     string
+	ClientID     int64
 	ClientSecret string
 
 	// Authorization Code Flow
@@ -159,10 +159,22 @@ type OAuth2TokenRequest struct {
 	RefreshToken string
 }
 
-type OAuth2TokenResponse struct {
+type OAuth2TokenResponseDTO struct {
 	AccessToken  string
 	TokenType    string
 	ExpiresIn    int
 	RefreshToken string
 	Scope        string
+}
+
+type OAuth2TokenAdminRequestDTO struct {
+	Username string
+	Password string
+}
+
+type OAuth2TokenAdminResponseDTO struct {
+	AccessToken string
+	TokenType   string
+	ExpiresIn   int
+	Scope       string
 }

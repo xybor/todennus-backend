@@ -10,6 +10,7 @@ import (
 type Repositories struct {
 	abstraction.UserRepository
 	abstraction.RefreshTokenRepository
+	abstraction.OAuth2ClientRepository
 }
 
 func InitializeRepositories(ctx context.Context, db Databases) (Repositories, error) {
@@ -17,6 +18,7 @@ func InitializeRepositories(ctx context.Context, db Databases) (Repositories, er
 
 	r.UserRepository = database.NewUserRepository(db.GormPostgres)
 	r.RefreshTokenRepository = database.NewRefreshTokenRepository(db.GormPostgres)
+	r.OAuth2ClientRepository = database.NewOAuth2ClientRepository(db.GormPostgres)
 
 	return r, nil
 }

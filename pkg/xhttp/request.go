@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
 )
 
 const (
@@ -14,73 +16,113 @@ const (
 )
 
 func ParseRequest[T any](req *http.Request) (T, error) {
+	var defaultT T
 	var t T
 
-	contentType := req.Header.Get("content-type")
-	switch contentType {
-	case ContentTypeApplicationJSON:
-		err := json.NewDecoder(req.Body).Decode(&t)
-		if err != nil {
-			return t, fmt.Errorf("%w%s", ErrBadRequest, err.Error())
+	if err := parseURLParameter(&t, req); err != nil {
+		return t, err
+	}
+
+	switch req.Method {
+	case http.MethodGet:
+		if err := parseURLQuery(&t, req); err != nil {
+			return defaultT, err
 		}
+
 		return t, nil
-	case ContentTypeXWWWFormUrlEncoded:
-		return parseURLEncodedFormData[T](req)
+
+	case http.MethodPost, http.MethodPut, http.MethodDelete:
+		contentType := req.Header.Get("content-type")
+		switch contentType {
+		case ContentTypeApplicationJSON:
+			if err := json.NewDecoder(req.Body).Decode(&t); err != nil {
+				return defaultT, fmt.Errorf("%w%s", ErrBadRequest, err.Error())
+			}
+			return t, nil
+
+		case ContentTypeXWWWFormUrlEncoded:
+			if err := parseURLEncodedFormData(&t, req); err != nil {
+				return defaultT, err
+			}
+
+			return t, nil
+
+		default:
+			return defaultT, fmt.Errorf("%w%s", ErrBadRequest, fmt.Sprintf("not support content type %s", contentType))
+		}
+
 	default:
-		return t, fmt.Errorf("%w%s", ErrBadRequest, fmt.Sprintf("not support content type %s", contentType))
+		return defaultT, fmt.Errorf("%w%s", ErrBadRequest, fmt.Sprintf("not support method %s", req.Method))
 	}
 }
 
-func parseURLEncodedFormData[T any](req *http.Request) (T, error) {
-	var result T
-	resultType := reflect.TypeOf(result)
-	resultVal := reflect.ValueOf(&result).Elem()
+func parseURLEncodedFormData[T any](obj T, req *http.Request) error {
+	return parse(obj, req, "form", func(req *http.Request, fieldName string) string {
+		return req.FormValue(fieldName)
+	})
+}
 
-	for i := 0; i < resultType.NumField(); i++ {
-		field := resultType.Field(i)
+func parseURLQuery[T any](obj T, req *http.Request) error {
+	return parse(obj, req, "query", func(r *http.Request, s string) string {
+		return req.URL.Query()[s][0]
+	})
+}
+
+func parseURLParameter[T any](obj T, req *http.Request) error {
+	return parse(obj, req, "param", func(r *http.Request, s string) string {
+		return chi.URLParam(r, s)
+	})
+}
+
+func parse[T any](obj T, req *http.Request, tagName string, fieldVal func(*http.Request, string) string) error {
+	objType := reflect.TypeOf(obj).Elem()
+	objVal := reflect.ValueOf(obj).Elem()
+
+	for i := 0; i < objType.NumField(); i++ {
+		field := objType.Field(i)
 		fieldName := field.Name
 
-		fieldTag := field.Tag.Get("form")
-		if fieldTag == "" {
-			return result, fmt.Errorf("not found form tag of field %s", fieldName)
-		}
-
-		formValue := req.FormValue(fieldTag)
-		if formValue == "" {
+		tagValue := field.Tag.Get(tagName)
+		if tagValue == "" {
 			continue
 		}
 
-		fieldVal := resultVal.FieldByName(fieldName)
+		fieldValue := fieldVal(req, tagValue)
+		if fieldValue == "" {
+			continue
+		}
+
+		fieldVal := objVal.FieldByName(fieldName)
 
 		switch field.Type.Kind() {
 		case reflect.String:
-			fieldVal.SetString(formValue)
+			fieldVal.SetString(fieldValue)
 
 		case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
-			intFormVal, err := strconv.ParseInt(formValue, 10, 64)
+			intFormVal, err := strconv.ParseInt(fieldValue, 10, 64)
 			if err != nil {
-				return result, fmt.Errorf("%w%s", ErrBadRequest, err.Error())
+				return fmt.Errorf("%w%s", ErrBadRequest, err.Error())
 			}
 			fieldVal.SetInt(intFormVal)
 
 		case reflect.Float32, reflect.Float64:
-			floatFormVal, err := strconv.ParseFloat(formValue, 64)
+			floatFormVal, err := strconv.ParseFloat(fieldValue, 64)
 			if err != nil {
-				return result, fmt.Errorf("%w%s", ErrBadRequest, err.Error())
+				return fmt.Errorf("%w%s", ErrBadRequest, err.Error())
 			}
 			fieldVal.SetFloat(floatFormVal)
 
 		case reflect.Bool:
-			boolFormVal, err := strconv.ParseBool(formValue)
+			boolFormVal, err := strconv.ParseBool(fieldValue)
 			if err != nil {
-				return result, fmt.Errorf("%w:%s", ErrBadRequest, err.Error())
+				return fmt.Errorf("%w:%s", ErrBadRequest, err.Error())
 			}
 			fieldVal.SetBool(boolFormVal)
 
 		default:
-			return result, fmt.Errorf("not support type %s", field.Type.Kind())
+			return fmt.Errorf("not support type %s", field.Type.Kind())
 		}
 	}
 
-	return result, nil
+	return nil
 }

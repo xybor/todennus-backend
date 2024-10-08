@@ -66,5 +66,9 @@ func loadSecret(paths ...string) (Secret, error) {
 		return s, err
 	}
 
+	if err := envconfig.Process("admin", &s.Admin); err != nil {
+		return s, err
+	}
+
 	return s, nil
 }

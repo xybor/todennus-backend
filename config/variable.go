@@ -9,6 +9,7 @@ type Variable struct {
 	Server         ServerVariable         `ini:"server"`
 	Postgres       PostgresVariable       `ini:"postgres"`
 	Authentication AuthenticationVariable `ini:"authentication"`
+	OAuth2         OAuth2Variable         `ini:"oauth2"`
 }
 
 func DefaultVariable() Variable {
@@ -16,6 +17,7 @@ func DefaultVariable() Variable {
 		Server:         DefaultSystemVariable(),
 		Postgres:       DefaultPostgresVariable(),
 		Authentication: DefaultAuthenticationVariable(),
+		OAuth2:         DefaultOAuth2Variable(),
 	}
 }
 
@@ -68,5 +70,15 @@ func DefaultAuthenticationVariable() AuthenticationVariable {
 		AccessTokenExpiration:  60,           // 60s
 		RefreshTokenExpiration: 60 * 60,      // 1h
 		IDTokenExpiration:      24 * 60 * 60, // 1d
+	}
+}
+
+type OAuth2Variable struct {
+	ClientSecretLength int `ini:"client_secret_length"`
+}
+
+func DefaultOAuth2Variable() OAuth2Variable {
+	return OAuth2Variable{
+		ClientSecretLength: 32,
 	}
 }

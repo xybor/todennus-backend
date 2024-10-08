@@ -7,6 +7,7 @@ import (
 	"github.com/xybor/todennus-backend/adapter/rest/abstraction"
 	"github.com/xybor/todennus-backend/adapter/rest/dto"
 	"github.com/xybor/todennus-backend/adapter/rest/response"
+	"github.com/xybor/todennus-backend/pkg/logging"
 	"github.com/xybor/todennus-backend/pkg/xcontext"
 	"github.com/xybor/todennus-backend/pkg/xhttp"
 )
@@ -35,16 +36,16 @@ func (a *OAuth2Adapter) Token() http.HandlerFunc {
 
 		resp, err := a.oauth2Usecase.Token(ctx, req.To())
 		if err != nil {
-			if code, errResp := dto.OAuth2TokenErrorResponseFrom(err); code != 0 {
+			if code, errResp := dto.NewOAuth2TokenErrorResponseDTO(err); code != 0 {
 				response.Write(ctx, w, code, errResp)
 			} else {
-				xcontext.Logger(ctx).Warn(err.Error())
+				logging.LogError(xcontext.Logger(ctx), err)
 				response.WriteErrorMsg(ctx, w, http.StatusInternalServerError, "Internal server error")
 			}
 
 			return
 		}
 
-		response.Write(ctx, w, http.StatusOK, dto.OAuth2TokenResponseFrom(resp))
+		response.Write(ctx, w, http.StatusOK, dto.NewOAuth2TokenResponseDTO(resp))
 	}
 }

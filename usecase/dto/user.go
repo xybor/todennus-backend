@@ -11,11 +11,11 @@ type UserRegisterResponseDTO struct {
 	User domain.User
 }
 
-type UserValidateRequestDTO struct {
+type UserRegisterSuperAdminRequestDTO struct {
 	Username string
 	Password string
 }
 
-type UserValidateResponseDTO struct {
+type UserRegisterSuperAdminResponseDTO struct {
 	User domain.User
 }

@@ -3,6 +3,7 @@ package dto
 import (
 	"net/http"
 
+	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/pkg/xerror"
 	"github.com/xybor/todennus-backend/usecase"
 	"github.com/xybor/todennus-backend/usecase/dto"
@@ -11,7 +12,7 @@ import (
 type OAuth2TokenRequestDTO struct {
 	GrantType string `form:"grant_type"`
 
-	ClientID     string `form:"client_id"`
+	ClientID     int64  `form:"client_id"`
 	ClientSecret string `form:"client_secret"`
 
 	// Authorization Code Flow
@@ -27,8 +28,8 @@ type OAuth2TokenRequestDTO struct {
 	RefreshToken string `form:"refresh_token"`
 }
 
-func (req OAuth2TokenRequestDTO) To() dto.OAuth2TokenRequest {
-	return dto.OAuth2TokenRequest{
+func (req OAuth2TokenRequestDTO) To() dto.OAuth2TokenRequestDTO {
+	return dto.OAuth2TokenRequestDTO{
 		GrantType: req.GrantType,
 
 		ClientID:     req.ClientID,
@@ -59,7 +60,7 @@ type OAuth2TokenErrorResponseDTO struct {
 	ErrorURI         string `json:"error_uri,omitempty"`
 }
 
-func OAuth2TokenResponseFrom(resp dto.OAuth2TokenResponse) OAuth2TokenResponseDTO {
+func NewOAuth2TokenResponseDTO(resp dto.OAuth2TokenResponseDTO) OAuth2TokenResponseDTO {
 	return OAuth2TokenResponseDTO{
 		AccessToken:  resp.AccessToken,
 		TokenType:    resp.TokenType,
@@ -69,18 +70,30 @@ func OAuth2TokenResponseFrom(resp dto.OAuth2TokenResponse) OAuth2TokenResponseDT
 	}
 }
 
-func OAuth2TokenErrorResponseFrom(err error) (int, OAuth2TokenErrorResponseDTO) {
+func NewOAuth2TokenErrorResponseDTO(err error) (int, OAuth2TokenErrorResponseDTO) {
 	switch {
-	case xerror.Is(err, usecase.ErrInvalidGrantType):
+	case xerror.Is(err, usecase.ErrGrantTypeInvalid):
 		return http.StatusBadRequest, OAuth2TokenErrorResponseDTO{
 			Error:            "unsupported_grant_type",
 			ErrorDescription: err.Error(),
 		}
 
+	case xerror.Is(err, usecase.ErrClientInvalid, domain.ErrClientInvalid):
+		return http.StatusBadRequest, OAuth2TokenErrorResponseDTO{
+			Error:            "invalid_client",
+			ErrorDescription: err.Error(),
+		}
+
+	case xerror.Is(err, domain.ErrClientUnauthorized):
+		return http.StatusUnauthorized, OAuth2TokenErrorResponseDTO{
+			Error:            "invalid_client",
+			ErrorDescription: err.Error(),
+		}
+
 	case xerror.Is(
 		err,
-		usecase.ErrInvalidRefreshToken,
-		usecase.ErrStolenRefreshToken,
+		usecase.ErrRefreshTokenInvalid,
+		usecase.ErrRefreshTokenStolen,
 		usecase.ErrUsernamePasswordInvalid,
 	):
 		return http.StatusUnauthorized, OAuth2TokenErrorResponseDTO{

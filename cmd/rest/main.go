@@ -59,7 +59,7 @@ var rootCommand = &cobra.Command{
 		}
 
 		address := fmt.Sprintf("%s:%d", config.Variable.Server.Host, config.Variable.Server.Port)
-		app := rest.App(infras, usecases)
+		app := rest.App(config, infras, usecases)
 
 		xcontext.Logger(ctx).Info("Server started", "address", address)
 		if err := http.ListenAndServe(address, app); err != nil {

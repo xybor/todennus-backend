@@ -3,6 +3,7 @@ package config
 type Secret struct {
 	Postgres       PostgresSecret
 	Authentication AuthenticationSecret
+	Admin          AdminSecret
 }
 
 type PostgresSecret struct {
@@ -19,4 +20,9 @@ type AuthenticationSecret struct {
 
 	// Use HMAC to sign and verify the token. Not support verifying at client.
 	TokenHMACSecretKey string `envconfig:"token_hmac_secret_key"`
+}
+
+type AdminSecret struct {
+	SecretKey     string `envconfig:"secret_key"`
+	MaxExpiration int    `envconfig:"max_expiration"` // in second
 }

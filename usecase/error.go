@@ -11,9 +11,16 @@ var (
 	ErrUsernameExisted         = errors.New("username is existed")
 	ErrUsernameNotFound        = errors.New("username is not found")
 	ErrUsernamePasswordInvalid = errors.New("username or password is invalid")
-	ErrInvalidGrantType        = errors.New("grant type is not supported by provider")
-	ErrInvalidRefreshToken     = errors.New("token is invalid")
-	ErrStolenRefreshToken      = errors.New("IMPORTANT: refresh token was stolen, we will remove it")
+
+	ErrRefreshTokenInvalid = errors.New("token is invalid")
+	ErrRefreshTokenStolen  = errors.New("IMPORTANT: refresh token was stolen, we will remove it")
+
+	ErrGrantTypeInvalid = errors.New("grant type is not supported by provider")
+
+	ErrUnauthorized = errors.New("unauthorized")
+
+	ErrClientInvalid  = errors.New("client is invalid")
+	ErrClientNotFound = errors.New("client is not found")
 )
 
 func wrapDomainError(err error) xerror.ServiceError {

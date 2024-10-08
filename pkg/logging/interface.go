@@ -1,6 +1,8 @@
 package logging
 
 import (
+	"errors"
+
 	"github.com/xybor/todennus-backend/pkg/xerror"
 )
 
@@ -36,6 +38,12 @@ func Serverity2Level(s xerror.Serverity) Level {
 	}
 }
 
-func LogServiceError(logger Logger, err xerror.ServiceError, a ...any) {
-	logger.Log(Serverity2Level(err.Serverity), err.Error(), a...)
+func LogError(logger Logger, err error, a ...any) {
+	var serviceErr xerror.ServiceError
+	switch {
+	case errors.As(err, &serviceErr):
+		logger.Log(Serverity2Level(serviceErr.Serverity), err.Error(), a...)
+	default:
+		logger.Warn(err.Error(), a...)
+	}
 }
