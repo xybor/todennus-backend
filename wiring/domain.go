@@ -26,6 +26,7 @@ func InitializeDomains(ctx context.Context, config config.Config, infras Infras)
 
 	domains.OAuth2Domain, err = domain.NewOAuth2Domain(
 		infras.NewSnowflakeNode(),
+		config.Variable.OAuth2.ClientSecretLength,
 		config.Variable.Authentication.TokenIssuer,
 		time.Duration(config.Variable.Authentication.AccessTokenExpiration)*time.Second,
 		time.Duration(config.Variable.Authentication.RefreshTokenExpiration)*time.Second,

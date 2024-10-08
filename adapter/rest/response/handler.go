@@ -10,6 +10,7 @@ import (
 	"github.com/xybor/todennus-backend/pkg/xcontext"
 	"github.com/xybor/todennus-backend/pkg/xerror"
 	"github.com/xybor/todennus-backend/pkg/xhttp"
+	"github.com/xybor/todennus-backend/usecase"
 )
 
 type ErrData struct {
@@ -28,7 +29,8 @@ type ResponseHandler struct {
 }
 
 func NewResponseHandler(val any, err error) *ResponseHandler {
-	return &ResponseHandler{resp: val, err: err, code: -1}
+	return (&ResponseHandler{resp: val, err: err, code: -1}).
+		Map(http.StatusUnauthorized, usecase.ErrUnauthorized)
 }
 
 func (h *ResponseHandler) Map(code int, errs ...error) *ResponseHandler {
@@ -62,11 +64,11 @@ func (h *ResponseHandler) WriteHTTPResponse(ctx context.Context, w http.Response
 		switch {
 		case errors.As(h.err, &serviceErr):
 			response.Data = ErrData{Msg: serviceErr.Message}
-			logging.LogServiceError(xcontext.Logger(ctx), serviceErr)
 		default:
 			response.Data = ErrData{Msg: http.StatusText(h.code)}
-			xcontext.Logger(ctx).Debug(h.err.Error())
 		}
+
+		logging.LogError(xcontext.Logger(ctx), h.err)
 	} else {
 		response.Data = h.resp
 	}

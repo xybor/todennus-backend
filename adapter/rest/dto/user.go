@@ -21,7 +21,7 @@ type UserRegisterResponseDTO struct {
 	resource.User
 }
 
-func NewUserRegisterResponse(resp dto.UserRegisterResponseDTO) UserRegisterResponseDTO {
+func NewUserRegisterResponseDTO(resp dto.UserRegisterResponseDTO) UserRegisterResponseDTO {
 	return UserRegisterResponseDTO{
 		User: resource.NewUser(resp.User),
 	}

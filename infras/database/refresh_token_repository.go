@@ -15,13 +15,13 @@ func NewRefreshTokenRepository(db *gorm.DB) *RefreshTokenRepository {
 	return &RefreshTokenRepository{db: db}
 }
 
-func (repo *RefreshTokenRepository) Save(
+func (repo *RefreshTokenRepository) Create(
 	ctx context.Context,
 	refreshTokenId,
 	accessTokenID int64,
 	seq int,
 ) error {
-	return convertGormError(repo.db.Save(&model.RefreshTokenModel{
+	return convertGormError(repo.db.Create(&model.RefreshTokenModel{
 		RefreshTokenID: refreshTokenId,
 		AccessTokenID:  accessTokenID,
 		Seq:            seq,

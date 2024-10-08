@@ -13,6 +13,8 @@ type contextKey int
 const (
 	loggerKey contextKey = iota
 	requestTimeKey
+	requestUserIDKey
+	adminExpiresAt
 )
 
 func WithLogger(ctx context.Context, logger logging.Logger) context.Context {
@@ -33,4 +35,32 @@ func WithRequestTime(ctx context.Context, t time.Time) context.Context {
 
 func RequestTime(ctx context.Context) time.Time {
 	return ctx.Value(requestTimeKey).(time.Time)
+}
+
+func WithRequestUserID(ctx context.Context, userID int64) context.Context {
+	return context.WithValue(ctx, requestUserIDKey, userID)
+}
+
+func RequestUserID(ctx context.Context) int64 {
+	if val := ctx.Value(requestUserIDKey); val != nil {
+		return val.(int64)
+	}
+
+	return 0
+}
+
+func WithAdminExpiresAt(ctx context.Context, t time.Time) context.Context {
+	return context.WithValue(ctx, adminExpiresAt, t)
+}
+
+func AdminExpiresAt(ctx context.Context) time.Time {
+	if val := ctx.Value(adminExpiresAt); val != nil {
+		return val.(time.Time)
+	}
+
+	return time.Time{}
+}
+
+func IsAdmin(ctx context.Context) bool {
+	return AdminExpiresAt(ctx).After(time.Now())
 }

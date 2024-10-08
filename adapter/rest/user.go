@@ -35,9 +35,9 @@ func (a *UserRESTAdapter) Register() http.HandlerFunc {
 		}
 
 		user, err := a.userUsecase.Register(ctx, request.To())
-		response.NewResponseHandler(dto.NewUserRegisterResponse(user), err).
+		response.NewResponseHandler(dto.NewUserRegisterResponseDTO(user), err).
 			Map(http.StatusConflict, usecase.ErrUsernameExisted).
-			Map(http.StatusBadRequest, domain.ErrInvalidUsername, domain.ErrInvalidPassword).
+			Map(http.StatusBadRequest, domain.ErrUsernameInvalid, domain.ErrPasswordInvalid).
 			Map(http.StatusInternalServerError).
 			WriteHTTPResponse(ctx, w)
 	}
