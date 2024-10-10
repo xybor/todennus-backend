@@ -38,6 +38,7 @@ Strictly follow Clean Architecture and DDD.
 - Handle scope (**completed**).
 - Allow integrate with custom external IdP.
 - Allow integrate with third-party OAuth2 provider (Google, Discord, etc.).
+- Implement rate limiter.
 
 ### User traffic
 
