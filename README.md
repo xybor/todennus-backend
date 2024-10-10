@@ -1,6 +1,6 @@
 # Todennus backend
 
-A centralized Authentication Server and OAuth2 Provider.
+An Identity, OpenID Connect, and OAuth2 Provider.
 
 ## Documentations
 
