@@ -53,6 +53,8 @@ func (h *ResponseHandler) Map(code int, errs ...error) *ResponseHandler {
 }
 
 func (h *ResponseHandler) WriteHTTPResponse(ctx context.Context, w http.ResponseWriter) {
+	h.Map(http.StatusInternalServerError)
+
 	if h.code == -1 {
 		h.code = http.StatusOK
 	}

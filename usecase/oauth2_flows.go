@@ -7,6 +7,7 @@ import (
 
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/infras/database"
+	"github.com/xybor/todennus-backend/pkg/scope"
 	"github.com/xybor/todennus-backend/pkg/token"
 	"github.com/xybor/todennus-backend/pkg/xcontext"
 	"github.com/xybor/todennus-backend/pkg/xerror"
@@ -27,8 +28,9 @@ const (
 type OAuth2Usecase struct {
 	tokenEngine token.Engine
 
-	userDomain   abstraction.UserDomain
-	oauth2Domain abstraction.OAuth2Domain
+	userDomain         abstraction.UserDomain
+	oauth2ClientDomain abstraction.OAuth2ClientDomain
+	oauth2FlowDomain   abstraction.OAuth2FlowDomain
 
 	userRepo         abstraction.UserRepository
 	refreshTokenRepo abstraction.RefreshTokenRepository
@@ -38,15 +40,18 @@ type OAuth2Usecase struct {
 func NewOAuth2Usecase(
 	tokenEngine token.Engine,
 	userDomain abstraction.UserDomain,
-	oauth2Domain abstraction.OAuth2Domain,
+	oauth2FlowDomain abstraction.OAuth2FlowDomain,
+	oauth2ClientDomain abstraction.OAuth2ClientDomain,
 	userRepo abstraction.UserRepository,
 	refreshTokenRepo abstraction.RefreshTokenRepository,
 	oauth2ClientRepo abstraction.OAuth2ClientRepository,
 ) *OAuth2Usecase {
 	return &OAuth2Usecase{
-		tokenEngine:      tokenEngine,
-		userDomain:       userDomain,
-		oauth2Domain:     oauth2Domain,
+		tokenEngine:        tokenEngine,
+		userDomain:         userDomain,
+		oauth2FlowDomain:   oauth2FlowDomain,
+		oauth2ClientDomain: oauth2ClientDomain,
+
 		userRepo:         userRepo,
 		refreshTokenRepo: refreshTokenRepo,
 		oauth2ClientRepo: oauth2ClientRepo,
@@ -82,7 +87,7 @@ func (usecase *OAuth2Usecase) handlePasswordFlow(
 	client domain.OAuth2Client,
 ) (dto.OAuth2TokenResponseDTO, error) {
 	if !xcontext.IsAdmin(ctx) {
-		err := usecase.oauth2Domain.ValidateClient(
+		err := usecase.oauth2ClientDomain.ValidateClient(
 			client, req.ClientID, req.ClientSecret, domain.RequireConfidential)
 		if err != nil {
 			return dto.OAuth2TokenResponseDTO{}, wrapDomainError(err)
@@ -108,21 +113,33 @@ func (usecase *OAuth2Usecase) handlePasswordFlow(
 		return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(ErrUsernamePasswordInvalid)
 	}
 
-	// Generate access token.
-	accessToken, err := usecase.oauth2Domain.CreateAccessToken("", user)
+	// Validate scope.
+	requestedScope, err := domain.ScopeEngine.ParseScopes(req.Scope)
 	if err != nil {
-		return dto.OAuth2TokenResponseDTO{}, wrapDomainError(err)
+		return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(fmt.Errorf("%w: %s", ErrScopeInvalid, err)).
+			WithMessage("requested scope is invalid")
 	}
 
-	refreshToken, err := usecase.oauth2Domain.CreateRefreshToken("", user.ID)
+	finalScope := requestedScope.Intersect(user.AllowedScope)
+	if !xcontext.IsAdmin(ctx) {
+		finalScope = finalScope.Intersect(client.AllowedScope)
+	}
+
+	if len(finalScope) == 0 {
+		return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(ErrScopeInvalid).
+			WithMessage("requested scope is not allowed")
+	}
+
+	// Generate both tokens.
+	accessToken, refreshToken, err := usecase.generateAccessAndRefreshTokens(finalScope, user)
 	if err != nil {
-		return dto.OAuth2TokenResponseDTO{}, wrapDomainError(err)
+		return dto.OAuth2TokenResponseDTO{}, err
 	}
 
 	// Serialize both tokens.
-	accessTokenString, refreshTokenString, err := usecase.serializeTokens(ctx, accessToken, refreshToken)
+	accessTokenString, refreshTokenString, err := usecase.serializeAccessAndRefreshTokens(ctx, accessToken, refreshToken)
 	if err != nil {
-		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(xerror.ServerityDebug, err)
+		return dto.OAuth2TokenResponseDTO{}, err
 	}
 
 	// Store refresh token information.
@@ -136,6 +153,7 @@ func (usecase *OAuth2Usecase) handlePasswordFlow(
 		TokenType:    usecase.tokenEngine.Type(),
 		ExpiresIn:    accessToken.Metadata.ExpiresIn,
 		RefreshToken: refreshTokenString,
+		Scope:        finalScope.String(),
 	}, nil
 }
 
@@ -144,7 +162,7 @@ func (usecase *OAuth2Usecase) handleRefreshTokenFlow(
 	req dto.OAuth2TokenRequestDTO,
 	client domain.OAuth2Client,
 ) (dto.OAuth2TokenResponseDTO, error) {
-	err := usecase.oauth2Domain.ValidateClient(
+	err := usecase.oauth2ClientDomain.ValidateClient(
 		client, req.ClientID, req.ClientSecret, domain.DependOnClientConfidential)
 	if err != nil {
 		return dto.OAuth2TokenResponseDTO{}, wrapDomainError(err)
@@ -162,8 +180,12 @@ func (usecase *OAuth2Usecase) handleRefreshTokenFlow(
 	}
 
 	// Generate the next refresh token.
-	domainCurRefreshToken := curRefreshToken.To()
-	refreshToken, err := usecase.oauth2Domain.NextRefreshToken(domainCurRefreshToken)
+	domainCurRefreshToken, err := curRefreshToken.To()
+	if err != nil {
+		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
+	}
+
+	refreshToken, err := usecase.oauth2FlowDomain.NextRefreshToken(domainCurRefreshToken)
 	if err != nil {
 		return dto.OAuth2TokenResponseDTO{}, wrapDomainError(err)
 	}
@@ -175,15 +197,16 @@ func (usecase *OAuth2Usecase) handleRefreshTokenFlow(
 	}
 
 	// Generate access token.
-	accessToken, err := usecase.oauth2Domain.CreateAccessToken(domainCurRefreshToken.Metadata.Audience, user)
+	accessToken, err := usecase.oauth2FlowDomain.CreateAccessToken(
+		domainCurRefreshToken.Metadata.Audience, domainCurRefreshToken.Scope, user)
 	if err != nil {
 		return dto.OAuth2TokenResponseDTO{}, wrapDomainError(err)
 	}
 
 	// Serialize both tokens.
-	accessTokenString, refreshTokenString, err := usecase.serializeTokens(ctx, accessToken, refreshToken)
+	accessTokenString, refreshTokenString, err := usecase.serializeAccessAndRefreshTokens(ctx, accessToken, refreshToken)
 	if err != nil {
-		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(xerror.ServerityDebug, err)
+		return dto.OAuth2TokenResponseDTO{}, err
 	}
 
 	// Store the seq number again.
@@ -211,22 +234,40 @@ func (usecase *OAuth2Usecase) handleRefreshTokenFlow(
 		TokenType:    usecase.tokenEngine.Type(),
 		ExpiresIn:    accessToken.Metadata.ExpiresIn,
 		RefreshToken: refreshTokenString,
+		Scope:        domainCurRefreshToken.Scope.String(),
 	}, nil
 }
 
-func (usecase *OAuth2Usecase) serializeTokens(
+func (usecase *OAuth2Usecase) generateAccessAndRefreshTokens(
+	scope scope.Scopes,
+	user domain.User,
+) (domain.OAuth2AccessToken, domain.OAuth2RefreshToken, error) {
+	accessToken, err := usecase.oauth2FlowDomain.CreateAccessToken("", scope, user)
+	if err != nil {
+		return domain.OAuth2AccessToken{}, domain.OAuth2RefreshToken{}, wrapDomainError(err)
+	}
+
+	refreshToken, err := usecase.oauth2FlowDomain.CreateRefreshToken("", scope, user.ID)
+	if err != nil {
+		return domain.OAuth2AccessToken{}, domain.OAuth2RefreshToken{}, wrapDomainError(err)
+	}
+
+	return accessToken, refreshToken, nil
+}
+
+func (usecase *OAuth2Usecase) serializeAccessAndRefreshTokens(
 	ctx context.Context,
 	accessToken domain.OAuth2AccessToken,
 	refreshToken domain.OAuth2RefreshToken,
 ) (string, string, error) {
 	accessTokenString, err := usecase.tokenEngine.Generate(ctx, dto.OAuth2AccessTokenFromDomain(accessToken))
 	if err != nil {
-		return "", "", err
+		return "", "", wrapNonDomainError(xerror.ServerityDebug, err)
 	}
 
 	refreshTokenString, err := usecase.tokenEngine.Generate(ctx, dto.OAuth2RefreshTokenFromDomain(refreshToken))
 	if err != nil {
-		return "", "", err
+		return "", "", wrapNonDomainError(xerror.ServerityDebug, err)
 	}
 
 	return accessTokenString, refreshTokenString, nil

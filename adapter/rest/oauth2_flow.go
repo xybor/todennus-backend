@@ -39,10 +39,10 @@ func (a *OAuth2Adapter) Token() http.HandlerFunc {
 			if code, errResp := dto.NewOAuth2TokenErrorResponseDTO(err); code != 0 {
 				response.Write(ctx, w, code, errResp)
 			} else {
-				logging.LogError(xcontext.Logger(ctx), err)
 				response.WriteErrorMsg(ctx, w, http.StatusInternalServerError, "Internal server error")
 			}
 
+			logging.LogError(xcontext.Logger(ctx), err)
 			return
 		}
 

@@ -12,7 +12,8 @@ import (
 
 type Domains struct {
 	abstraction.UserDomain
-	abstraction.OAuth2Domain
+	abstraction.OAuth2FlowDomain
+	abstraction.OAuth2ClientDomain
 }
 
 func InitializeDomains(ctx context.Context, config config.Config, infras Infras) (Domains, error) {
@@ -24,13 +25,18 @@ func InitializeDomains(ctx context.Context, config config.Config, infras Infras)
 	domains.UserDomain, err = domain.NewUserDomain(infras.NewSnowflakeNode())
 	finalErr = errors.Join(finalErr, err)
 
-	domains.OAuth2Domain, err = domain.NewOAuth2Domain(
+	domains.OAuth2FlowDomain, err = domain.NewOAuth2FlowDomain(
 		infras.NewSnowflakeNode(),
-		config.Variable.OAuth2.ClientSecretLength,
 		config.Variable.Authentication.TokenIssuer,
 		time.Duration(config.Variable.Authentication.AccessTokenExpiration)*time.Second,
 		time.Duration(config.Variable.Authentication.RefreshTokenExpiration)*time.Second,
 		time.Duration(config.Variable.Authentication.IDTokenExpiration)*time.Second,
+	)
+	finalErr = errors.Join(finalErr, err)
+
+	domains.OAuth2ClientDomain, err = domain.NewOAuth2ClientDomain(
+		infras.NewSnowflakeNode(),
+		config.Variable.OAuth2.ClientSecretLength,
 	)
 	finalErr = errors.Join(finalErr, err)
 

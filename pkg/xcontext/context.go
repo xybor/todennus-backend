@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/xybor/todennus-backend/pkg/logging"
+	"github.com/xybor/todennus-backend/pkg/scope"
 )
 
 type contextKey int
@@ -14,7 +15,8 @@ const (
 	loggerKey contextKey = iota
 	requestTimeKey
 	requestUserIDKey
-	adminExpiresAt
+	adminExpiresAtKey
+	scopeKey
 )
 
 func WithLogger(ctx context.Context, logger logging.Logger) context.Context {
@@ -50,11 +52,11 @@ func RequestUserID(ctx context.Context) int64 {
 }
 
 func WithAdminExpiresAt(ctx context.Context, t time.Time) context.Context {
-	return context.WithValue(ctx, adminExpiresAt, t)
+	return context.WithValue(ctx, adminExpiresAtKey, t)
 }
 
 func AdminExpiresAt(ctx context.Context) time.Time {
-	if val := ctx.Value(adminExpiresAt); val != nil {
+	if val := ctx.Value(adminExpiresAtKey); val != nil {
 		return val.(time.Time)
 	}
 
@@ -63,4 +65,16 @@ func AdminExpiresAt(ctx context.Context) time.Time {
 
 func IsAdmin(ctx context.Context) bool {
 	return AdminExpiresAt(ctx).After(time.Now())
+}
+
+func WithScope(ctx context.Context, scopes scope.Scopes) context.Context {
+	return context.WithValue(ctx, scopeKey, scopes)
+}
+
+func Scope(ctx context.Context) scope.Scopes {
+	if val := ctx.Value(scopeKey); val != nil {
+		return val.(scope.Scopes)
+	}
+
+	return nil
 }

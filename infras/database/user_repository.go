@@ -29,7 +29,7 @@ func (repo *UserRepository) GetByUsername(ctx context.Context, username string) 
 		return domain.User{}, convertGormError(err)
 	}
 
-	return model.To(), nil
+	return model.To()
 }
 
 func (repo *UserRepository) GetByID(ctx context.Context, userID int64) (domain.User, error) {
@@ -38,5 +38,5 @@ func (repo *UserRepository) GetByID(ctx context.Context, userID int64) (domain.U
 		return domain.User{}, convertGormError(err)
 	}
 
-	return model.To(), nil
+	return model.To()
 }

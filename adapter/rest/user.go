@@ -22,6 +22,9 @@ func NewUserAdapter(userUsecase abstraction.UserUsecase) *UserRESTAdapter {
 
 func (a *UserRESTAdapter) Router(r chi.Router) {
 	r.Post("/", a.Register())
+
+	r.Get("/{user_id}", a.GetByID())
+	r.Get("/username/{username}", a.GetByUsername())
 }
 
 func (a *UserRESTAdapter) Register() http.HandlerFunc {
@@ -38,7 +41,46 @@ func (a *UserRESTAdapter) Register() http.HandlerFunc {
 		response.NewResponseHandler(dto.NewUserRegisterResponseDTO(user), err).
 			Map(http.StatusConflict, usecase.ErrUsernameExisted).
 			Map(http.StatusBadRequest, domain.ErrUsernameInvalid, domain.ErrPasswordInvalid).
-			Map(http.StatusInternalServerError).
+			WriteHTTPResponse(ctx, w)
+	}
+}
+
+func (a *UserRESTAdapter) GetByID() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		req, err := xhttp.ParseRequest[dto.UserGetByIDRequestDTO](r)
+		if err != nil {
+			response.HandleParseError(ctx, w, err)
+			return
+		}
+
+		ucReq, err := req.To(ctx)
+		if err != nil {
+			response.WriteErrorMsg(ctx, w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		resp, err := a.userUsecase.GetByID(ctx, ucReq)
+		response.NewResponseHandler(dto.NewUserGetByIDResponseDTO(resp), err).
+			Map(http.StatusNotFound, usecase.ErrUserNotFound).
+			WriteHTTPResponse(ctx, w)
+	}
+}
+
+func (a *UserRESTAdapter) GetByUsername() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		req, err := xhttp.ParseRequest[dto.UserGetByUsernameRequestDTO](r)
+		if err != nil {
+			response.HandleParseError(ctx, w, err)
+			return
+		}
+
+		resp, err := a.userUsecase.GetByUsername(ctx, req.To())
+		response.NewResponseHandler(dto.NewUserGetByUsernameResponseDTO(resp), err).
+			Map(http.StatusNotFound, usecase.ErrUserNotFound).
 			WriteHTTPResponse(ctx, w)
 	}
 }
