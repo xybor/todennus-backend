@@ -26,7 +26,13 @@ func Authentication(engine token.Engine, adminCfg config.AdminSecret) func(http.
 					if err != nil {
 						xcontext.Logger(ctx).Debug("failed-to-parse-token", "err", err)
 					} else if ok {
-						ctx = xcontext.WithRequestUserID(ctx, accessToken.To().Metadata.Subject)
+						domainAccessToken, err := accessToken.To()
+						if err != nil {
+							xcontext.Logger(ctx).Warn("failed-to-convert-to-domain-token", "err", err)
+						} else {
+							ctx = xcontext.WithRequestUserID(ctx, domainAccessToken.Metadata.Subject)
+							ctx = xcontext.WithScope(ctx, domainAccessToken.Scope)
+						}
 					}
 				}
 			}

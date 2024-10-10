@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/xybor/todennus-backend/pkg/xstring"
 )
 
 const (
@@ -99,7 +100,7 @@ func parse[T any](obj T, req *http.Request, tagName string, fieldVal func(*http.
 			fieldVal.SetString(fieldValue)
 
 		case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
-			intFormVal, err := strconv.ParseInt(fieldValue, 10, 64)
+			intFormVal, err := xstring.ParseID(fieldValue)
 			if err != nil {
 				return fmt.Errorf("%w%s", ErrBadRequest, err.Error())
 			}

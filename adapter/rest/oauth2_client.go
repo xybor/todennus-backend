@@ -40,7 +40,6 @@ func (a *OAuth2ClientAdapter) Get() http.HandlerFunc {
 		resp, err := a.oauth2ClientUsecase.GetClient(ctx, req.To())
 		response.NewResponseHandler(dto.NewOAuth2ClientGetResponseDTO(resp), err).
 			Map(http.StatusNotFound, usecase.ErrClientNotFound).
-			Map(http.StatusInternalServerError).
 			WriteHTTPResponse(ctx, w)
 	}
 }
@@ -58,7 +57,6 @@ func (a *OAuth2ClientAdapter) Create() http.HandlerFunc {
 		resp, err := a.oauth2ClientUsecase.CreateClient(ctx, req.To())
 		response.NewResponseHandler(dto.NewOauth2ClientCreateResponseDTO(resp), err).
 			Map(http.StatusBadRequest, domain.ErrClientNameInvalid).
-			Map(http.StatusInternalServerError).
 			WriteHTTPResponse(ctx, w)
 	}
 }

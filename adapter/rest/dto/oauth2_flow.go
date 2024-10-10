@@ -23,6 +23,7 @@ type OAuth2TokenRequestDTO struct {
 	// Resource Owner Password Credentials Flow
 	Username string `form:"username"`
 	Password string `form:"password"`
+	Scope    string `form:"scope"`
 
 	// Refresh Token Flow
 	RefreshToken string `form:"refresh_token"`
@@ -41,6 +42,7 @@ func (req OAuth2TokenRequestDTO) To() dto.OAuth2TokenRequestDTO {
 
 		Username: req.Username,
 		Password: req.Password,
+		Scope:    req.Scope,
 
 		RefreshToken: req.RefreshToken,
 	}
@@ -75,19 +77,25 @@ func NewOAuth2TokenErrorResponseDTO(err error) (int, OAuth2TokenErrorResponseDTO
 	case xerror.Is(err, usecase.ErrGrantTypeInvalid):
 		return http.StatusBadRequest, OAuth2TokenErrorResponseDTO{
 			Error:            "unsupported_grant_type",
-			ErrorDescription: err.Error(),
+			ErrorDescription: xerror.Message(err),
 		}
 
 	case xerror.Is(err, usecase.ErrClientInvalid, domain.ErrClientInvalid):
 		return http.StatusBadRequest, OAuth2TokenErrorResponseDTO{
 			Error:            "invalid_client",
-			ErrorDescription: err.Error(),
+			ErrorDescription: xerror.Message(err),
 		}
 
 	case xerror.Is(err, domain.ErrClientUnauthorized):
 		return http.StatusUnauthorized, OAuth2TokenErrorResponseDTO{
 			Error:            "invalid_client",
-			ErrorDescription: err.Error(),
+			ErrorDescription: xerror.Message(err),
+		}
+
+	case xerror.Is(err, usecase.ErrScopeInvalid):
+		return http.StatusBadRequest, OAuth2TokenErrorResponseDTO{
+			Error:            "invalid_scope",
+			ErrorDescription: xerror.Message(err),
 		}
 
 	case xerror.Is(
@@ -98,7 +106,7 @@ func NewOAuth2TokenErrorResponseDTO(err error) (int, OAuth2TokenErrorResponseDTO
 	):
 		return http.StatusUnauthorized, OAuth2TokenErrorResponseDTO{
 			Error:            "invalid_grant",
-			ErrorDescription: err.Error(),
+			ErrorDescription: xerror.Message(err),
 		}
 
 	default:

@@ -29,5 +29,5 @@ func (repo *OAuth2ClientRepository) GetByID(ctx context.Context, clientID int64)
 		return domain.OAuth2Client{}, convertGormError(err)
 	}
 
-	return model.To(), nil
+	return model.To()
 }

@@ -8,6 +8,8 @@ import (
 
 type UserUsecase interface {
 	Register(ctx context.Context, req dto.UserRegisterRequestDTO) (dto.UserRegisterResponseDTO, error)
+	GetByID(ctx context.Context, req dto.UserGetByIDRequestDTO) (dto.UserGetByIDResponseDTO, error)
+	GetByUsername(ctx context.Context, req dto.UserGetByUsernameRequestDTO) (dto.UserGetByUsernameResponseDTO, error)
 }
 
 type OAuth2Usecase interface {

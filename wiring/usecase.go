@@ -24,13 +24,14 @@ func InitializeUsecases(
 	uc.OAuth2Usecase = usecase.NewOAuth2Usecase(
 		infras.TokenEngine,
 		domains.UserDomain,
-		domains.OAuth2Domain,
+		domains.OAuth2FlowDomain,
+		domains.OAuth2ClientDomain,
 		repositories.UserRepository,
 		repositories.RefreshTokenRepository,
 		repositories.OAuth2ClientRepository,
 	)
 	uc.OAuth2ClientUsecase = usecase.NewOAuth2ClientUsecase(
-		domains.OAuth2Domain,
+		domains.OAuth2ClientDomain,
 		repositories.OAuth2ClientRepository,
 	)
 

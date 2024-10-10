@@ -1,12 +1,12 @@
 package dto
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/pkg/token"
+	"github.com/xybor/todennus-backend/pkg/xstring"
 )
 
 var _ (token.Claims) = (*OAuth2StandardClaims)(nil)
@@ -22,26 +22,24 @@ type OAuth2StandardClaims struct {
 
 func OAuth2StandardClaimsFromDomain(claims domain.OAuth2TokenMedata) *OAuth2StandardClaims {
 	return &OAuth2StandardClaims{
-		Id:        strconv.FormatInt(claims.Id, 10),
+		Id:        xstring.FormatID(claims.Id),
 		Issuer:    claims.Issuer,
 		Audience:  claims.Audience,
-		Subject:   strconv.FormatInt(claims.Subject, 10),
+		Subject:   xstring.FormatID(claims.Subject),
 		ExpiresAt: claims.ExpiresAt,
 		NotBefore: claims.NotBefore,
 	}
 }
 
-func (claims *OAuth2StandardClaims) To() domain.OAuth2TokenMedata {
-	// We signed the claims, so we ensure that this claims is always in correct
-	// form.
-	id, err := strconv.ParseInt(claims.Id, 10, 64)
+func (claims *OAuth2StandardClaims) To() (domain.OAuth2TokenMedata, error) {
+	id, err := xstring.ParseID(claims.Id)
 	if err != nil {
-		panic(err)
+		return domain.OAuth2TokenMedata{}, err
 	}
 
-	sub, err := strconv.ParseInt(claims.Subject, 10, 64)
+	sub, err := xstring.ParseID(claims.Subject)
 	if err != nil {
-		panic(err)
+		return domain.OAuth2TokenMedata{}, err
 	}
 
 	return domain.OAuth2TokenMedata{
@@ -51,7 +49,7 @@ func (claims *OAuth2StandardClaims) To() domain.OAuth2TokenMedata {
 		Subject:   sub,
 		ExpiresAt: claims.ExpiresAt,
 		NotBefore: claims.NotBefore,
-	}
+	}, nil
 }
 
 func (claims *OAuth2StandardClaims) Valid() error {
@@ -79,37 +77,63 @@ func (claims *OAuth2StandardClaims) Valid() error {
 
 type OAuth2AccessToken struct {
 	*OAuth2StandardClaims
+	Scope string `json:"scope"`
 }
 
 func OAuth2AccessTokenFromDomain(token domain.OAuth2AccessToken) OAuth2AccessToken {
 	return OAuth2AccessToken{
 		OAuth2StandardClaims: OAuth2StandardClaimsFromDomain(token.Metadata),
+		Scope:                token.Scope.String(),
 	}
 }
 
-func (token *OAuth2AccessToken) To() domain.OAuth2AccessToken {
-	return domain.OAuth2AccessToken{
-		Metadata: token.OAuth2StandardClaims.To(),
+func (token *OAuth2AccessToken) To() (domain.OAuth2AccessToken, error) {
+	scope, err := domain.ScopeEngine.ParseScopes(token.Scope)
+	if err != nil {
+		return domain.OAuth2AccessToken{}, err
 	}
+
+	metadata, err := token.OAuth2StandardClaims.To()
+	if err != nil {
+		return domain.OAuth2AccessToken{}, err
+	}
+
+	return domain.OAuth2AccessToken{
+		Metadata: metadata,
+		Scope:    scope,
+	}, nil
 }
 
 type OAuth2RefreshToken struct {
 	*OAuth2StandardClaims
-	SequenceNumber int `json:"seq"`
+	SequenceNumber int    `json:"seq"`
+	Scope          string `json:"scope"`
 }
 
 func OAuth2RefreshTokenFromDomain(token domain.OAuth2RefreshToken) OAuth2RefreshToken {
 	return OAuth2RefreshToken{
 		OAuth2StandardClaims: OAuth2StandardClaimsFromDomain(token.Metadata),
 		SequenceNumber:       token.SequenceNumber,
+		Scope:                token.Scope.String(),
 	}
 }
 
-func (token *OAuth2RefreshToken) To() domain.OAuth2RefreshToken {
-	return domain.OAuth2RefreshToken{
-		Metadata:       token.OAuth2StandardClaims.To(),
-		SequenceNumber: token.SequenceNumber,
+func (token *OAuth2RefreshToken) To() (domain.OAuth2RefreshToken, error) {
+	scope, err := domain.ScopeEngine.ParseScopes(token.Scope)
+	if err != nil {
+		return domain.OAuth2RefreshToken{}, err
 	}
+
+	metadata, err := token.OAuth2StandardClaims.To()
+	if err != nil {
+		return domain.OAuth2RefreshToken{}, err
+	}
+
+	return domain.OAuth2RefreshToken{
+		Metadata:       metadata,
+		SequenceNumber: token.SequenceNumber,
+		Scope:          scope,
+	}, nil
 }
 
 type OAuth2IDToken struct {
@@ -127,8 +151,11 @@ func OAuth2IDTokenFromDomain(token domain.OAuth2IDToken) OAuth2IDToken {
 	}
 }
 
-func (token *OAuth2IDToken) To() domain.OAuth2IDToken {
-	metadata := token.OAuth2StandardClaims.To()
+func (token *OAuth2IDToken) To() (domain.OAuth2IDToken, error) {
+	metadata, err := token.OAuth2StandardClaims.To()
+	if err != nil {
+		return domain.OAuth2IDToken{}, err
+	}
 
 	return domain.OAuth2IDToken{
 		Metadata: metadata,
@@ -137,7 +164,7 @@ func (token *OAuth2IDToken) To() domain.OAuth2IDToken {
 			Username:    token.Username,
 			DisplayName: token.Displayname,
 		},
-	}
+	}, nil
 }
 
 type OAuth2TokenRequestDTO struct {
@@ -154,6 +181,7 @@ type OAuth2TokenRequestDTO struct {
 	// Resource Owner Password Credentials Flow
 	Username string
 	Password string
+	Scope    string
 
 	// Refresh Token Flow
 	RefreshToken string
@@ -165,16 +193,4 @@ type OAuth2TokenResponseDTO struct {
 	ExpiresIn    int
 	RefreshToken string
 	Scope        string
-}
-
-type OAuth2TokenAdminRequestDTO struct {
-	Username string
-	Password string
-}
-
-type OAuth2TokenAdminResponseDTO struct {
-	AccessToken string
-	TokenType   string
-	ExpiresIn   int
-	Scope       string
 }

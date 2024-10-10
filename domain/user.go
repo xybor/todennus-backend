@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/xybor-x/snowflake"
+	"github.com/xybor/todennus-backend/pkg/scope"
 	"github.com/xybor/todennus-backend/pkg/xstring"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -22,11 +23,12 @@ const (
 )
 
 type User struct {
-	ID          int64
-	DisplayName string
-	Username    string
-	HashedPass  string
-	UpdatedAt   time.Time
+	ID           int64
+	DisplayName  string
+	Username     string
+	HashedPass   string
+	AllowedScope scope.Scopes
+	UpdatedAt    time.Time
 }
 
 type UserDomain struct {
@@ -52,10 +54,11 @@ func (domain *UserDomain) Create(username, password string) (User, error) {
 	}
 
 	return User{
-		ID:          domain.Snowflake.Generate().Int64(),
-		DisplayName: username,
-		Username:    username,
-		HashedPass:  string(hashedPass),
+		ID:           domain.Snowflake.Generate().Int64(),
+		DisplayName:  username,
+		Username:     username,
+		AllowedScope: scope.New(Actions, Resources).AsScopes(),
+		HashedPass:   string(hashedPass),
 	}, nil
 }
 
@@ -88,7 +91,6 @@ func (domain *UserDomain) validateDisplayName(displayname string) error {
 	}
 
 	return nil
-
 }
 
 func (domain *UserDomain) validateUsername(username string) error {

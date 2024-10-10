@@ -1,21 +1,22 @@
 package resource
 
 import (
-	"strconv"
-
-	"github.com/xybor/todennus-backend/domain"
+	"github.com/xybor/todennus-backend/pkg/xstring"
+	"github.com/xybor/todennus-backend/usecase/dto/resource"
 )
 
 type User struct {
-	ID          string `json:"id"`
-	Username    string `json:"username"`
-	DisplayName string `json:"display_name"`
+	ID           string `json:"id,omitempty"`
+	Username     string `json:"username,omitempty"`
+	DisplayName  string `json:"display_name,omitempty"`
+	AllowedScope string `json:"allowed_scope,omitempty"`
 }
 
-func NewUser(user domain.User) User {
+func NewUser(user resource.User) User {
 	return User{
-		ID:          strconv.FormatInt(user.ID, 10),
-		Username:    user.Username,
-		DisplayName: user.DisplayName,
+		ID:           xstring.FormatID(user.ID),
+		Username:     user.Username,
+		DisplayName:  user.DisplayName,
+		AllowedScope: user.AllowedScope,
 	}
 }

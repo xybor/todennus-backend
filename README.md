@@ -25,7 +25,10 @@ Strictly follow Clean Architecture and DDD.
   + Refresh Token Flow (**completed**).
   + Device Flow (low priority).
 
-- Support registering by third-party OAuth2 provider (Google, Facebook).
+- Handle scope (**completed**).
+- Allow integrate with custom external IdP.
+- Allow integrate with third-party OAuth2 provider (Google, Discord, etc.).
+- Support payment.
 
 ### User traffic
 
@@ -59,7 +62,9 @@ POST /users
 }
 ```
 
-6. Generate a temporary access token by the admin secret key (currently we don't have any OAuth2 Client, therefore we cannot generate access token by the normal flow).
+6. Generate a temporary access token by the admin secret key (currently we don't
+have any OAuth2 Client, therefore we cannot generate access token by the normal
+flow).
 
 ```
 POST /oauth2/token
@@ -72,6 +77,7 @@ password=P@ssw0rd
 ```
 
 7. Create the first OAuth2 Client. Note that you must save the `client_secret` in the response. The secret will never be retrieved by anyway.
+
 ```
 POST /oauth2_clients
 

@@ -1,9 +1,8 @@
 package dto
 
 import (
-	"strconv"
-
 	"github.com/xybor/todennus-backend/adapter/rest/dto/resource"
+	"github.com/xybor/todennus-backend/pkg/xstring"
 	"github.com/xybor/todennus-backend/usecase/dto"
 )
 
@@ -36,7 +35,7 @@ type OAuth2ClientGetRequestDTO struct {
 }
 
 func (req *OAuth2ClientGetRequestDTO) To() dto.OAuth2ClientGetRequestDTO {
-	clientID, err := strconv.ParseInt(req.ClientID, 10, 64)
+	clientID, err := xstring.ParseID(req.ClientID)
 	if err != nil {
 		clientID = 0
 	}

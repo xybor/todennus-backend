@@ -15,3 +15,12 @@ func Is(err error, target error, otherTargets ...error) bool {
 
 	return false
 }
+
+func Message(err error) string {
+	var serviceErr ServiceError
+	if errors.As(err, &serviceErr) {
+		return serviceErr.Message
+	}
+
+	return err.Error()
+}
