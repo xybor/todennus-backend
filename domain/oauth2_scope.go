@@ -11,6 +11,7 @@ var ScopeEngine = scope.NewEngine(actionMap, resourceMap)
 
 // Full permission
 var _ = ScopeEngine.Define(Actions, Resources)
+var _ = ScopeEngine.Define(Actions.Read, Resources)
 
 // User
 var _ = ScopeEngine.Define(Actions.Read, Resources.User.AllowedScope).

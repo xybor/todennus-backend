@@ -13,13 +13,8 @@ import (
 	"github.com/xybor/todennus-backend/usecase"
 )
 
-type ErrData struct {
-	Msg string `json:"msg"`
-}
-
-type Response struct {
-	Code int `json:"code"`
-	Data any `json:"data"`
+type ErrorResponse struct {
+	ErrMsg any `json:"error"`
 }
 
 type ResponseHandler struct {
@@ -59,23 +54,21 @@ func (h *ResponseHandler) WriteHTTPResponse(ctx context.Context, w http.Response
 		h.code = http.StatusOK
 	}
 
-	response := Response{Code: h.code}
+	var resp any = h.resp
 
 	if h.err != nil {
 		var serviceErr xerror.ServiceError
 		switch {
 		case errors.As(h.err, &serviceErr):
-			response.Data = ErrData{Msg: serviceErr.Message}
+			resp = ErrorResponse{ErrMsg: serviceErr.Message}
 		default:
-			response.Data = ErrData{Msg: http.StatusText(h.code)}
+			resp = ErrorResponse{ErrMsg: http.StatusText(h.code)}
 		}
 
 		logging.LogError(xcontext.Logger(ctx), h.err)
-	} else {
-		response.Data = h.resp
 	}
 
-	Write(ctx, w, h.code, response)
+	Write(ctx, w, h.code, resp)
 }
 
 func HandleParseError(ctx context.Context, w http.ResponseWriter, err error) {
@@ -83,30 +76,23 @@ func HandleParseError(ctx context.Context, w http.ResponseWriter, err error) {
 		panic("do not pass a nil error here")
 	}
 
-	response := Response{}
+	var code int
+	response := ErrorResponse{}
 	if errors.Is(err, xhttp.ErrBadRequest) {
-		response.Code = http.StatusBadRequest
-		response.Data = ErrData{
-			Msg: err.Error(),
-		}
+		code = http.StatusBadRequest
+		response.ErrMsg = err.Error()
 	} else {
 		xcontext.Logger(ctx).Debug("failed to parse data", "err", err.Error())
-		response.Code = http.StatusInternalServerError
-		response.Data = ErrData{
-			Msg: "Internal Server Error",
-		}
+		code = http.StatusInternalServerError
+		response.ErrMsg = "Internal Server Error"
 	}
 
-	Write(ctx, w, response.Code, response)
+	Write(ctx, w, code, response)
 }
 
 func WriteErrorMsg(ctx context.Context, w http.ResponseWriter, code int, msg string, a ...any) {
-	response := Response{
-		Code: code,
-		Data: ErrData{Msg: fmt.Sprintf(msg, a...)},
-	}
-
-	Write(ctx, w, response.Code, response)
+	response := ErrorResponse{ErrMsg: fmt.Sprintf(msg, a...)}
+	Write(ctx, w, code, response)
 }
 
 func Write(ctx context.Context, w http.ResponseWriter, code int, obj any) {
