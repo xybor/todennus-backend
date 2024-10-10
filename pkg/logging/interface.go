@@ -16,6 +16,7 @@ const (
 )
 
 type Logger interface {
+	With(a ...any) Logger
 	Log(level Level, msg string, a ...any)
 	Debug(msg string, a ...any)
 	Info(msg string, a ...any)

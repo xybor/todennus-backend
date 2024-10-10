@@ -17,12 +17,11 @@ func App(
 ) chi.Router {
 	r := chi.NewRouter()
 
-	r.Use(middleware.WithInfras(infras))
-	r.Use(middleware.Time)
+	r.Use(builtinMiddleware.Recoverer)
 	r.Use(builtinMiddleware.RequestID)
 	r.Use(builtinMiddleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(builtinMiddleware.Recoverer)
+	r.Use(middleware.WithInfras(infras))
+	r.Use(middleware.RoundTripTime)
 	r.Use(middleware.Authentication(infras.TokenEngine, config.Admin))
 
 	r.Route("/users", NewUserAdapter(usecases.UserUsecase).Router)
