@@ -38,6 +38,12 @@ func NewSLogger(level Level) *SLogger {
 	return &SLogger{core: core}
 }
 
+func (l *SLogger) With(a ...any) Logger {
+	return &SLogger{
+		core: l.core.With(a...),
+	}
+}
+
 func (l *SLogger) Log(level Level, msg string, a ...any) {
 	l.core.Log(context.Background(), LevelToSlogLevel(level), msg, a...)
 }

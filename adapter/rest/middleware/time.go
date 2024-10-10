@@ -7,11 +7,12 @@ import (
 	"github.com/xybor/todennus-backend/pkg/xcontext"
 )
 
-func Time(next http.Handler) http.Handler {
+func RoundTripTime(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		ctx = xcontext.WithRequestTime(ctx, time.Now())
+		start := time.Now()
 
-		next.ServeHTTP(w, r.WithContext(ctx))
+		next.ServeHTTP(w, r)
+
+		xcontext.Logger(r.Context()).Debug("response", "rtt", time.Since(start))
 	})
 }
