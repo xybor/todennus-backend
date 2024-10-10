@@ -1,6 +1,16 @@
 # Todennus backend
 
-A centralized Authentication Server and OAuth2 Provider.
+An Identity, OpenID Connect, and OAuth2 Provider.
+
+## Documentations
+
+[API Refereneces](./docs/1.references.md)
+
+[Resources](./docs/2.resources.md)
+
+[API Endpoints](./docs/3.endpoints.md)
+
+[OAuth2 Endpoints](./docs/4.oauth2_endpoints.md)
 
 ## Tech stack
 
@@ -28,7 +38,6 @@ Strictly follow Clean Architecture and DDD.
 - Handle scope (**completed**).
 - Allow integrate with custom external IdP.
 - Allow integrate with third-party OAuth2 provider (Google, Discord, etc.).
-- Support payment.
 
 ### User traffic
 
@@ -48,7 +57,7 @@ Strictly follow Clean Architecture and DDD.
 4. Start the server.
 
 ```shell
-$ go run ./cmd/rest/main.go
+$ make start-rest-server
 ```
 
 5. Create the first user.

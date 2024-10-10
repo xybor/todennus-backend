@@ -10,6 +10,14 @@ import (
 	"github.com/xybor/todennus-backend/usecase/dto"
 )
 
+func ParseUserID(ctx context.Context, s string) (int64, error) {
+	if s == "@me" {
+		return xcontext.RequestUserID(ctx), nil
+	}
+
+	return xstring.ParseID(s)
+}
+
 // Register
 type UserRegisterRequestDTO struct {
 	Username string `json:"username"`
@@ -39,14 +47,10 @@ type UserGetByIDRequestDTO struct {
 }
 
 func (req UserGetByIDRequestDTO) To(ctx context.Context) (dto.UserGetByIDRequestDTO, error) {
-	if req.UserID == "@me" {
-		return dto.UserGetByIDRequestDTO{UserID: xcontext.RequestUserID(ctx)}, nil
-	}
-
-	userID, err := xstring.ParseID(req.UserID)
+	userID, err := ParseUserID(ctx, req.UserID)
 	if err != nil {
 		xcontext.Logger(ctx).Debug("failed-to-parse-userid", "err", err)
-		return dto.UserGetByIDRequestDTO{}, errors.New("invalid user id")
+		return dto.UserGetByIDRequestDTO{}, errors.New("invalid userid")
 	}
 
 	return dto.UserGetByIDRequestDTO{UserID: userID}, nil
