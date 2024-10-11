@@ -22,7 +22,7 @@ func App(
 	r.Use(builtinMiddleware.RealIP)
 	r.Use(middleware.WithInfras(infras))
 	r.Use(middleware.RoundTripTime)
-	r.Use(middleware.Authentication(infras.TokenEngine, config.Admin))
+	r.Use(middleware.Authentication(infras.TokenEngine))
 
 	r.Route("/users", NewUserAdapter(usecases.UserUsecase).Router)
 	r.Route("/oauth2", NewOAuth2Adapter(usecases.OAuth2Usecase).Router)

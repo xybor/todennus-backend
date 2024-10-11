@@ -91,8 +91,8 @@ func Test_DefineResource(t *testing.T) {
 
 func Test_SerializeScope(t *testing.T) {
 	scopes := scope.NewScopes(
-		scope.New(ActionSet.Read, ResourceAll.User),
-		scope.New(ActionSet.Write, ResourceAll.User.Avatar),
+		scope.NewONLYFORTEST(ActionSet.Read, ResourceAll.User),
+		scope.NewONLYFORTEST(ActionSet.Write, ResourceAll.User.Avatar),
 	)
 
 	assert.Equal(t, "read:user write:user.avatar", scopes.String())
@@ -104,11 +104,11 @@ func Test_ParseScope(t *testing.T) {
 	scopes, err := parser.ParseScopes("read:user write:user.avatar")
 	assert.NoError(t, err)
 
-	assert.True(t, scopes.Contains(scope.New(ActionSet.Read, ResourceAll.User)))
-	assert.True(t, scopes.Contains(scope.New(ActionSet.Read, ResourceAll.User.Email)))
+	assert.True(t, scopes.Contains(scope.NewONLYFORTEST(ActionSet.Read, ResourceAll.User)))
+	assert.True(t, scopes.Contains(scope.NewONLYFORTEST(ActionSet.Read, ResourceAll.User.Email)))
 
-	assert.True(t, scopes.Contains(scope.New(ActionSet.Write, ResourceAll.User.Avatar)))
-	assert.False(t, scopes.Contains(scope.New(ActionSet.Write, ResourceAll.User)))
+	assert.True(t, scopes.Contains(scope.NewONLYFORTEST(ActionSet.Write, ResourceAll.User.Avatar)))
+	assert.False(t, scopes.Contains(scope.NewONLYFORTEST(ActionSet.Write, ResourceAll.User)))
 }
 
 func Test_ParseScopeEmpty(t *testing.T) {
@@ -116,11 +116,11 @@ func Test_ParseScopeEmpty(t *testing.T) {
 	scopes, err := parser.ParseScopes("")
 	assert.NoError(t, err)
 
-	assert.False(t, scopes.Contains(scope.New(ActionSet.Read, ResourceAll.User)))
-	assert.False(t, scopes.Contains(scope.New(ActionSet.Read, ResourceAll.User.Email)))
+	assert.False(t, scopes.Contains(scope.NewONLYFORTEST(ActionSet.Read, ResourceAll.User)))
+	assert.False(t, scopes.Contains(scope.NewONLYFORTEST(ActionSet.Read, ResourceAll.User.Email)))
 
-	assert.False(t, scopes.Contains(scope.New(ActionSet.Write, ResourceAll.User.Avatar)))
-	assert.False(t, scopes.Contains(scope.New(ActionSet.Write, ResourceAll.User)))
+	assert.False(t, scopes.Contains(scope.NewONLYFORTEST(ActionSet.Write, ResourceAll.User.Avatar)))
+	assert.False(t, scopes.Contains(scope.NewONLYFORTEST(ActionSet.Write, ResourceAll.User)))
 }
 
 func Test_ParseScopeAll(t *testing.T) {
@@ -128,11 +128,11 @@ func Test_ParseScopeAll(t *testing.T) {
 	scopes, err := parser.ParseScopes("*")
 	assert.NoError(t, err)
 
-	assert.True(t, scopes.Contains(scope.New(ActionSet.Read, ResourceAll.User)))
-	assert.True(t, scopes.Contains(scope.New(ActionSet.Read, ResourceAll.User.Email)))
+	assert.True(t, scopes.Contains(scope.NewONLYFORTEST(ActionSet.Read, ResourceAll.User)))
+	assert.True(t, scopes.Contains(scope.NewONLYFORTEST(ActionSet.Read, ResourceAll.User.Email)))
 
-	assert.True(t, scopes.Contains(scope.New(ActionSet.Write, ResourceAll.User.Avatar)))
-	assert.True(t, scopes.Contains(scope.New(ActionSet.Write, ResourceAll.User)))
+	assert.True(t, scopes.Contains(scope.NewONLYFORTEST(ActionSet.Write, ResourceAll.User.Avatar)))
+	assert.True(t, scopes.Contains(scope.NewONLYFORTEST(ActionSet.Write, ResourceAll.User)))
 }
 
 func Test_ScopesNil(t *testing.T) {

@@ -3,6 +3,7 @@ package wiring
 import (
 	"context"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/config"
 	"github.com/xybor/todennus-backend/pkg/logging"
@@ -14,6 +15,7 @@ type Infras struct {
 	Logger        logging.Logger
 	SnowflakeNode int64
 	TokenEngine   token.Engine
+	RedisClient   *redis.Client
 }
 
 func InitializeInfras(config config.Config) (Infras, error) {
@@ -43,6 +45,13 @@ func InitializeInfras(config config.Config) (Infras, error) {
 	}
 
 	infras.TokenEngine = tokenEngine
+
+	infras.RedisClient = redis.NewClient(&redis.Options{
+		Addr:     config.Variable.Redis.Addr,
+		DB:       config.Variable.Redis.DB,
+		Username: config.Secret.Redis.Username,
+		Password: config.Secret.Redis.Password,
+	})
 
 	return infras, nil
 }

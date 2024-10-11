@@ -20,7 +20,13 @@ func InitializeUsecases(
 	repositories Repositories,
 ) (Usecases, error) {
 	uc := Usecases{}
-	uc.UserUsecase = usecase.NewUserUsecase(repositories.UserRepository, domains.UserDomain)
+
+	uc.UserUsecase = usecase.NewUserUsecase(
+		infras.RedisClient,
+		repositories.UserRepository,
+		domains.UserDomain,
+	)
+
 	uc.OAuth2Usecase = usecase.NewOAuth2Usecase(
 		infras.TokenEngine,
 		domains.UserDomain,
@@ -30,8 +36,12 @@ func InitializeUsecases(
 		repositories.RefreshTokenRepository,
 		repositories.OAuth2ClientRepository,
 	)
+
 	uc.OAuth2ClientUsecase = usecase.NewOAuth2ClientUsecase(
+		infras.RedisClient,
+		domains.UserDomain,
 		domains.OAuth2ClientDomain,
+		repositories.UserRepository,
 		repositories.OAuth2ClientRepository,
 	)
 

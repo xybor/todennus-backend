@@ -35,7 +35,7 @@ func NewEngine(actionMap map[string]Actioner, resourceMap map[string]Resourcer) 
 }
 
 func (engine *Engine) Define(action Actioner, resource Resourcer) definitionWrapper {
-	str := New(action, resource).String()
+	str := newAction(action, resource).String()
 	if _, ok := engine.definedScopes[str]; ok {
 		panic(fmt.Sprintf("add an existed scope %s", str))
 	}
@@ -45,7 +45,7 @@ func (engine *Engine) Define(action Actioner, resource Resourcer) definitionWrap
 }
 
 func (engine *Engine) New(action Actioner, resource Resourcer) Scope {
-	scope := New(action, resource)
+	scope := newAction(action, resource)
 	if !engine.IsDefined(scope) {
 		panic(fmt.Errorf("%w: %s", ErrScopeNotDefined, scope))
 	}
@@ -79,7 +79,7 @@ func (engine Engine) ParseScope(s string) (Scope, error) {
 		return Scope{}, fmt.Errorf("%w: not found resource %s", ErrScopeInvalid, resourceStr)
 	}
 
-	scope := New(action, resource)
+	scope := newAction(action, resource)
 	if !engine.IsDefined(scope) {
 		return scope, fmt.Errorf("%w: %s", ErrScopeNotDefined, scope)
 	}

@@ -37,12 +37,14 @@ func (client *OAuth2ClientModel) To() (domain.OAuth2Client, error) {
 	}, nil
 }
 
-func (client *OAuth2ClientModel) From(domain domain.OAuth2Client) {
-	client.ID = domain.ID
-	client.UserID = domain.OwnerUserID
-	client.Name = domain.Name
-	client.HashedSecret = domain.HashedSecret
-	client.IsConfidential = domain.IsConfidential
-	client.UpdatedAt = domain.UpdatedAt
-	client.AllowedScope = domain.AllowedScope.String()
+func NewOAuth2Client(domain domain.OAuth2Client) OAuth2ClientModel {
+	return OAuth2ClientModel{
+		ID:             domain.ID,
+		UserID:         domain.OwnerUserID,
+		Name:           domain.Name,
+		HashedSecret:   domain.HashedSecret,
+		IsConfidential: domain.IsConfidential,
+		UpdatedAt:      domain.UpdatedAt,
+		AllowedScope:   domain.AllowedScope.String(),
+	}
 }

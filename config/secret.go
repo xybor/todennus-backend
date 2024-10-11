@@ -3,7 +3,7 @@ package config
 type Secret struct {
 	Postgres       PostgresSecret
 	Authentication AuthenticationSecret
-	Admin          AdminSecret
+	Redis          RedisSecret
 }
 
 type PostgresSecret struct {
@@ -22,7 +22,7 @@ type AuthenticationSecret struct {
 	TokenHMACSecretKey string `envconfig:"token_hmac_secret_key"`
 }
 
-type AdminSecret struct {
-	SecretKey     string `envconfig:"secret_key"`
-	MaxExpiration int    `envconfig:"max_expiration"` // in second
+type RedisSecret struct {
+	Username string
+	Password string
 }

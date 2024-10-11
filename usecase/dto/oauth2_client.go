@@ -24,6 +24,25 @@ func NewOAuth2ClientCreateResponseDTO(ctx context.Context, client domain.OAuth2C
 	}
 }
 
+type OAuth2ClientCreateFirstRequestDTO struct {
+	Username string
+	Password string
+
+	Name string
+}
+
+type OAuth2ClientCreateByAdminResponseDTO struct {
+	Client       resource.OAuth2Client
+	ClientSecret string
+}
+
+func NewOAuth2ClientCreateFirstResponseDTO(ctx context.Context, client domain.OAuth2Client, secret string) OAuth2ClientCreateByAdminResponseDTO {
+	return OAuth2ClientCreateByAdminResponseDTO{
+		Client:       resource.NewOAuth2Client(ctx, client, false),
+		ClientSecret: secret,
+	}
+}
+
 type OAuth2ClientGetRequestDTO struct {
 	ClientID int64
 }

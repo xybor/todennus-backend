@@ -20,11 +20,14 @@ var (
 	ErrGrantTypeInvalid = errors.New("grant type is not supported by provider")
 
 	ErrUnauthorized = errors.New("unauthorized")
+	ErrForbidden    = errors.New("forbidden")
 
 	ErrClientInvalid  = errors.New("client is invalid")
 	ErrClientNotFound = errors.New("client is not found")
 
 	ErrScopeInvalid = errors.New("scope is invalid")
+
+	ErrRequestInvalid = errors.New("request is invalid")
 )
 
 func wrapDomainError(err error) xerror.ServiceError {

@@ -10,6 +10,7 @@ type User struct {
 	Username     string `json:"username,omitempty"`
 	DisplayName  string `json:"display_name,omitempty"`
 	AllowedScope string `json:"allowed_scope,omitempty"`
+	Role         string `json:"role,omitempty"`
 }
 
 func NewUser(user resource.User) User {
@@ -18,5 +19,6 @@ func NewUser(user resource.User) User {
 		Username:     user.Username,
 		DisplayName:  user.DisplayName,
 		AllowedScope: user.AllowedScope,
+		Role:         user.Role.String(),
 	}
 }

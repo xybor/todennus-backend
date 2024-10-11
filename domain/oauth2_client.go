@@ -47,7 +47,7 @@ func (domain *OAuth2ClientDomain) CreateClient(ownerID int64, name string, isCon
 	}
 
 	secret := ""
-	allowedScope := scope.New(Actions.Read, Resources).AsScopes()
+	allowedScope := ScopeEngine.New(Actions.Read, Resources).AsScopes()
 	hashedSecret := []byte{}
 	if isConfidential {
 		secret = xrandom.RandString(domain.ClientSecretLength)
@@ -56,7 +56,7 @@ func (domain *OAuth2ClientDomain) CreateClient(ownerID int64, name string, isCon
 			return OAuth2Client{}, "", err
 		}
 
-		allowedScope = scope.New(Actions, Resources).AsScopes()
+		allowedScope = ScopeEngine.New(Actions, Resources).AsScopes()
 	}
 
 	return OAuth2Client{

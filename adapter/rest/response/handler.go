@@ -25,7 +25,8 @@ type ResponseHandler struct {
 
 func NewResponseHandler(val any, err error) *ResponseHandler {
 	return (&ResponseHandler{resp: val, err: err, code: -1}).
-		Map(http.StatusUnauthorized, usecase.ErrUnauthorized)
+		Map(http.StatusUnauthorized, usecase.ErrUnauthorized).
+		Map(http.StatusForbidden, usecase.ErrForbidden)
 }
 
 func (h *ResponseHandler) Map(code int, errs ...error) *ResponseHandler {

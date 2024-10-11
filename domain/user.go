@@ -4,16 +4,24 @@ import (
 	"time"
 
 	"github.com/xybor-x/snowflake"
+	"github.com/xybor/todennus-backend/pkg/enum"
 	"github.com/xybor/todennus-backend/pkg/scope"
 	"github.com/xybor/todennus-backend/pkg/xstring"
 	"golang.org/x/crypto/bcrypt"
+)
+
+type UserRole int
+
+var (
+	UserRoleAdmin = enum.New[UserRole](1, "admin")
+	UserRoleUser  = enum.New[UserRole](2, "user")
 )
 
 const (
 	MinimumDisplayNameLength = 3
 	MaximumDisplayNameLength = 32
 
-	MinimumUsernameLength = 6
+	MinimumUsernameLength = 4
 	MaximumUsernameLength = 20
 
 	MinimumPasswordLength = 8
@@ -27,6 +35,7 @@ type User struct {
 	DisplayName  string
 	Username     string
 	HashedPass   string
+	Role         enum.Enum[UserRole]
 	AllowedScope scope.Scopes
 	UpdatedAt    time.Time
 }
@@ -57,8 +66,9 @@ func (domain *UserDomain) Create(username, password string) (User, error) {
 		ID:           domain.Snowflake.Generate().Int64(),
 		DisplayName:  username,
 		Username:     username,
-		AllowedScope: scope.New(Actions, Resources).AsScopes(),
+		AllowedScope: ScopeEngine.New(Actions, Resources).AsScopes(),
 		HashedPass:   string(hashedPass),
+		Role:         UserRoleUser,
 	}, nil
 }
 

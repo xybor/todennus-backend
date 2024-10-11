@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/xybor/todennus-backend/domain"
+	"github.com/xybor/todennus-backend/pkg/enum"
 )
 
 type User struct {
@@ -11,6 +12,7 @@ type User struct {
 	Username     string
 	DisplayName  string
 	AllowedScope string
+	Role         enum.Enum[domain.UserRole]
 }
 
 func NewUser(ctx context.Context, user domain.User, needFilter bool) User {
@@ -19,6 +21,7 @@ func NewUser(ctx context.Context, user domain.User, needFilter bool) User {
 		Username:     user.Username,
 		DisplayName:  user.DisplayName,
 		AllowedScope: user.AllowedScope.String(),
+		Role:         user.Role,
 	}
 
 	if needFilter {
@@ -27,6 +30,13 @@ func NewUser(ctx context.Context, user domain.User, needFilter bool) User {
 			WhenNotContainsScope(domain.ScopeEngine.New(
 				domain.Actions.Read,
 				domain.Resources.User.AllowedScope,
+			))
+
+		Set(ctx, &usecaseUser.Role, enum.Default[domain.UserRole]()).
+			WhenRequestUserNot(user.ID).
+			WhenNotContainsScope(domain.ScopeEngine.New(
+				domain.Actions.Read,
+				domain.Resources.User.Role,
 			))
 	}
 

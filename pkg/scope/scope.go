@@ -20,11 +20,15 @@ type Scope struct {
 	resource Resourcer
 }
 
-func New(action Actioner, resource Resourcer) Scope {
+func NewONLYFORTEST(action Actioner, resource Resourcer) Scope {
 	return Scope{
 		action:   action,
 		resource: resource,
 	}
+}
+
+func newAction(action Actioner, resource Resourcer) Scope {
+	return Scope{action: action, resource: resource}
 }
 
 func (scope Scope) String() string {

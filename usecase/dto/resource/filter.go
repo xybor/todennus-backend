@@ -8,39 +8,41 @@ import (
 	"github.com/xybor/todennus-backend/pkg/xcontext"
 )
 
-type Filterer struct {
+type Filterer[T any] struct {
 	ctx      context.Context
-	obj      any
+	obj      *T
 	filtered bool
+	target   T
 }
 
-func Filter(ctx context.Context, obj any) *Filterer {
-	return &Filterer{ctx: ctx, obj: obj}
+func Set[T any](ctx context.Context, obj *T, target T) *Filterer[T] {
+	return &Filterer[T]{ctx: ctx, obj: obj, target: target}
 }
 
-func (f *Filterer) When(target bool) *Filterer {
-	if !f.filtered && target {
+func Filter[T any](ctx context.Context, obj *T) *Filterer[T] {
+	var t T
+	return Set(ctx, obj, t)
+}
+
+func (f *Filterer[T]) When(cond bool) *Filterer[T] {
+	if !f.filtered && cond {
 		f.setzero()
 	}
 	return f
 }
 
-func (f *Filterer) WhenNot(target bool) *Filterer {
-	return f.When(!target)
+func (f *Filterer[T]) WhenNot(cond bool) *Filterer[T] {
+	return f.When(!cond)
 }
 
-func (f *Filterer) WhenNotContainsScope(target scope.Scope) *Filterer {
+func (f *Filterer[T]) WhenNotContainsScope(target scope.Scope) *Filterer[T] {
 	return f.WhenNot(xcontext.Scope(f.ctx).Contains(target))
 }
 
-func (f *Filterer) WhenRequestUserNot(userID int64) *Filterer {
+func (f *Filterer[T]) WhenRequestUserNot(userID int64) *Filterer[T] {
 	return f.WhenNot(xcontext.RequestUserID(f.ctx) == userID)
 }
 
-func (f *Filterer) IfNotAdmin() *Filterer {
-	return f.WhenNot(xcontext.IsAdmin(f.ctx))
-}
-
-func (f *Filterer) setzero() {
-	reflect.ValueOf(f.obj).Elem().SetZero()
+func (f *Filterer[T]) setzero() {
+	reflect.ValueOf(f.obj).Elem().Set(reflect.ValueOf(f.target))
 }
