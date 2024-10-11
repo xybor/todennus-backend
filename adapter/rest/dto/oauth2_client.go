@@ -30,6 +30,32 @@ func NewOauth2ClientCreateResponseDTO(resp dto.OAuth2ClientCreateResponseDTO) OA
 	}
 }
 
+type OAuth2ClientCreateFirstRequestDTO struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+}
+
+func (req *OAuth2ClientCreateFirstRequestDTO) To() dto.OAuth2ClientCreateFirstRequestDTO {
+	return dto.OAuth2ClientCreateFirstRequestDTO{
+		Username: req.Username,
+		Password: req.Password,
+		Name:     req.Name,
+	}
+}
+
+type OAuth2ClientCreateFirstResponseDTO struct {
+	resource.OAuth2Client
+	ClientSecret string `json:"client_secret"`
+}
+
+func NewOauth2ClientCreateFirstResponseDTO(resp dto.OAuth2ClientCreateByAdminResponseDTO) OAuth2ClientCreateFirstResponseDTO {
+	return OAuth2ClientCreateFirstResponseDTO{
+		OAuth2Client: resource.NewOAuth2Client(resp.Client),
+		ClientSecret: resp.ClientSecret,
+	}
+}
+
 type OAuth2ClientGetRequestDTO struct {
 	ClientID string `param:"client_id"`
 }

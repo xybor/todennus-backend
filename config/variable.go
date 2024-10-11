@@ -8,6 +8,7 @@ import (
 type Variable struct {
 	Server         ServerVariable         `ini:"server"`
 	Postgres       PostgresVariable       `ini:"postgres"`
+	Redis          RedisVariable          `ini:"redis"`
 	Authentication AuthenticationVariable `ini:"authentication"`
 	OAuth2         OAuth2Variable         `ini:"oauth2"`
 }
@@ -16,6 +17,7 @@ func DefaultVariable() Variable {
 	return Variable{
 		Server:         DefaultSystemVariable(),
 		Postgres:       DefaultPostgresVariable(),
+		Redis:          DefaultRedisVariable(),
 		Authentication: DefaultAuthenticationVariable(),
 		OAuth2:         DefaultOAuth2Variable(),
 	}
@@ -58,6 +60,18 @@ func DefaultPostgresVariable() PostgresVariable {
 	}
 }
 
+type RedisVariable struct {
+	Addr string `ini:"addr"`
+	DB   int    `ini:"db"`
+}
+
+func DefaultRedisVariable() RedisVariable {
+	return RedisVariable{
+		Addr: "localhost:6379",
+		DB:   0,
+	}
+}
+
 type AuthenticationVariable struct {
 	AccessTokenExpiration  int    `ini:"access_token_expiration"`  // in second
 	RefreshTokenExpiration int    `ini:"refresh_token_expiration"` // in second
@@ -79,6 +93,6 @@ type OAuth2Variable struct {
 
 func DefaultOAuth2Variable() OAuth2Variable {
 	return OAuth2Variable{
-		ClientSecretLength: 32,
+		ClientSecretLength: 64,
 	}
 }

@@ -3,23 +3,36 @@ package usecase
 import (
 	"context"
 	"errors"
+	"time"
 
+	"github.com/redis/go-redis/v9"
+	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/infras/database"
 	"github.com/xybor/todennus-backend/pkg/xcontext"
 	"github.com/xybor/todennus-backend/pkg/xerror"
+	"github.com/xybor/todennus-backend/pkg/xredis"
 	"github.com/xybor/todennus-backend/usecase/abstraction"
 	"github.com/xybor/todennus-backend/usecase/dto"
 )
 
 type UserUsecase struct {
+	adminLocker       *xredis.Locker
+	shouldCreateAdmin bool
+
 	userDomain abstraction.UserDomain
 	userRepo   abstraction.UserRepository
 }
 
-func NewUserUsecase(userRepo abstraction.UserRepository, userDomain abstraction.UserDomain) *UserUsecase {
+func NewUserUsecase(
+	redis *redis.Client,
+	userRepo abstraction.UserRepository,
+	userDomain abstraction.UserDomain,
+) *UserUsecase {
 	return &UserUsecase{
-		userRepo:   userRepo,
-		userDomain: userDomain,
+		adminLocker:       xredis.NewLock(redis, "admin-user", 10*time.Second),
+		shouldCreateAdmin: true,
+		userRepo:          userRepo,
+		userDomain:        userDomain,
 	}
 }
 
@@ -42,9 +55,15 @@ func (uc *UserUsecase) Register(
 		return dto.UserRegisterResponseDTO{}, wrapDomainError(err)
 	}
 
-	err = uc.userRepo.Create(ctx, user)
+	created, err := uc.createAdmin(ctx, &user)
 	if err != nil {
-		return dto.UserRegisterResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
+		return dto.UserRegisterResponseDTO{}, err
+	}
+
+	if !created {
+		if err = uc.userRepo.Create(ctx, user); err != nil {
+			return dto.UserRegisterResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
+		}
 	}
 
 	return dto.NewUserRegisterResponseDTO(ctx, user), nil
@@ -90,4 +109,36 @@ func (usecase *UserUsecase) GetByUsername(
 	}
 
 	return dto.NewUserGetByUsernameResponseDTO(ctx, user), nil
+}
+
+func (uc *UserUsecase) createAdmin(
+	ctx context.Context,
+	user *domain.User,
+) (bool, error) {
+	if !uc.shouldCreateAdmin {
+		return false, nil
+	}
+
+	err := uc.adminLocker.LockFunc(ctx, func() error {
+		adminCount, err := uc.userRepo.CountByRole(ctx, domain.UserRoleAdmin)
+		if err != nil {
+			return wrapNonDomainError(xerror.ServerityCritical, err)
+		}
+
+		if adminCount > 0 {
+			uc.shouldCreateAdmin = false
+			return nil
+		}
+
+		user.Role = domain.UserRoleAdmin
+		err = uc.userRepo.Create(ctx, *user)
+		if err != nil {
+			return wrapNonDomainError(xerror.ServerityWarn, err)
+		}
+
+		uc.shouldCreateAdmin = false
+		return nil
+	})
+
+	return !uc.shouldCreateAdmin, err
 }

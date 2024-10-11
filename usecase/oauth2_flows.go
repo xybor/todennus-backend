@@ -61,14 +61,12 @@ func NewOAuth2Usecase(
 func (usecase *OAuth2Usecase) Token(ctx context.Context, req dto.OAuth2TokenRequestDTO) (dto.OAuth2TokenResponseDTO, error) {
 	client, err := usecase.oauth2ClientRepo.GetByID(ctx, req.ClientID)
 	if err != nil {
-		if !errors.Is(err, database.ErrRecordNotFound) {
-			return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(xerror.ServerityCritical, err)
-		}
-
-		if !xcontext.IsAdmin(ctx) {
+		if errors.Is(err, database.ErrRecordNotFound) {
 			return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(ErrClientInvalid).
 				WithMessage("client is not found")
 		}
+
+		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(xerror.ServerityCritical, err)
 	}
 
 	switch req.GrantType {
@@ -86,12 +84,10 @@ func (usecase *OAuth2Usecase) handlePasswordFlow(
 	req dto.OAuth2TokenRequestDTO,
 	client domain.OAuth2Client,
 ) (dto.OAuth2TokenResponseDTO, error) {
-	if !xcontext.IsAdmin(ctx) {
-		err := usecase.oauth2ClientDomain.ValidateClient(
-			client, req.ClientID, req.ClientSecret, domain.RequireConfidential)
-		if err != nil {
-			return dto.OAuth2TokenResponseDTO{}, wrapDomainError(err)
-		}
+	err := usecase.oauth2ClientDomain.ValidateClient(
+		client, req.ClientID, req.ClientSecret, domain.RequireConfidential)
+	if err != nil {
+		return dto.OAuth2TokenResponseDTO{}, wrapDomainError(err)
 	}
 
 	// Get the user information.
@@ -120,11 +116,7 @@ func (usecase *OAuth2Usecase) handlePasswordFlow(
 			WithMessage("requested scope is invalid")
 	}
 
-	finalScope := requestedScope.Intersect(user.AllowedScope)
-	if !xcontext.IsAdmin(ctx) {
-		finalScope = finalScope.Intersect(client.AllowedScope)
-	}
-
+	finalScope := requestedScope.Intersect(user.AllowedScope).Intersect(client.AllowedScope)
 	if len(finalScope) == 0 {
 		return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(ErrScopeInvalid).
 			WithMessage("requested scope is not allowed")

@@ -5,6 +5,7 @@ import (
 
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/infras/database/model"
+	"github.com/xybor/todennus-backend/pkg/enum"
 	"gorm.io/gorm"
 )
 
@@ -17,9 +18,7 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 }
 
 func (repo *UserRepository) Create(ctx context.Context, user domain.User) error {
-	model := &model.UserModel{}
-	model.From(user)
-
+	model := model.NewUser(user)
 	return convertGormError(repo.db.Create(&model).Error)
 }
 
@@ -39,4 +38,10 @@ func (repo *UserRepository) GetByID(ctx context.Context, userID int64) (domain.U
 	}
 
 	return model.To()
+}
+
+func (repo *UserRepository) CountByRole(ctx context.Context, role enum.Enum[domain.UserRole]) (int64, error) {
+	var n int64
+	err := repo.db.Model(&model.UserModel{}).Where("role=?", role.String()).Count(&n).Error
+	return n, convertGormError(err)
 }

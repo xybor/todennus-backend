@@ -16,6 +16,7 @@ type UserResource struct {
 
 	DisplayName  scope.BaseResource
 	AllowedScope scope.BaseResource `resource:"allowed_scope"`
+	Role         scope.BaseResource
 }
 
 type OAuth2ClientResource struct {

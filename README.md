@@ -15,7 +15,7 @@ An Identity, OpenID Connect, and OAuth2 Provider.
 ## Tech stack
 
 - Architecture: Clean architecture, Domain Driven Development.
-- Database: [gorm](https://github.com/go-gorm/gorm), [go-migrate](https://github.com/golang-migrate/migrate), [postgreSQL](https://www.postgresql.org/).
+- Database: [gorm](https://github.com/go-gorm/gorm), [go-migrate](https://github.com/golang-migrate/migrate), [postgreSQL](https://www.postgresql.org/), [redis](https://redis.io/).
 - Mux: [go-chi](https://github.com/go-chi/chi).
 
 ## Target
@@ -36,9 +36,7 @@ Strictly follow Clean Architecture and DDD.
   + Device Flow (low priority).
 
 - Handle scope (**completed**).
-- Allow integrate with custom external IdP.
-- Allow integrate with third-party OAuth2 provider (Google, Discord, etc.).
-- Implement rate limiter.
+- Allow integrate with external Identity/OAuth2 Provider.
 
 ### User traffic
 
@@ -52,16 +50,18 @@ Strictly follow Clean Architecture and DDD.
 
 2. Install [Postgres](https://www.postgresql.org/download/).
 
-3. Setup secret values at `config/.env` (or environment variables) and
+3. Install [Redis](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/).
+
+4. Setup secret values at `config/.env` (or environment variables) and
    configurations at `config/default.ini`.
 
-4. Start the server.
+5. Start the server.
 
 ```shell
 $ make start-rest-server
 ```
 
-5. Create the first user.
+6. The first registered user is always admininistrator.
 
 ```
 POST /users
@@ -72,34 +72,21 @@ POST /users
 }
 ```
 
-6. Generate a temporary access token by the admin secret key (currently we don't
-have any OAuth2 Client, therefore we cannot generate access token by the normal
-flow).
+7. Create the first OAuth2 Client. This API Endpoint will be blocked after the
+first client is created.
 
 ```
-POST /oauth2/token
-
-Authorization: Admin $ADMIN_SECRET_KEY$
-
-grant_type=password&
-username=admin&
-password=P@ssw0rd
-```
-
-7. Create the first OAuth2 Client. Note that you must save the `client_secret` in the response. The secret will never be retrieved by anyway.
-
-```
-POST /oauth2_clients
-
-Authorization: Bearer $ACCESS_TOKEN$
+POST /oauth2_clients/first
 
 {
   "name": "Admin Client",
-  "is_confidential": true
+  "is_confidential": true,
+  "username": "{admin_username}",
+  "password": "{admin_password}"
 }
 ```
 
-8. Now you can use the normal OAuth2 now.
+8. You can use the OAuth2 flow now.
 
 ```
 POST /oauth2/token

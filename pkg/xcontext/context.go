@@ -15,7 +15,6 @@ const (
 	loggerKey contextKey = iota
 	requestTimeKey
 	requestUserIDKey
-	adminExpiresAtKey
 	scopeKey
 )
 
@@ -49,22 +48,6 @@ func RequestUserID(ctx context.Context) int64 {
 	}
 
 	return 0
-}
-
-func WithAdminExpiresAt(ctx context.Context, t time.Time) context.Context {
-	return context.WithValue(ctx, adminExpiresAtKey, t)
-}
-
-func AdminExpiresAt(ctx context.Context) time.Time {
-	if val := ctx.Value(adminExpiresAtKey); val != nil {
-		return val.(time.Time)
-	}
-
-	return time.Time{}
-}
-
-func IsAdmin(ctx context.Context) bool {
-	return AdminExpiresAt(ctx).After(time.Now())
 }
 
 func WithScope(ctx context.Context, scopes scope.Scopes) context.Context {
