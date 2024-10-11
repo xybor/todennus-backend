@@ -36,8 +36,7 @@ Strictly follow Clean Architecture and DDD.
   + Device Flow (low priority).
 
 - Handle scope (**completed**).
-- Allow integrate with custom external IdP.
-- Allow integrate with third-party Identity/OAuth2 provider (Google, Discord, etc.).
+- Allow integrate with external Identity/OAuth2 Provider.
 
 ### User traffic
 
@@ -51,16 +50,18 @@ Strictly follow Clean Architecture and DDD.
 
 2. Install [Postgres](https://www.postgresql.org/download/).
 
-3. Setup secret values at `config/.env` (or environment variables) and
+3. Install [Redis](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/).
+
+4. Setup secret values at `config/.env` (or environment variables) and
    configurations at `config/default.ini`.
 
-4. Start the server.
+5. Start the server.
 
 ```shell
 $ make start-rest-server
 ```
 
-5. The first registered user is always admininistrator.
+6. The first registered user is always admininistrator.
 
 ```
 POST /users
@@ -71,7 +72,7 @@ POST /users
 }
 ```
 
-6. Create the first OAuth2 Client. This API Endpoint will be blocked after the
+7. Create the first OAuth2 Client. This API Endpoint will be blocked after the
 first client is created.
 
 ```
@@ -85,7 +86,7 @@ POST /oauth2_clients/first
 }
 ```
 
-7. You can use the OAuth2 flow now.
+8. You can use the OAuth2 flow now.
 
 ```
 POST /oauth2/token
