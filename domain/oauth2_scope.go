@@ -23,6 +23,7 @@ func init() {
 	// OAuth2 Client
 	ScopeEngine.Define(Actions.Read, Resources.Client).Description("grant read-only access to client's information")
 	ScopeEngine.Define(Actions.Read, Resources.Client.AllowedScope).Description("grant read-only access to client's allowed scope")
+
 	ScopeEngine.Define(Actions.Write, Resources.Client).Description("grant write permission to OAuth2 Client")
 	ScopeEngine.Define(Actions.Write.Create, Resources.Client).Description("allow user to create OAuth2 Client")
 }
