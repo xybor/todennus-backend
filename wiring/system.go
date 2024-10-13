@@ -16,8 +16,8 @@ type System struct {
 	Usecases
 }
 
-func InitializeSystem(envPaths []string, iniPaths []string) (System, context.Context, error) {
-	config, err := config.Load(sources(envPaths), sources(iniPaths))
+func InitializeSystem(migrationPath string, paths ...string) (System, context.Context, error) {
+	config, err := config.Load(sources(paths)...)
 	if err != nil {
 		return System{}, nil, fmt.Errorf("cannot load variable and secrets, err=%w", err)
 	}
@@ -35,7 +35,7 @@ func InitializeSystem(envPaths []string, iniPaths []string) (System, context.Con
 		return System{}, nil, fmt.Errorf("cannot initialize domains, err=%w", err)
 	}
 
-	databases, err := InitializeDatabases(ctx, config)
+	databases, err := InitializeDatabases(ctx, config, migrationPath)
 	if err != nil {
 		return System{}, nil, fmt.Errorf("cannot initialize databases, err=%w", err)
 	}

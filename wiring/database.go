@@ -19,11 +19,11 @@ type Databases struct {
 	GormPostgres *gorm.DB
 }
 
-func InitializeDatabases(ctx context.Context, config config.Config) (Databases, error) {
+func InitializeDatabases(ctx context.Context, config config.Config, migrationPath string) (Databases, error) {
 	db := Databases{}
 	var err error
 
-	db.GormPostgres, err = initializeGormPostgres(ctx, config)
+	db.GormPostgres, err = initializeGormPostgres(ctx, config, migrationPath)
 	if err != nil {
 		return db, err
 	}
@@ -31,7 +31,7 @@ func InitializeDatabases(ctx context.Context, config config.Config) (Databases, 
 	return db, nil
 }
 
-func initializeGormPostgres(ctx context.Context, config config.Config) (*gorm.DB, error) {
+func initializeGormPostgres(ctx context.Context, config config.Config, migrationPath string) (*gorm.DB, error) {
 	loglevel := config.Variable.Postgres.LogLevel
 	newLogger := gormlogger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
@@ -65,7 +65,7 @@ func initializeGormPostgres(ctx context.Context, config config.Config) (*gorm.DB
 		if err == nil {
 			break
 		}
-		xcontext.Logger(ctx).Warn("failed to connect postgres, retry...", "err", err)
+		xcontext.Logger(ctx).Warn("failed-to-connect-to-postgres", "err", err)
 		time.Sleep(time.Duration(retryDuration) * time.Second)
 	}
 
@@ -78,7 +78,7 @@ func initializeGormPostgres(ctx context.Context, config config.Config) (*gorm.DB
 		return nil, err
 	}
 
-	if err := postgres.Migrate(ctx, db); err != nil {
+	if err := postgres.Migrate(ctx, db, migrationPath); err != nil {
 		return nil, err
 	}
 

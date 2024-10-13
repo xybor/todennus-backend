@@ -44,7 +44,12 @@ Strictly follow Clean Architecture and DDD.
 - 1M new users per day.
 - 10M OAuth2 requests per day.
 
-## Usage
+## Get started
+
+You need to setup secret values at `.env` (or export environment variables). You
+can refer the [.env.example](./.env.example).
+
+###  Run without Docker
 
 1. Install [Golang 1.23](https://go.dev/doc/install).
 
@@ -52,16 +57,29 @@ Strictly follow Clean Architecture and DDD.
 
 3. Install [Redis](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/).
 
-4. Setup secret values at `config/.env` (or environment variables) and
-   configurations at `config/default.ini`.
-
-5. Start the server.
+4. Start the server.
 
 ```shell
 $ make start-rest-server
 ```
 
-6. The first registered user is always admininistrator.
+### Run with Docker
+
+1. Build dockerfile.
+
+```shell
+$ make docker-build
+```
+
+2. Start docker compose.
+
+```shell
+$ make docker-compose-up
+```
+
+### Create the first user and client
+
+1. Create the first user. The first registered user is always admininistrator.
 
 ```
 POST /users
@@ -72,7 +90,7 @@ POST /users
 }
 ```
 
-7. Create the first OAuth2 Client. This API Endpoint will be blocked after the
+2. Create the first OAuth2 Client. This API Endpoint will be blocked after the
 first client is created.
 
 ```
@@ -81,12 +99,12 @@ POST /oauth2_clients/first
 {
   "name": "Admin Client",
   "is_confidential": true,
-  "username": "{admin_username}",
-  "password": "{admin_password}"
+  "username": "admin",
+  "password": "P@ssw0rd"
 }
 ```
 
-8. You can use the OAuth2 flow now.
+3. You can use the OAuth2 flow now.
 
 ```
 POST /oauth2/token

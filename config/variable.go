@@ -6,16 +6,16 @@ import (
 )
 
 type Variable struct {
-	Server         ServerVariable         `ini:"server"`
-	Postgres       PostgresVariable       `ini:"postgres"`
-	Redis          RedisVariable          `ini:"redis"`
-	Authentication AuthenticationVariable `ini:"authentication"`
-	OAuth2         OAuth2Variable         `ini:"oauth2"`
+	Server         ServerVariable         `envconfig:"server"`
+	Postgres       PostgresVariable       `envconfig:"postgres"`
+	Redis          RedisVariable          `envconfig:"redis"`
+	Authentication AuthenticationVariable `envconfig:"authentication"`
+	OAuth2         OAuth2Variable         `envconfig:"oauth2"`
 }
 
 func DefaultVariable() Variable {
 	return Variable{
-		Server:         DefaultSystemVariable(),
+		Server:         DefaultServerVariable(),
 		Postgres:       DefaultPostgresVariable(),
 		Redis:          DefaultRedisVariable(),
 		Authentication: DefaultAuthenticationVariable(),
@@ -24,13 +24,13 @@ func DefaultVariable() Variable {
 }
 
 type ServerVariable struct {
-	Host     string `ini:"host"`
-	Port     int    `ini:"port"`
-	NodeID   int    `ini:"nodeid"`
-	LogLevel int    `ini:"loglevel"`
+	Host     string `envconfig:"host"`
+	Port     int    `envconfig:"port"`
+	NodeID   int    `envconfig:"nodeid"`
+	LogLevel int    `envconfig:"loglevel"`
 }
 
-func DefaultSystemVariable() ServerVariable {
+func DefaultServerVariable() ServerVariable {
 	return ServerVariable{
 		Host:     "",
 		Port:     7063, // == tode
@@ -40,13 +40,13 @@ func DefaultSystemVariable() ServerVariable {
 }
 
 type PostgresVariable struct {
-	LogLevel      int    `ini:"loglevel"`
-	Host          string `ini:"host"`
-	Port          int    `ini:"port"`
-	SSLMode       string `ini:"sslmode"`
-	Timezone      string `ini:"timezone"`
-	RetryAttempts int    `ini:"retry_attempts"`
-	RetryInterval int    `ini:"retry_interval"` // in second
+	LogLevel      int    `envconfig:"loglevel"`
+	Host          string `envconfig:"host"`
+	Port          int    `envconfig:"port"`
+	SSLMode       string `envconfig:"sslmode"`
+	Timezone      string `envconfig:"timezone"`
+	RetryAttempts int    `envconfig:"retry_attempts"`
+	RetryInterval int    `envconfig:"retry_interval"` // in second
 }
 
 func DefaultPostgresVariable() PostgresVariable {
@@ -61,8 +61,8 @@ func DefaultPostgresVariable() PostgresVariable {
 }
 
 type RedisVariable struct {
-	Addr string `ini:"addr"`
-	DB   int    `ini:"db"`
+	Addr string `envconfig:"addr"`
+	DB   int    `envconfig:"db"`
 }
 
 func DefaultRedisVariable() RedisVariable {
@@ -73,10 +73,10 @@ func DefaultRedisVariable() RedisVariable {
 }
 
 type AuthenticationVariable struct {
-	AccessTokenExpiration  int    `ini:"access_token_expiration"`  // in second
-	RefreshTokenExpiration int    `ini:"refresh_token_expiration"` // in second
-	IDTokenExpiration      int    `ini:"id_token_expiration"`      // in second
-	TokenIssuer            string `ini:"token_issuer"`
+	AccessTokenExpiration  int    `envconfig:"access_token_expiration"`  // in second
+	RefreshTokenExpiration int    `envconfig:"refresh_token_expiration"` // in second
+	IDTokenExpiration      int    `envconfig:"id_token_expiration"`      // in second
+	TokenIssuer            string `envconfig:"token_issuer"`
 }
 
 func DefaultAuthenticationVariable() AuthenticationVariable {
@@ -88,7 +88,7 @@ func DefaultAuthenticationVariable() AuthenticationVariable {
 }
 
 type OAuth2Variable struct {
-	ClientSecretLength int `ini:"client_secret_length"`
+	ClientSecretLength int `envconfig:"client_secret_length"`
 }
 
 func DefaultOAuth2Variable() OAuth2Variable {

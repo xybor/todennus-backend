@@ -1,14 +1,14 @@
 package config
 
 type Secret struct {
-	Postgres       PostgresSecret
-	Authentication AuthenticationSecret
-	Redis          RedisSecret
+	Postgres       PostgresSecret       `envconfig:"postgres"`
+	Authentication AuthenticationSecret `envconfig:"auth"`
+	Redis          RedisSecret          `envconfig:"redis"`
 }
 
 type PostgresSecret struct {
-	Password string
-	User     string
+	User     string `envconfig:"user"`
+	Password string `envconfig:"password"`
 	DBName   string `envconfig:"db"`
 }
 
@@ -23,6 +23,6 @@ type AuthenticationSecret struct {
 }
 
 type RedisSecret struct {
-	Username string
-	Password string
+	Username string `envconfig:"username"`
+	Password string `envconfig:"password"`
 }

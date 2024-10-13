@@ -14,17 +14,17 @@ var Command = &cobra.Command{
 	Use:   "rest",
 	Short: "Start a REST API server",
 	Run: func(cmd *cobra.Command, args []string) {
-		envPaths, err := cmd.Flags().GetStringArray("env")
+		paths, err := cmd.Flags().GetStringArray("env")
 		if err != nil {
 			panic(err)
 		}
 
-		iniPaths, err := cmd.Flags().GetStringArray("ini")
+		migrationPath, err := cmd.Flags().GetString("migration")
 		if err != nil {
 			panic(err)
 		}
 
-		system, ctx, err := wiring.InitializeSystem(envPaths, iniPaths)
+		system, ctx, err := wiring.InitializeSystem(migrationPath, paths...)
 		if err != nil {
 			panic(err)
 		}
