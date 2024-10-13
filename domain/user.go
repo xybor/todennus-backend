@@ -66,7 +66,7 @@ func (domain *UserDomain) Create(username, password string) (User, error) {
 		ID:           domain.Snowflake.Generate().Int64(),
 		DisplayName:  username,
 		Username:     username,
-		AllowedScope: ScopeEngine.New(Actions, Resources).AsScopes(),
+		AllowedScope: scope.New(Actions, Resources).AsScopes(),
 		HashedPass:   string(hashedPass),
 		Role:         UserRoleUser,
 	}, nil

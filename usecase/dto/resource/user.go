@@ -5,6 +5,7 @@ import (
 
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/pkg/enum"
+	"github.com/xybor/todennus-backend/pkg/scope"
 )
 
 type User struct {
@@ -27,17 +28,11 @@ func NewUser(ctx context.Context, user domain.User, needFilter bool) User {
 	if needFilter {
 		Filter(ctx, &usecaseUser.AllowedScope).
 			WhenRequestUserNot(user.ID).
-			WhenNotContainsScope(domain.ScopeEngine.New(
-				domain.Actions.Read,
-				domain.Resources.User.AllowedScope,
-			))
+			WhenNotContainsScope(scope.New(domain.Actions.Read, domain.Resources.User.AllowedScope))
 
 		Set(ctx, &usecaseUser.Role, enum.Default[domain.UserRole]()).
 			WhenRequestUserNot(user.ID).
-			WhenNotContainsScope(domain.ScopeEngine.New(
-				domain.Actions.Read,
-				domain.Resources.User.Role,
-			))
+			WhenNotContainsScope(scope.New(domain.Actions.Read, domain.Resources.User.Role))
 	}
 
 	return usecaseUser

@@ -8,6 +8,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/infras/database"
+	"github.com/xybor/todennus-backend/pkg/scope"
 	"github.com/xybor/todennus-backend/pkg/xcontext"
 	"github.com/xybor/todennus-backend/pkg/xerror"
 	"github.com/xybor/todennus-backend/pkg/xredis"
@@ -51,7 +52,7 @@ func (usecase *OAuth2ClientUsecase) Create(
 		return dto.OAuth2ClientCreateResponseDTO{}, xerror.WrapDebug(ErrUnauthorized)
 	}
 
-	requiredScope := domain.ScopeEngine.New(domain.Actions.Write, domain.Resources.Client)
+	requiredScope := scope.New(domain.Actions.Write.Create, domain.Resources.Client)
 	if !xcontext.Scope(ctx).Contains(requiredScope) {
 		return dto.OAuth2ClientCreateResponseDTO{}, xerror.WrapDebug(ErrForbidden).
 			WithMessage("insufficient scope %s", requiredScope.String())

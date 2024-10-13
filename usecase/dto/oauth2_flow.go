@@ -88,11 +88,6 @@ func OAuth2AccessTokenFromDomain(token domain.OAuth2AccessToken) OAuth2AccessTok
 }
 
 func (token *OAuth2AccessToken) To() (domain.OAuth2AccessToken, error) {
-	scope, err := domain.ScopeEngine.ParseScopes(token.Scope)
-	if err != nil {
-		return domain.OAuth2AccessToken{}, err
-	}
-
 	metadata, err := token.OAuth2StandardClaims.To()
 	if err != nil {
 		return domain.OAuth2AccessToken{}, err
@@ -100,7 +95,7 @@ func (token *OAuth2AccessToken) To() (domain.OAuth2AccessToken, error) {
 
 	return domain.OAuth2AccessToken{
 		Metadata: metadata,
-		Scope:    scope,
+		Scope:    domain.ScopeEngine.ParseScopes(token.Scope),
 	}, nil
 }
 
@@ -119,11 +114,6 @@ func OAuth2RefreshTokenFromDomain(token domain.OAuth2RefreshToken) OAuth2Refresh
 }
 
 func (token *OAuth2RefreshToken) To() (domain.OAuth2RefreshToken, error) {
-	scope, err := domain.ScopeEngine.ParseScopes(token.Scope)
-	if err != nil {
-		return domain.OAuth2RefreshToken{}, err
-	}
-
 	metadata, err := token.OAuth2StandardClaims.To()
 	if err != nil {
 		return domain.OAuth2RefreshToken{}, err
@@ -132,7 +122,7 @@ func (token *OAuth2RefreshToken) To() (domain.OAuth2RefreshToken, error) {
 	return domain.OAuth2RefreshToken{
 		Metadata:       metadata,
 		SequenceNumber: token.SequenceNumber,
-		Scope:          scope,
+		Scope:          domain.ScopeEngine.ParseScopes(token.Scope),
 	}, nil
 }
 

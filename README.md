@@ -35,7 +35,6 @@ Strictly follow Clean Architecture and DDD.
   + Refresh Token Flow (**completed**).
   + Device Flow (low priority).
 
-- Handle scope (**completed**).
 - Allow integrate with external Identity/OAuth2 Provider.
 
 ### User traffic
@@ -46,8 +45,8 @@ Strictly follow Clean Architecture and DDD.
 
 ## Get started
 
-You need to setup secret values at `.env` (or export environment variables). You
-can refer the [.env.example](./.env.example).
+You need to setup secret values at `.env` (or export environment variables).
+Please refer the [.env.example](./.env.example).
 
 ###  Run without Docker
 

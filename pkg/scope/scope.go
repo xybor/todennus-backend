@@ -2,7 +2,6 @@ package scope
 
 import (
 	"fmt"
-	"strings"
 )
 
 type scopeRelationship int
@@ -13,22 +12,26 @@ const (
 	scopeRelationshipSuperset
 )
 
-var NoScope = Scope{}
+type Scoper interface {
+	Contains(another Scoper) bool
+
+	String() string
+
+	IsUndefined() bool
+}
+
+var _ Scoper = Scope{}
 
 type Scope struct {
 	action   Actioner
 	resource Resourcer
 }
 
-func NewONLYFORTEST(action Actioner, resource Resourcer) Scope {
+func New(action Actioner, resource Resourcer) Scope {
 	return Scope{
 		action:   action,
 		resource: resource,
 	}
-}
-
-func newAction(action Actioner, resource Resourcer) Scope {
-	return Scope{action: action, resource: resource}
 }
 
 func (scope Scope) String() string {
@@ -39,69 +42,44 @@ func (scope Scope) String() string {
 	return fmt.Sprintf("%s:%s", scope.action.String(), scope.resource.String())
 }
 
-func (scope Scope) IsSubset(another Scope) bool {
-	return scope.action.IsSubset(another.action) && scope.resource.IsSubset(another.resource)
-}
+func (scope Scope) Contains(another Scoper) bool {
+	anotherScope, ok := another.(Scope)
+	if !ok {
+		return false
+	}
 
-func (scope Scope) Contains(target Scope) bool {
-	return target.IsSubset(scope)
+	return anotherScope.action.IsSubset(scope.action) && anotherScope.resource.IsSubset(scope.resource)
 }
 
 func (scope Scope) AsScopes() Scopes {
 	return NewScopes(scope)
 }
 
-func (scope Scope) relationship(another Scope) scopeRelationship {
-	switch {
-	case scope.IsSubset(another):
-		return scopeRelationshipSubset
-	case scope.Contains(another):
-		return scopeRelationshipSuperset
-	default:
-		return scopeRelationshipNone
-	}
-}
-
-type Scopes []Scope
-
-func NewScopes(scopes ...Scope) Scopes {
-	return scopes
-}
-
-func (scopes Scopes) String() string {
-	scopeValues := []string{}
-	for i := range scopes {
-		scopeValues = append(scopeValues, scopes[i].String())
-	}
-
-	return strings.Join(scopeValues, " ")
-}
-
-func (scopes Scopes) Contains(target Scope) bool {
-	for _, scope := range scopes {
-		if scope.Contains(target) {
-			return true
-		}
-	}
-
+func (scope Scope) IsUndefined() bool {
 	return false
 }
 
-func (scopes Scopes) Intersect(another Scopes) Scopes {
-	result := Scopes{}
-	for _, scope := range scopes {
-		for _, targetScope := range another {
-			if relationship := scope.relationship(targetScope); relationship != scopeRelationshipNone {
-				if relationship == scopeRelationshipSubset {
-					result = append(result, scope)
-				} else {
-					result = append(result, targetScope)
-				}
+type UndefinedScope string
 
-				break
-			}
-		}
+func (scope UndefinedScope) String() string {
+	return string(scope)
+}
+
+func (scope UndefinedScope) Contains(another Scoper) bool {
+	return false
+}
+
+func (scope UndefinedScope) IsUndefined() bool {
+	return true
+}
+
+func relationship(scope, another Scoper) scopeRelationship {
+	switch {
+	case scope.Contains(another):
+		return scopeRelationshipSuperset
+	case another.Contains(scope):
+		return scopeRelationshipSubset
+	default:
+		return scopeRelationshipNone
 	}
-
-	return result
 }
