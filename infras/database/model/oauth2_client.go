@@ -21,18 +21,13 @@ func (OAuth2ClientModel) TableName() string {
 }
 
 func (client *OAuth2ClientModel) To() (domain.OAuth2Client, error) {
-	allowedScope, err := domain.ScopeEngine.ParseScopes(client.AllowedScope)
-	if err != nil {
-		return domain.OAuth2Client{}, err
-	}
-
 	return domain.OAuth2Client{
 		ID:             client.ID,
 		OwnerUserID:    client.UserID,
 		Name:           client.Name,
 		HashedSecret:   client.HashedSecret,
 		IsConfidential: client.IsConfidential,
-		AllowedScope:   allowedScope,
+		AllowedScope:   domain.ScopeEngine.ParseScopes(client.AllowedScope),
 		UpdatedAt:      client.UpdatedAt,
 	}, nil
 }

@@ -110,17 +110,13 @@ func (usecase *OAuth2Usecase) handlePasswordFlow(
 	}
 
 	// Validate scope.
-	requestedScope, err := domain.ScopeEngine.ParseScopes(req.Scope)
-	if err != nil {
-		return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(fmt.Errorf("%w: %s", ErrScopeInvalid, err)).
-			WithMessage("requested scope is invalid")
+	requestedScope := domain.ScopeEngine.ParseScopes(req.Scope)
+	if !requestedScope.LessThan(client.AllowedScope) {
+		return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(ErrScopeInvalid).
+			WithMessage("client has not permission to request this scope")
 	}
 
-	finalScope := requestedScope.Intersect(user.AllowedScope).Intersect(client.AllowedScope)
-	if len(finalScope) == 0 {
-		return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(ErrScopeInvalid).
-			WithMessage("requested scope is not allowed")
-	}
+	finalScope := requestedScope.Intersect(user.AllowedScope)
 
 	// Generate both tokens.
 	accessToken, refreshToken, err := usecase.generateAccessAndRefreshTokens(finalScope, user)

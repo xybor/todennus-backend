@@ -34,17 +34,12 @@ func NewUser(d domain.User) UserModel {
 }
 
 func (u *UserModel) To() (domain.User, error) {
-	allowedScope, err := domain.ScopeEngine.ParseScopes(u.AllowedScope)
-	if err != nil {
-		return domain.User{}, err
-	}
-
 	return domain.User{
 		ID:           u.ID,
 		DisplayName:  u.DisplayName,
 		Username:     u.Username,
 		HashedPass:   u.HashedPass,
-		AllowedScope: allowedScope,
+		AllowedScope: domain.ScopeEngine.ParseScopes(u.AllowedScope),
 		Role:         enum.FromStr[domain.UserRole](u.Role),
 		UpdatedAt:    u.UpdatedAt,
 	}, nil
