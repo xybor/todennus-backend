@@ -2,6 +2,7 @@ package xredis
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -40,7 +41,7 @@ func (l *Locker) Lock(ctx context.Context) error {
 	for {
 		ok, err := l.client.SetNX(ctx, l.key, "", l.exipration).Result()
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot lock by redis: %w", err)
 		}
 
 		if ok {

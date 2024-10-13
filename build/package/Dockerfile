@@ -1,0 +1,25 @@
+FROM golang:1.23-alpine AS build
+
+WORKDIR /todennus-backend
+
+RUN apk add -U --no-cache ca-certificates
+
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
+COPY . ./
+
+RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o /todennus ./cmd/main.go
+
+FROM scratch
+
+WORKDIR /
+
+COPY --from=build /todennus /
+COPY --from=build /todennus-backend/infras/database/postgres/migration /migration
+
+EXPOSE 8080
+
+ENTRYPOINT [ "/todennus", "rest", "--migration", "/migration" ]

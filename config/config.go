@@ -1,9 +1,11 @@
 package config
 
 import (
+	"reflect"
+	"strings"
+
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
-	"gopkg.in/ini.v1"
 )
 
 type Config struct {
@@ -11,64 +13,41 @@ type Config struct {
 	Variable
 }
 
-func Load(envPaths []string, iniPaths []string) (Config, error) {
-	c := Config{}
-	var err error
-
-	c.Variable, err = loadVariables(iniPaths...)
-	if err != nil {
-		return c, err
+func Load(paths ...string) (Config, error) {
+	if len(paths) > 0 {
+		if err := godotenv.Load(paths...); err != nil {
+			return Config{}, err
+		}
 	}
 
-	c.Secret, err = loadSecret(envPaths...)
-	if err != nil {
-		return c, err
+	c := Config{}
+	c.Variable = DefaultVariable()
+
+	if err := load(&c.Variable); err != nil {
+		return Config{}, err
+	}
+
+	if err := load(&c.Secret); err != nil {
+		return Config{}, err
 	}
 
 	return c, nil
 }
 
-func loadVariables(paths ...string) (Variable, error) {
-	v := DefaultVariable()
-
-	if len(paths) > 0 {
-		otherSources := []any{}
-		for _, p := range paths[1:] {
-			otherSources = append(otherSources, p)
+func load[T any](obj *T) error {
+	sType := reflect.TypeOf(obj).Elem()
+	sValue := reflect.ValueOf(obj).Elem()
+	for i := range sType.NumField() {
+		field := sType.Field(i)
+		prefix := field.Tag.Get("envconfig")
+		if prefix == "" {
+			prefix = strings.ToLower(field.Name)
 		}
 
-		initFile, err := ini.Load(paths[0], otherSources...)
-		if err != nil {
-			return Variable{}, err
-		}
-
-		err = initFile.MapTo(&v)
-		if err != nil {
-			return Variable{}, err
+		if err := envconfig.Process(prefix, sValue.FieldByName(field.Name).Addr().Interface()); err != nil {
+			return err
 		}
 	}
 
-	return v, nil
-}
-
-func loadSecret(paths ...string) (Secret, error) {
-	s := Secret{}
-
-	if err := godotenv.Load(paths...); err != nil {
-		return s, err
-	}
-
-	if err := envconfig.Process("postgres", &s.Postgres); err != nil {
-		return s, err
-	}
-
-	if err := envconfig.Process("auth", &s.Authentication); err != nil {
-		return s, err
-	}
-
-	if err := envconfig.Process("redis", &s.Redis); err != nil {
-		return s, err
-	}
-
-	return s, nil
+	return nil
 }

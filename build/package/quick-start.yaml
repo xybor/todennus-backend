@@ -1,0 +1,102 @@
+services:
+  postgresql:
+    container_name: postgresql
+    image: postgres:12
+    command: -p 5432
+    restart: always
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    volumes:
+      - postgresql:/var/lib/postgresql/data
+    expose:
+      - 5432
+    networks:
+      - POSTGRES
+      - PG_ADMIN
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@todennus.com
+      - PGADMIN_DEFAULT_PASSWORD=123456
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - 5050:80
+    networks:
+      - PG_ADMIN
+
+  redis:
+    container_name: redis
+    image: redis:6.2-alpine
+    restart: always
+    expose:
+      - 6379
+    volumes:
+      - redis:/data
+    networks:
+      - REDIS
+
+  todennus:
+    container_name: todennus-backend
+    image: xybor/todennus-backend:latest
+    command: --env ""
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8080
+      - SERVER_NODEID=0
+      - SERVER_LOGLEVEL=0
+
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_LOGLEVEL=1
+      - POSTGRES_HOST=postgresql
+      - POSTGRES_PORT=5432
+      - POSTGRES_TIMEZONE=UTC
+      - POSTGRES_SSLMODE=disable
+      - POSTGRES_RETRY_ATTEMPTS=3
+      - POSTGRES_RETRY_INTERVAL=5
+
+      - REDIS_DB
+      - REDIS_USERNAME=
+      - REDIS_PASSWORD=
+      - REDIS_ADDR=redis:6379
+
+      - AUTH_TOKEN_RSA_PRIVATE_KEY
+      - AUTH_TOKEN_RSA_PUBLIC_KEY
+      - AUTH_TOKEN_HMAC_SECRET_KEY
+      - AUTH_ACCESS_TOKEN_EXPIRATION
+      - AUTH_REFRESH_TOKEN_EXPIRATION
+      - AUTH_ID_TOKEN_EXPIRATION
+      - AUTH_TOKEN_ISSUER
+
+      - OAUTH2_CLIENT_SECRET_LENGTH
+
+    networks:
+      - POSTGRES
+      - REDIS
+
+volumes:
+  postgresql:
+    name: postgresql
+  pgadmin:
+    name: pgadmin
+  redis:
+    name: redis
+
+networks:
+  PG_ADMIN:
+    name: PG_ADMIN
+  POSTGRES:
+    name: POSTGRES
+  REDIS:
+    name: REDIS
