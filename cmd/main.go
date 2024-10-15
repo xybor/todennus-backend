@@ -12,8 +12,6 @@ var rootCommand = &cobra.Command{
 
 func main() {
 	rootCommand.PersistentFlags().StringArray("env", []string{".env"}, "environment file paths")
-	rootCommand.PersistentFlags().String("migration", "./infras/database/postgres/migration", "migration path")
-
 	rootCommand.AddCommand(rest.Command)
 
 	if err := rootCommand.Execute(); err != nil {

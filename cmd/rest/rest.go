@@ -19,12 +19,7 @@ var Command = &cobra.Command{
 			panic(err)
 		}
 
-		migrationPath, err := cmd.Flags().GetString("migration")
-		if err != nil {
-			panic(err)
-		}
-
-		system, ctx, err := wiring.InitializeSystem(migrationPath, envPaths...)
+		system, ctx, err := wiring.InitializeSystem(envPaths...)
 		if err != nil {
 			panic(err)
 		}

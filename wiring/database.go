@@ -12,7 +12,7 @@ type Databases struct {
 	GormPostgres *gorm.DB
 }
 
-func InitializeDatabases(ctx context.Context, config config.Config, migrationPath string) (Databases, error) {
+func InitializeDatabases(ctx context.Context, config config.Config) (Databases, error) {
 	db := Databases{}
 	var err error
 
