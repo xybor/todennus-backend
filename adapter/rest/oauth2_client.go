@@ -8,8 +8,8 @@ import (
 	"github.com/xybor/todennus-backend/adapter/rest/dto"
 	"github.com/xybor/todennus-backend/adapter/rest/response"
 	"github.com/xybor/todennus-backend/domain"
-	"github.com/xybor/todennus-backend/pkg/xhttp"
 	"github.com/xybor/todennus-backend/usecase"
+	"github.com/xybor/x"
 )
 
 type OAuth2ClientAdapter struct {
@@ -33,7 +33,7 @@ func (a *OAuth2ClientAdapter) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseRequest[dto.OAuth2ClientGetRequestDTO](r)
+		req, err := x.ParseHTTPRequest[dto.OAuth2ClientGetRequestDTO](r)
 		if err != nil {
 			response.HandleParseError(ctx, w, err)
 			return
@@ -50,7 +50,7 @@ func (a *OAuth2ClientAdapter) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseRequest[dto.OAuth2ClientCreateRequestDTO](r)
+		req, err := x.ParseHTTPRequest[dto.OAuth2ClientCreateRequestDTO](r)
 		if err != nil {
 			response.HandleParseError(ctx, w, err)
 			return
@@ -67,7 +67,7 @@ func (a *OAuth2ClientAdapter) CreateByAdmin() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseRequest[dto.OAuth2ClientCreateFirstRequestDTO](r)
+		req, err := x.ParseHTTPRequest[dto.OAuth2ClientCreateFirstRequestDTO](r)
 		if err != nil {
 			response.HandleParseError(ctx, w, err)
 			return

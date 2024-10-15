@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/xybor/todennus-backend/pkg/logging"
-	"github.com/xybor/todennus-backend/pkg/xcontext"
-	"github.com/xybor/todennus-backend/pkg/xerror"
-	"github.com/xybor/todennus-backend/pkg/xhttp"
 	"github.com/xybor/todennus-backend/usecase"
+	"github.com/xybor/x"
+	"github.com/xybor/x/errorx"
+	"github.com/xybor/x/logging"
+	"github.com/xybor/x/xcontext"
 )
 
 type ErrorResponse struct {
@@ -58,7 +58,7 @@ func (h *ResponseHandler) WriteHTTPResponse(ctx context.Context, w http.Response
 	var resp any = h.resp
 
 	if h.err != nil {
-		var serviceErr xerror.ServiceError
+		var serviceErr errorx.ServiceError
 		switch {
 		case errors.As(h.err, &serviceErr):
 			resp = ErrorResponse{ErrMsg: serviceErr.Message}
@@ -79,7 +79,7 @@ func HandleParseError(ctx context.Context, w http.ResponseWriter, err error) {
 
 	var code int
 	response := ErrorResponse{}
-	if errors.Is(err, xhttp.ErrBadRequest) {
+	if errors.Is(err, x.ErrHTTPBadRequest) {
 		code = http.StatusBadRequest
 		response.ErrMsg = err.Error()
 	} else {
@@ -97,7 +97,7 @@ func WriteErrorMsg(ctx context.Context, w http.ResponseWriter, code int, msg str
 }
 
 func Write(ctx context.Context, w http.ResponseWriter, code int, obj any) {
-	if err := xhttp.WriteResponseJSON(w, code, obj); err != nil {
+	if err := x.WriteHTTPResponseJSON(w, code, obj); err != nil {
 		xcontext.Logger(ctx).Critical("failed to write response", "err", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}

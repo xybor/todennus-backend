@@ -5,7 +5,7 @@ import (
 
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/infras/database/model"
-	"github.com/xybor/todennus-backend/pkg/enum"
+	"github.com/xybor/x/enum"
 	"gorm.io/gorm"
 )
 

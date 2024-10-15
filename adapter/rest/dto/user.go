@@ -4,18 +4,18 @@ import (
 	"context"
 	"errors"
 
+	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/adapter/rest/dto/resource"
-	"github.com/xybor/todennus-backend/pkg/xcontext"
-	"github.com/xybor/todennus-backend/pkg/xstring"
 	"github.com/xybor/todennus-backend/usecase/dto"
+	"github.com/xybor/x/xcontext"
 )
 
-func ParseUserID(ctx context.Context, s string) (int64, error) {
+func ParseUserID(ctx context.Context, s string) (snowflake.ID, error) {
 	if s == "@me" {
 		return xcontext.RequestUserID(ctx), nil
 	}
 
-	return xstring.ParseID(s)
+	return snowflake.ParseString(s)
 }
 
 // Register

@@ -7,12 +7,12 @@ import (
 
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/infras/database"
-	"github.com/xybor/todennus-backend/pkg/scope"
-	"github.com/xybor/todennus-backend/pkg/token"
-	"github.com/xybor/todennus-backend/pkg/xcontext"
-	"github.com/xybor/todennus-backend/pkg/xerror"
 	"github.com/xybor/todennus-backend/usecase/abstraction"
 	"github.com/xybor/todennus-backend/usecase/dto"
+	"github.com/xybor/x/errorx"
+	"github.com/xybor/x/scope"
+	"github.com/xybor/x/token"
+	"github.com/xybor/x/xcontext"
 )
 
 const (
@@ -59,14 +59,14 @@ func NewOAuth2Usecase(
 }
 
 func (usecase *OAuth2Usecase) Token(ctx context.Context, req dto.OAuth2TokenRequestDTO) (dto.OAuth2TokenResponseDTO, error) {
-	client, err := usecase.oauth2ClientRepo.GetByID(ctx, req.ClientID)
+	client, err := usecase.oauth2ClientRepo.GetByID(ctx, req.ClientID.Int64())
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
-			return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(ErrClientInvalid).
+			return dto.OAuth2TokenResponseDTO{}, errorx.WrapDebug(ErrClientInvalid).
 				WithMessage("client is not found")
 		}
 
-		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(xerror.ServerityCritical, err)
+		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(errorx.ServerityCritical, err)
 	}
 
 	switch req.GrantType {
@@ -94,10 +94,10 @@ func (usecase *OAuth2Usecase) handlePasswordFlow(
 	user, err := usecase.userRepo.GetByUsername(ctx, req.Username)
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
-			return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(ErrUsernamePasswordInvalid)
+			return dto.OAuth2TokenResponseDTO{}, errorx.WrapDebug(ErrUsernamePasswordInvalid)
 		}
 
-		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
+		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(errorx.ServerityWarn, err)
 	}
 
 	// Validate password.
@@ -106,13 +106,13 @@ func (usecase *OAuth2Usecase) handlePasswordFlow(
 		return dto.OAuth2TokenResponseDTO{}, wrapDomainError(err)
 	}
 	if !ok {
-		return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(ErrUsernamePasswordInvalid)
+		return dto.OAuth2TokenResponseDTO{}, errorx.WrapDebug(ErrUsernamePasswordInvalid)
 	}
 
 	// Validate scope.
 	requestedScope := domain.ScopeEngine.ParseScopes(req.Scope)
 	if !requestedScope.LessThan(client.AllowedScope) {
-		return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(ErrScopeInvalid).
+		return dto.OAuth2TokenResponseDTO{}, errorx.WrapDebug(ErrScopeInvalid).
 			WithMessage("client has not permission to request this scope")
 	}
 
@@ -131,9 +131,10 @@ func (usecase *OAuth2Usecase) handlePasswordFlow(
 	}
 
 	// Store refresh token information.
-	err = usecase.refreshTokenRepo.Create(ctx, refreshToken.Metadata.Id, accessToken.Metadata.Id, 0)
+	err = usecase.refreshTokenRepo.Create(
+		ctx, refreshToken.Metadata.Id.Int64(), accessToken.Metadata.Id.Int64(), 0)
 	if err != nil {
-		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
+		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(errorx.ServerityWarn, err)
 	}
 
 	return dto.OAuth2TokenResponseDTO{
@@ -160,17 +161,17 @@ func (usecase *OAuth2Usecase) handleRefreshTokenFlow(
 	curRefreshToken := dto.OAuth2RefreshToken{}
 	ok, err := usecase.tokenEngine.Validate(ctx, req.RefreshToken, &curRefreshToken)
 	if err != nil {
-		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
+		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(errorx.ServerityWarn, err)
 	}
 
 	if !ok {
-		return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(ErrRefreshTokenInvalid)
+		return dto.OAuth2TokenResponseDTO{}, errorx.WrapDebug(ErrRefreshTokenInvalid)
 	}
 
 	// Generate the next refresh token.
 	domainCurRefreshToken, err := curRefreshToken.To()
 	if err != nil {
-		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
+		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(errorx.ServerityWarn, err)
 	}
 
 	refreshToken, err := usecase.oauth2FlowDomain.NextRefreshToken(domainCurRefreshToken)
@@ -179,9 +180,9 @@ func (usecase *OAuth2Usecase) handleRefreshTokenFlow(
 	}
 
 	// Get the user.
-	user, err := usecase.userRepo.GetByID(ctx, refreshToken.Metadata.Subject)
+	user, err := usecase.userRepo.GetByID(ctx, refreshToken.Metadata.Subject.Int64())
 	if err != nil {
-		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
+		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(errorx.ServerityWarn, err)
 	}
 
 	// Generate access token.
@@ -200,21 +201,21 @@ func (usecase *OAuth2Usecase) handleRefreshTokenFlow(
 	// Store the seq number again.
 	err = usecase.refreshTokenRepo.UpdateByRefreshTokenID(
 		ctx,
-		domainCurRefreshToken.Metadata.Id,
-		accessToken.Metadata.Id,
+		domainCurRefreshToken.Metadata.Id.Int64(),
+		accessToken.Metadata.Id.Int64(),
 		domainCurRefreshToken.SequenceNumber,
 	)
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
-			err = usecase.refreshTokenRepo.DeleteByRefreshTokenID(ctx, domainCurRefreshToken.Metadata.Id)
+			err = usecase.refreshTokenRepo.DeleteByRefreshTokenID(ctx, domainCurRefreshToken.Metadata.Id.Int64())
 			if err != nil {
 				xcontext.Logger(ctx).Warn("failed to delete stolen token", "err", err)
 			}
 
-			return dto.OAuth2TokenResponseDTO{}, xerror.WrapDebug(ErrRefreshTokenStolen)
+			return dto.OAuth2TokenResponseDTO{}, errorx.WrapDebug(ErrRefreshTokenStolen)
 		}
 
-		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
+		return dto.OAuth2TokenResponseDTO{}, wrapNonDomainError(errorx.ServerityWarn, err)
 	}
 
 	return dto.OAuth2TokenResponseDTO{
@@ -250,12 +251,12 @@ func (usecase *OAuth2Usecase) serializeAccessAndRefreshTokens(
 ) (string, string, error) {
 	accessTokenString, err := usecase.tokenEngine.Generate(ctx, dto.OAuth2AccessTokenFromDomain(accessToken))
 	if err != nil {
-		return "", "", wrapNonDomainError(xerror.ServerityDebug, err)
+		return "", "", wrapNonDomainError(errorx.ServerityDebug, err)
 	}
 
 	refreshTokenString, err := usecase.tokenEngine.Generate(ctx, dto.OAuth2RefreshTokenFromDomain(refreshToken))
 	if err != nil {
-		return "", "", wrapNonDomainError(xerror.ServerityDebug, err)
+		return "", "", wrapNonDomainError(errorx.ServerityDebug, err)
 	}
 
 	return accessTokenString, refreshTokenString, nil

@@ -1,6 +1,6 @@
 package definition
 
-import "github.com/xybor/todennus-backend/pkg/scope"
+import "github.com/xybor/x/scope"
 
 type Actions struct {
 	scope.BaseAction

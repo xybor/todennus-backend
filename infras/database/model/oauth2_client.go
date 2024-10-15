@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/domain"
 )
 
@@ -20,26 +21,26 @@ func (OAuth2ClientModel) TableName() string {
 	return "oauth2_clients"
 }
 
-func (client *OAuth2ClientModel) To() (domain.OAuth2Client, error) {
-	return domain.OAuth2Client{
-		ID:             client.ID,
-		OwnerUserID:    client.UserID,
-		Name:           client.Name,
-		HashedSecret:   client.HashedSecret,
-		IsConfidential: client.IsConfidential,
-		AllowedScope:   domain.ScopeEngine.ParseScopes(client.AllowedScope),
-		UpdatedAt:      client.UpdatedAt,
-	}, nil
-}
-
 func NewOAuth2Client(domain domain.OAuth2Client) OAuth2ClientModel {
 	return OAuth2ClientModel{
-		ID:             domain.ID,
-		UserID:         domain.OwnerUserID,
+		ID:             domain.ID.Int64(),
+		UserID:         domain.OwnerUserID.Int64(),
 		Name:           domain.Name,
 		HashedSecret:   domain.HashedSecret,
 		IsConfidential: domain.IsConfidential,
 		UpdatedAt:      domain.UpdatedAt,
 		AllowedScope:   domain.AllowedScope.String(),
 	}
+}
+
+func (client *OAuth2ClientModel) To() (domain.OAuth2Client, error) {
+	return domain.OAuth2Client{
+		ID:             snowflake.ID(client.ID),
+		OwnerUserID:    snowflake.ID(client.UserID),
+		Name:           client.Name,
+		HashedSecret:   client.HashedSecret,
+		IsConfidential: client.IsConfidential,
+		AllowedScope:   domain.ScopeEngine.ParseScopes(client.AllowedScope),
+		UpdatedAt:      client.UpdatedAt,
+	}, nil
 }

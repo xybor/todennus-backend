@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/xybor/todennus-backend/config"
+	config "github.com/xybor/todennus-config"
 )
 
 type System struct {

@@ -32,6 +32,8 @@ services:
       - 5050:80
     networks:
       - PG_ADMIN
+    depends_on:
+      - postgresql
 
   redis:
     container_name: redis
@@ -46,10 +48,29 @@ services:
     networks:
       - REDIS
 
+  todennus-migration:
+    container_name: todennus-migration
+    image: xybor/todennus-migration:latest
+    command: "--postgres"
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_LOGLEVEL=1
+      - POSTGRES_HOST=postgresql
+      - POSTGRES_PORT=5432
+      - POSTGRES_TIMEZONE=UTC
+      - POSTGRES_SSLMODE=disable
+      - POSTGRES_RETRY_ATTEMPTS=3
+      - POSTGRES_RETRY_INTERVAL=5
+    networks:
+      - POSTGRES
+    depends_on:
+      - postgresql
+
   todennus:
     container_name: todennus-backend
     image: xybor/todennus-backend:latest
-    command: --env ""
     restart: always
     ports:
       - 8080:8080
@@ -84,10 +105,12 @@ services:
       - AUTH_TOKEN_ISSUER
 
       - OAUTH2_CLIENT_SECRET_LENGTH
-
     networks:
       - POSTGRES
       - REDIS
+    depends_on:
+      - postgresql
+      - todennus-migration
 
 volumes:
   postgresql:

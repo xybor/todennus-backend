@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/xybor/todennus-backend/pkg/xcontext"
+	"github.com/xybor/x/xcontext"
 )
 
 func RoundTripTime(next http.Handler) http.Handler {

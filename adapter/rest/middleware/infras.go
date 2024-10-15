@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/xybor/todennus-backend/pkg/xcontext"
 	"github.com/xybor/todennus-backend/wiring"
+	"github.com/xybor/x/xcontext"
 )
 
 func WithInfras(infras wiring.Infras) func(http.Handler) http.Handler {

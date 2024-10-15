@@ -1,8 +1,9 @@
 package abstraction
 
 import (
+	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/domain"
-	"github.com/xybor/todennus-backend/pkg/scope"
+	"github.com/xybor/x/scope"
 )
 
 type UserDomain interface {
@@ -12,16 +13,16 @@ type UserDomain interface {
 
 type OAuth2FlowDomain interface {
 	CreateAccessToken(aud string, scope scope.Scopes, user domain.User) (domain.OAuth2AccessToken, error)
-	CreateRefreshToken(aud string, scope scope.Scopes, userID int64) (domain.OAuth2RefreshToken, error)
+	CreateRefreshToken(aud string, scope scope.Scopes, userID snowflake.ID) (domain.OAuth2RefreshToken, error)
 	NextRefreshToken(current domain.OAuth2RefreshToken) (domain.OAuth2RefreshToken, error)
 	CreateIDToken(aud string, user domain.User) (domain.OAuth2IDToken, error)
 }
 
 type OAuth2ClientDomain interface {
-	CreateClient(ownerID int64, name string, isConfidential bool) (domain.OAuth2Client, string, error)
+	CreateClient(ownerID snowflake.ID, name string, isConfidential bool) (domain.OAuth2Client, string, error)
 	ValidateClient(
 		client domain.OAuth2Client,
-		clientID int64,
+		clientID snowflake.ID,
 		clientSecret string,
 		confidentialRequirement domain.ConfidentialRequirementType,
 	) error

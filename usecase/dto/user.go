@@ -3,6 +3,7 @@ package dto
 import (
 	"context"
 
+	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/usecase/dto/resource"
 )
@@ -25,7 +26,7 @@ func NewUserRegisterResponseDTO(ctx context.Context, user domain.User) UserRegis
 
 // GetByID
 type UserGetByIDRequestDTO struct {
-	UserID int64
+	UserID snowflake.ID
 }
 
 type UserGetByIDResponseDTO struct {

@@ -3,10 +3,11 @@ package dto
 import (
 	"net/http"
 
+	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/domain"
-	"github.com/xybor/todennus-backend/pkg/xerror"
 	"github.com/xybor/todennus-backend/usecase"
 	"github.com/xybor/todennus-backend/usecase/dto"
+	"github.com/xybor/x/errorx"
 )
 
 type OAuth2TokenRequestDTO struct {
@@ -33,7 +34,7 @@ func (req OAuth2TokenRequestDTO) To() dto.OAuth2TokenRequestDTO {
 	return dto.OAuth2TokenRequestDTO{
 		GrantType: req.GrantType,
 
-		ClientID:     req.ClientID,
+		ClientID:     snowflake.ID(req.ClientID),
 		ClientSecret: req.ClientSecret,
 
 		Code:         req.Code,
@@ -74,31 +75,31 @@ func NewOAuth2TokenResponseDTO(resp dto.OAuth2TokenResponseDTO) OAuth2TokenRespo
 
 func NewOAuth2TokenErrorResponseDTO(err error) (int, OAuth2TokenErrorResponseDTO) {
 	switch {
-	case xerror.Is(err, usecase.ErrGrantTypeInvalid):
+	case errorx.Is(err, usecase.ErrGrantTypeInvalid):
 		return http.StatusBadRequest, OAuth2TokenErrorResponseDTO{
 			Error:            "unsupported_grant_type",
-			ErrorDescription: xerror.Message(err),
+			ErrorDescription: errorx.MessageOf(err),
 		}
 
-	case xerror.Is(err, usecase.ErrClientInvalid, domain.ErrClientInvalid):
+	case errorx.Is(err, usecase.ErrClientInvalid, domain.ErrClientInvalid):
 		return http.StatusBadRequest, OAuth2TokenErrorResponseDTO{
 			Error:            "invalid_client",
-			ErrorDescription: xerror.Message(err),
+			ErrorDescription: errorx.MessageOf(err),
 		}
 
-	case xerror.Is(err, domain.ErrClientUnauthorized):
+	case errorx.Is(err, domain.ErrClientUnauthorized):
 		return http.StatusUnauthorized, OAuth2TokenErrorResponseDTO{
 			Error:            "invalid_client",
-			ErrorDescription: xerror.Message(err),
+			ErrorDescription: errorx.MessageOf(err),
 		}
 
-	case xerror.Is(err, usecase.ErrScopeInvalid):
+	case errorx.Is(err, usecase.ErrScopeInvalid):
 		return http.StatusBadRequest, OAuth2TokenErrorResponseDTO{
 			Error:            "invalid_scope",
-			ErrorDescription: xerror.Message(err),
+			ErrorDescription: errorx.MessageOf(err),
 		}
 
-	case xerror.Is(
+	case errorx.Is(
 		err,
 		usecase.ErrRefreshTokenInvalid,
 		usecase.ErrRefreshTokenStolen,
@@ -106,7 +107,7 @@ func NewOAuth2TokenErrorResponseDTO(err error) (int, OAuth2TokenErrorResponseDTO
 	):
 		return http.StatusUnauthorized, OAuth2TokenErrorResponseDTO{
 			Error:            "invalid_grant",
-			ErrorDescription: xerror.Message(err),
+			ErrorDescription: errorx.MessageOf(err),
 		}
 
 	default:

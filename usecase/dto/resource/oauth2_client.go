@@ -3,13 +3,14 @@ package resource
 import (
 	"context"
 
+	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/domain"
-	"github.com/xybor/todennus-backend/pkg/scope"
+	"github.com/xybor/x/scope"
 )
 
 type OAuth2Client struct {
-	OwnerID      int64
-	ClientID     int64
+	OwnerID      snowflake.ID
+	ClientID     snowflake.ID
 	Name         string
 	AllowedScope string
 }

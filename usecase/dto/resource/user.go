@@ -3,13 +3,14 @@ package resource
 import (
 	"context"
 
+	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/domain"
-	"github.com/xybor/todennus-backend/pkg/enum"
-	"github.com/xybor/todennus-backend/pkg/scope"
+	"github.com/xybor/x/enum"
+	"github.com/xybor/x/scope"
 )
 
 type User struct {
-	ID           int64
+	ID           snowflake.ID
 	Username     string
 	DisplayName  string
 	AllowedScope string

@@ -6,8 +6,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	builtinMiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/xybor/todennus-backend/adapter/rest/middleware"
-	"github.com/xybor/todennus-backend/config"
 	"github.com/xybor/todennus-backend/wiring"
+	config "github.com/xybor/todennus-config"
 )
 
 func App(

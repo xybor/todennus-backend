@@ -5,14 +5,14 @@
 `POST /oauth2/token`
 
 
-| Field           | Type     | Description                                    |
-| --------------- | -------- | ---------------------------------------------- |
-| `grant_type`    | `string` | Must `password`                                |
-| `client_id`     | `string` | Client ID                                      |
-| `client_secret` | `string` | Client Secret                                  |
-| `username`      | `string` | User's username                                |
-| `password`      | `string` | User's password                                |
-| `scope`         | `string` | Client Secret [scope](./1.references.md#scope) |
+| Field           | Type     | Description                                  |
+| --------------- | -------- | -------------------------------------------- |
+| `grant_type`    | `string` | Must `password`                              |
+| `client_id`     | `string` | Client ID                                    |
+| `client_secret` | `string` | Client Secret                                |
+| `username`      | `string` | User's username                              |
+| `password`      | `string` | User's password                              |
+| `scope`         | `string` | Client Secret [scope](./references.md#scope) |
 
 For example:
 

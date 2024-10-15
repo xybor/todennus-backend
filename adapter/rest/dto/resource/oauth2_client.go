@@ -1,7 +1,6 @@
 package resource
 
 import (
-	"github.com/xybor/todennus-backend/pkg/xstring"
 	"github.com/xybor/todennus-backend/usecase/dto/resource"
 )
 
@@ -14,8 +13,8 @@ type OAuth2Client struct {
 
 func NewOAuth2Client(client resource.OAuth2Client) OAuth2Client {
 	return OAuth2Client{
-		OwnerID:      xstring.FormatID(client.OwnerID),
-		ClientID:     xstring.FormatID(client.ClientID),
+		OwnerID:      client.OwnerID.String(),
+		ClientID:     client.ClientID.String(),
 		Name:         client.Name,
 		AllowedScope: client.AllowedScope,
 	}

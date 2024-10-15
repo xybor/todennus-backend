@@ -6,15 +6,15 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/xybor/todennus-backend/adapter/rest"
-	"github.com/xybor/todennus-backend/pkg/xcontext"
 	"github.com/xybor/todennus-backend/wiring"
+	"github.com/xybor/x/xcontext"
 )
 
 var Command = &cobra.Command{
 	Use:   "rest",
 	Short: "Start a REST API server",
 	Run: func(cmd *cobra.Command, args []string) {
-		paths, err := cmd.Flags().GetStringArray("env")
+		envPaths, err := cmd.Flags().GetStringArray("env")
 		if err != nil {
 			panic(err)
 		}
@@ -24,7 +24,7 @@ var Command = &cobra.Command{
 			panic(err)
 		}
 
-		system, ctx, err := wiring.InitializeSystem(migrationPath, paths...)
+		system, ctx, err := wiring.InitializeSystem(migrationPath, envPaths...)
 		if err != nil {
 			panic(err)
 		}

@@ -2,9 +2,11 @@ package wiring
 
 import (
 	"context"
+	"time"
 
 	"github.com/xybor/todennus-backend/adapter/rest/abstraction"
 	"github.com/xybor/todennus-backend/usecase"
+	"github.com/xybor/x/lock"
 )
 
 type Usecases struct {
@@ -22,7 +24,7 @@ func InitializeUsecases(
 	uc := Usecases{}
 
 	uc.UserUsecase = usecase.NewUserUsecase(
-		infras.RedisClient,
+		lock.NewRedisLock(infras.RedisClient, "user-lock", 10*time.Second),
 		repositories.UserRepository,
 		domains.UserDomain,
 	)
@@ -38,7 +40,7 @@ func InitializeUsecases(
 	)
 
 	uc.OAuth2ClientUsecase = usecase.NewOAuth2ClientUsecase(
-		infras.RedisClient,
+		lock.NewRedisLock(infras.RedisClient, "client-lock", 10*time.Second),
 		domains.UserDomain,
 		domains.OAuth2ClientDomain,
 		repositories.UserRepository,
