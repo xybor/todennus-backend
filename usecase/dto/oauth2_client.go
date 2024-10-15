@@ -3,6 +3,7 @@ package dto
 import (
 	"context"
 
+	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/usecase/dto/resource"
 )
@@ -44,7 +45,7 @@ func NewOAuth2ClientCreateFirstResponseDTO(ctx context.Context, client domain.OA
 }
 
 type OAuth2ClientGetRequestDTO struct {
-	ClientID int64
+	ClientID snowflake.ID
 }
 
 type OAuth2ClientGetResponseDTO struct {

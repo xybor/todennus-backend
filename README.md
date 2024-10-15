@@ -4,13 +4,13 @@ An Identity, OpenID Connect, and OAuth2 Provider.
 
 ## Documentations
 
-[API Refereneces](./docs/1.references.md)
+[API Refereneces](./docs/references.md)
 
-[Resources](./docs/2.resources.md)
+[Resources](./docs/resources.md)
 
-[API Endpoints](./docs/3.endpoints.md)
+[API Endpoints](./docs/endpoints.md)
 
-[OAuth2 Endpoints](./docs/4.oauth2_endpoints.md)
+[OAuth2 Endpoints](./docs/oauth2_endpoints.md)
 
 ## Tech stack
 

@@ -27,10 +27,10 @@ Authorization: Bearer {ACCESS_TOKEN}
 
 ## Scope
 
-Refers [Resources](./2.resources.md#resources) to know the scope to read a
+Refers [Resources](./resources.md#resources) to know the scope to read a
 particular resource or field.
 
-Refers [API Endpoints](./3.endpoints.md#api-endpoints) to know the scope which
+Refers [API Endpoints](./endpoints.md#api-endpoints) to know the scope which
 each API needs to execute.
 
 A scope can cover another scope. For example:

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/xybor/todennus-backend/config"
+	config "github.com/xybor/todennus-config"
 )
 
 type System struct {
@@ -16,7 +16,7 @@ type System struct {
 	Usecases
 }
 
-func InitializeSystem(migrationPath string, paths ...string) (System, context.Context, error) {
+func InitializeSystem(paths ...string) (System, context.Context, error) {
 	config, err := config.Load(sources(paths)...)
 	if err != nil {
 		return System{}, nil, fmt.Errorf("cannot load variable and secrets, err=%w", err)
@@ -35,7 +35,7 @@ func InitializeSystem(migrationPath string, paths ...string) (System, context.Co
 		return System{}, nil, fmt.Errorf("cannot initialize domains, err=%w", err)
 	}
 
-	databases, err := InitializeDatabases(ctx, config, migrationPath)
+	databases, err := InitializeDatabases(ctx, config)
 	if err != nil {
 		return System{}, nil, fmt.Errorf("cannot initialize databases, err=%w", err)
 	}

@@ -5,8 +5,7 @@ import (
 
 	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/domain"
-	"github.com/xybor/todennus-backend/pkg/token"
-	"github.com/xybor/todennus-backend/pkg/xstring"
+	"github.com/xybor/x/token"
 )
 
 var _ (token.Claims) = (*OAuth2StandardClaims)(nil)
@@ -22,22 +21,22 @@ type OAuth2StandardClaims struct {
 
 func OAuth2StandardClaimsFromDomain(claims domain.OAuth2TokenMedata) *OAuth2StandardClaims {
 	return &OAuth2StandardClaims{
-		Id:        xstring.FormatID(claims.Id),
+		Id:        claims.Id.String(),
 		Issuer:    claims.Issuer,
 		Audience:  claims.Audience,
-		Subject:   xstring.FormatID(claims.Subject),
+		Subject:   claims.Subject.String(),
 		ExpiresAt: claims.ExpiresAt,
 		NotBefore: claims.NotBefore,
 	}
 }
 
 func (claims *OAuth2StandardClaims) To() (domain.OAuth2TokenMedata, error) {
-	id, err := xstring.ParseID(claims.Id)
+	id, err := snowflake.ParseString(claims.Id)
 	if err != nil {
 		return domain.OAuth2TokenMedata{}, err
 	}
 
-	sub, err := xstring.ParseID(claims.Subject)
+	sub, err := snowflake.ParseString(claims.Subject)
 	if err != nil {
 		return domain.OAuth2TokenMedata{}, err
 	}
@@ -160,7 +159,7 @@ func (token *OAuth2IDToken) To() (domain.OAuth2IDToken, error) {
 type OAuth2TokenRequestDTO struct {
 	GrantType string
 
-	ClientID     int64
+	ClientID     snowflake.ID
 	ClientSecret string
 
 	// Authorization Code Flow

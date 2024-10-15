@@ -8,8 +8,8 @@ import (
 	"github.com/xybor/todennus-backend/adapter/rest/dto"
 	"github.com/xybor/todennus-backend/adapter/rest/response"
 	"github.com/xybor/todennus-backend/domain"
-	"github.com/xybor/todennus-backend/pkg/xhttp"
 	"github.com/xybor/todennus-backend/usecase"
+	"github.com/xybor/x"
 )
 
 type UserRESTAdapter struct {
@@ -31,7 +31,7 @@ func (a *UserRESTAdapter) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		request, err := xhttp.ParseRequest[dto.UserRegisterRequestDTO](r)
+		request, err := x.ParseHTTPRequest[dto.UserRegisterRequestDTO](r)
 		if err != nil {
 			response.HandleParseError(ctx, w, err)
 			return
@@ -49,7 +49,7 @@ func (a *UserRESTAdapter) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseRequest[dto.UserGetByIDRequestDTO](r)
+		req, err := x.ParseHTTPRequest[dto.UserGetByIDRequestDTO](r)
 		if err != nil {
 			response.HandleParseError(ctx, w, err)
 			return
@@ -72,7 +72,7 @@ func (a *UserRESTAdapter) GetByUsername() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseRequest[dto.UserGetByUsernameRequestDTO](r)
+		req, err := x.ParseHTTPRequest[dto.UserGetByUsernameRequestDTO](r)
 		if err != nil {
 			response.HandleParseError(ctx, w, err)
 			return

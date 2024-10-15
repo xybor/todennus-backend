@@ -7,9 +7,9 @@ import (
 	"github.com/xybor/todennus-backend/adapter/rest/abstraction"
 	"github.com/xybor/todennus-backend/adapter/rest/dto"
 	"github.com/xybor/todennus-backend/adapter/rest/response"
-	"github.com/xybor/todennus-backend/pkg/logging"
-	"github.com/xybor/todennus-backend/pkg/xcontext"
-	"github.com/xybor/todennus-backend/pkg/xhttp"
+	"github.com/xybor/x"
+	"github.com/xybor/x/logging"
+	"github.com/xybor/x/xcontext"
 )
 
 type OAuth2Adapter struct {
@@ -28,7 +28,7 @@ func (a *OAuth2Adapter) Token() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseRequest[dto.OAuth2TokenRequestDTO](r)
+		req, err := x.ParseHTTPRequest[dto.OAuth2TokenRequestDTO](r)
 		if err != nil {
 			response.HandleParseError(ctx, w, err)
 			return

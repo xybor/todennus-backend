@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/xybor/todennus-backend/pkg/token"
-	"github.com/xybor/todennus-backend/pkg/xcontext"
 	"github.com/xybor/todennus-backend/usecase/dto"
+	"github.com/xybor/x/token"
+	"github.com/xybor/x/xcontext"
 )
 
 func Authentication(engine token.Engine) func(http.Handler) http.Handler {

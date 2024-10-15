@@ -5,9 +5,8 @@ import (
 	"time"
 
 	"github.com/xybor-x/snowflake"
-	"github.com/xybor/todennus-backend/pkg/scope"
-	"github.com/xybor/todennus-backend/pkg/xrandom"
-	"github.com/xybor/todennus-backend/pkg/xstring"
+	"github.com/xybor/x"
+	"github.com/xybor/x/scope"
 )
 
 const (
@@ -15,9 +14,17 @@ const (
 	MinimumClientNameLength int = 3
 )
 
+type ConfidentialRequirementType int
+
+const (
+	RequireConfidential ConfidentialRequirementType = iota
+	NotRequireConfidential
+	DependOnClientConfidential
+)
+
 type OAuth2Client struct {
-	ID             int64
-	OwnerUserID    int64
+	ID             snowflake.ID
+	OwnerUserID    snowflake.ID
 	Name           string
 	HashedSecret   string
 	IsConfidential bool
@@ -40,7 +47,7 @@ func NewOAuth2ClientDomain(
 	}, nil
 }
 
-func (domain *OAuth2ClientDomain) CreateClient(ownerID int64, name string, isConfidential bool) (OAuth2Client, string, error) {
+func (domain *OAuth2ClientDomain) CreateClient(ownerID snowflake.ID, name string, isConfidential bool) (OAuth2Client, string, error) {
 	err := domain.validateClientName(name)
 	if err != nil {
 		return OAuth2Client{}, "", err
@@ -50,7 +57,7 @@ func (domain *OAuth2ClientDomain) CreateClient(ownerID int64, name string, isCon
 	allowedScope := scope.New(Actions.Read, Resources).AsScopes()
 	hashedSecret := []byte{}
 	if isConfidential {
-		secret = xrandom.RandString(domain.ClientSecretLength)
+		secret = x.RandString(domain.ClientSecretLength)
 		hashedSecret, err = HashPassword(secret)
 		if err != nil {
 			return OAuth2Client{}, "", err
@@ -60,7 +67,7 @@ func (domain *OAuth2ClientDomain) CreateClient(ownerID int64, name string, isCon
 	}
 
 	return OAuth2Client{
-		ID:             domain.Snowflake.Generate().Int64(),
+		ID:             domain.Snowflake.Generate(),
 		Name:           name,
 		OwnerUserID:    ownerID,
 		IsConfidential: isConfidential,
@@ -71,7 +78,7 @@ func (domain *OAuth2ClientDomain) CreateClient(ownerID int64, name string, isCon
 
 func (domain *OAuth2ClientDomain) ValidateClient(
 	client OAuth2Client,
-	clientID int64,
+	clientID snowflake.ID,
 	clientSecret string,
 	confidentialRequirement ConfidentialRequirementType,
 ) error {
@@ -120,7 +127,7 @@ func (domain *OAuth2ClientDomain) validateClientName(clientName string) error {
 	}
 
 	for _, c := range clientName {
-		if !xstring.IsNumber(c) && !xstring.IsLetter(c) && !xstring.IsUnderscore(c) && !xstring.IsSpace(c) {
+		if !x.IsNumber(c) && !x.IsLetter(c) && !x.IsUnderscore(c) && !x.IsSpace(c) {
 			return Wrap(ErrClientNameInvalid, "got an invalid character %c", c)
 		}
 	}

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/xybor/todennus-backend/config"
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/usecase/abstraction"
+	"github.com/xybor/todennus-config"
 )
 
 type Domains struct {

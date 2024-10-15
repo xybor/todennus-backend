@@ -4,8 +4,9 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/xybor/todennus-backend/pkg/scope"
-	"github.com/xybor/todennus-backend/pkg/xcontext"
+	"github.com/xybor-x/snowflake"
+	"github.com/xybor/x/scope"
+	"github.com/xybor/x/xcontext"
 )
 
 type Filterer[T any] struct {
@@ -39,7 +40,7 @@ func (f *Filterer[T]) WhenNotContainsScope(target scope.Scope) *Filterer[T] {
 	return f.WhenNot(xcontext.Scope(f.ctx).Contains(target))
 }
 
-func (f *Filterer[T]) WhenRequestUserNot(userID int64) *Filterer[T] {
+func (f *Filterer[T]) WhenRequestUserNot(userID snowflake.ID) *Filterer[T] {
 	return f.WhenNot(xcontext.RequestUserID(f.ctx) == userID)
 }
 

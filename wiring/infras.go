@@ -5,10 +5,10 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/xybor-x/snowflake"
-	"github.com/xybor/todennus-backend/config"
-	"github.com/xybor/todennus-backend/pkg/logging"
-	"github.com/xybor/todennus-backend/pkg/token"
-	"github.com/xybor/todennus-backend/pkg/xcontext"
+	config "github.com/xybor/todennus-config"
+	"github.com/xybor/x/logging"
+	"github.com/xybor/x/token"
+	"github.com/xybor/x/xcontext"
 )
 
 type Infras struct {

@@ -3,8 +3,9 @@ package model
 import (
 	"time"
 
+	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/domain"
-	"github.com/xybor/todennus-backend/pkg/enum"
+	"github.com/xybor/x/enum"
 )
 
 type UserModel struct {
@@ -23,7 +24,7 @@ func (UserModel) TableName() string {
 
 func NewUser(d domain.User) UserModel {
 	return UserModel{
-		ID:           d.ID,
+		ID:           d.ID.Int64(),
 		DisplayName:  d.DisplayName,
 		Username:     d.Username,
 		HashedPass:   d.HashedPass,
@@ -35,7 +36,7 @@ func NewUser(d domain.User) UserModel {
 
 func (u *UserModel) To() (domain.User, error) {
 	return domain.User{
-		ID:           u.ID,
+		ID:           snowflake.ID(u.ID),
 		DisplayName:  u.DisplayName,
 		Username:     u.Username,
 		HashedPass:   u.HashedPass,

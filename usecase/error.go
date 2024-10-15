@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/xybor/todennus-backend/domain"
-	"github.com/xybor/todennus-backend/pkg/xerror"
+	"github.com/xybor/x/errorx"
 )
 
 var (
@@ -30,19 +30,19 @@ var (
 	ErrRequestInvalid = errors.New("request is invalid")
 )
 
-func wrapDomainError(err error) xerror.ServiceError {
+func wrapDomainError(err error) errorx.ServiceError {
 	switch {
 	case errors.Is(err, domain.ErrUnknownRecoverable):
-		return wrapNonDomainError(xerror.ServerityWarn, err)
+		return wrapNonDomainError(errorx.ServerityWarn, err)
 	case errors.Is(err, domain.ErrUnknownCritical):
-		return wrapNonDomainError(xerror.ServerityCritical, err)
+		return wrapNonDomainError(errorx.ServerityCritical, err)
 	case errors.Is(err, domain.ErrKnown):
-		return xerror.WrapDebug(err)
+		return errorx.WrapDebug(err)
 	default:
-		return xerror.WrapCritical(err).WithMessage("[invalid] internal server error")
+		return errorx.WrapCritical(err).WithMessage("[invalid] internal server error")
 	}
 }
 
-func wrapNonDomainError(serverity xerror.Serverity, err error) xerror.ServiceError {
-	return xerror.Wrap(err, serverity).WithMessage("internal server error")
+func wrapNonDomainError(serverity errorx.Serverity, err error) errorx.ServiceError {
+	return errorx.Wrap(err, serverity).WithMessage("internal server error")
 }

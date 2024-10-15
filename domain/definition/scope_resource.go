@@ -1,7 +1,7 @@
 package definition
 
 import (
-	"github.com/xybor/todennus-backend/pkg/scope"
+	"github.com/xybor/x/scope"
 )
 
 type Resource struct {

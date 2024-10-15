@@ -4,22 +4,14 @@ import (
 	"time"
 
 	"github.com/xybor-x/snowflake"
-	"github.com/xybor/todennus-backend/pkg/scope"
-)
-
-type ConfidentialRequirementType int
-
-const (
-	RequireConfidential ConfidentialRequirementType = iota
-	NotRequireConfidential
-	DependOnClientConfidential
+	"github.com/xybor/x/scope"
 )
 
 type OAuth2TokenMedata struct {
-	Id        int64
+	Id        snowflake.ID
 	Issuer    string
 	Audience  string
-	Subject   int64
+	Subject   snowflake.ID
 	ExpiresAt int
 	NotBefore int
 
@@ -80,7 +72,7 @@ func (domain *OAuth2FlowDomain) CreateAccessToken(aud string, scope scope.Scopes
 	}, nil
 }
 
-func (domain *OAuth2FlowDomain) CreateRefreshToken(aud string, scope scope.Scopes, userID int64) (OAuth2RefreshToken, error) {
+func (domain *OAuth2FlowDomain) CreateRefreshToken(aud string, scope scope.Scopes, userID snowflake.ID) (OAuth2RefreshToken, error) {
 	return OAuth2RefreshToken{
 		Metadata:       domain.createMedata(aud, userID, domain.RefreshTokenExpiration),
 		SequenceNumber: 0,
@@ -112,11 +104,11 @@ func (domain *OAuth2FlowDomain) CreateAdminToken(aud string) (OAuth2AdminToken, 
 	}, nil
 }
 
-func (domain *OAuth2FlowDomain) createMedata(aud string, sub int64, expiration time.Duration) OAuth2TokenMedata {
+func (domain *OAuth2FlowDomain) createMedata(aud string, sub snowflake.ID, expiration time.Duration) OAuth2TokenMedata {
 	id := domain.Snowflake.Generate()
 
 	return OAuth2TokenMedata{
-		Id:        id.Int64(),
+		Id:        id,
 		Issuer:    domain.Issuer,
 		Audience:  aud,
 		Subject:   sub,

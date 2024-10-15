@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/xybor-x/snowflake"
-	"github.com/xybor/todennus-backend/pkg/enum"
-	"github.com/xybor/todennus-backend/pkg/scope"
-	"github.com/xybor/todennus-backend/pkg/xstring"
+	"github.com/xybor/x"
+	"github.com/xybor/x/enum"
+	"github.com/xybor/x/scope"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -31,7 +31,7 @@ const (
 )
 
 type User struct {
-	ID           int64
+	ID           snowflake.ID
 	DisplayName  string
 	Username     string
 	HashedPass   string
@@ -63,7 +63,7 @@ func (domain *UserDomain) Create(username, password string) (User, error) {
 	}
 
 	return User{
-		ID:           domain.Snowflake.Generate().Int64(),
+		ID:           domain.Snowflake.Generate(),
 		DisplayName:  username,
 		Username:     username,
 		AllowedScope: scope.New(Actions, Resources).AsScopes(),
@@ -95,7 +95,7 @@ func (domain *UserDomain) validateDisplayName(displayname string) error {
 	}
 
 	for _, c := range displayname {
-		if !xstring.IsNumber(c) && !xstring.IsLetter(c) && !xstring.IsUnderscore(c) && !xstring.IsSpace(c) {
+		if !x.IsNumber(c) && !x.IsLetter(c) && !x.IsUnderscore(c) && !x.IsSpace(c) {
 			return Wrap(ErrUsernameInvalid, "got an invalid character %c", c)
 		}
 	}
@@ -113,7 +113,7 @@ func (domain *UserDomain) validateUsername(username string) error {
 	}
 
 	for _, c := range username {
-		if !xstring.IsNumber(c) && !xstring.IsLetter(c) && !xstring.IsUnderscore(c) {
+		if !x.IsNumber(c) && !x.IsLetter(c) && !x.IsUnderscore(c) {
 			return Wrap(ErrUsernameInvalid, "got an invalid character %c", c)
 		}
 	}
@@ -137,13 +137,13 @@ func (domain *UserDomain) validatePassword(password string) error {
 
 	for _, c := range password {
 		switch {
-		case xstring.IsLowerCaseLetter(c):
+		case x.IsLowerCaseLetter(c):
 			haveLowercase = true
-		case xstring.IsUpperCaseLetter(c):
+		case x.IsUpperCaseLetter(c):
 			haveUppercase = true
-		case xstring.IsNumber(c):
+		case x.IsNumber(c):
 			haveNumber = true
-		case xstring.IsSpecialCharacter(c):
+		case x.IsSpecialCharacter(c):
 			haveSpecial = true
 		default:
 			return Wrap(ErrPasswordInvalid, "got an invalid character %c", c)

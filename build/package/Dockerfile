@@ -18,8 +18,7 @@ FROM scratch
 WORKDIR /
 
 COPY --from=build /todennus /
-COPY --from=build /todennus-backend/infras/database/postgres/migration /migration
 
 EXPOSE 8080
 
-ENTRYPOINT [ "/todennus", "rest", "--migration", "/migration" ]
+ENTRYPOINT [ "/todennus", "rest", "--env", ""]
