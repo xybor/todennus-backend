@@ -27,15 +27,15 @@ Strictly follow Clean Architecture and DDD.
 ### Features
 
 - OAuth2 Provider with:
-  + Authorization Code Flow (**draft**).
-  + Authorization Code Flow With PKCE (**draft**).
+  + Authorization Code Flow ***\*draft\****.
+  + Authorization Code Flow With PKCE ***\*draft\****.
   + Implicit Flow.
-  + Resource Owner Password Credentials Flow (**completed**).
+  + Resource Owner Password Credentials Flow ***\*completed\****.
   + Client Credentials Flow.
-  + Refresh Token Flow (**completed**).
+  + Refresh Token Flow ***\*completed\****.
   + Device Flow (low priority).
 
-- Allow integrate with external Identity/OAuth2 Provider.
+- Allow integrate with external Identity/OAuth2 Provider ***\*completed\****.
 
 ### User traffic
 
@@ -45,36 +45,9 @@ Strictly follow Clean Architecture and DDD.
 
 ## Get started
 
-You need to setup secret values at `.env` (or export environment variables).
-Please refer the [.env.example](./.env.example).
+### Start a server
 
-###  Run without Docker
-
-1. Install [Golang 1.23](https://go.dev/doc/install).
-
-2. Install [Postgres](https://www.postgresql.org/download/).
-
-3. Install [Redis](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/).
-
-4. Start the server.
-
-```shell
-$ make start-rest
-```
-
-### Run with Docker
-
-1. Build dockerfile.
-
-```shell
-$ make docker-build
-```
-
-2. Start docker compose.
-
-```shell
-$ make docker-compose-up
-```
+Please refer [todennus-orchestration](https://github.com/xybor/todennus-orchestration) for starting server.
 
 ### Create the first user and client
 

@@ -87,3 +87,26 @@ func NewUserGetByUsernameResponseDTO(resp dto.UserGetByUsernameResponseDTO) User
 		User: resource.NewUser(resp.User),
 	}
 }
+
+// Validate
+type UserValidateRequestDTO struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func (req UserValidateRequestDTO) To() dto.UserValidateCredentialsRequestDTO {
+	return dto.UserValidateCredentialsRequestDTO{
+		Username: req.Username,
+		Password: req.Password,
+	}
+}
+
+type UserValidateResponseDTO struct {
+	resource.User
+}
+
+func NewUserValidateResponseDTO(resp dto.UserValidateCredentialsResponseDTO) UserValidateResponseDTO {
+	return UserValidateResponseDTO{
+		User: resource.NewUser(resp.User),
+	}
+}

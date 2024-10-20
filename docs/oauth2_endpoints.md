@@ -6,13 +6,13 @@
 `POST /oauth2/token`
 
 
-| Field           | Type     | Description               |
-| --------------- | -------- | ------------------------- |
-| `grant_type`    | `string` | Must `authorization_code` |
-| `client_id`     | `string` | Client ID                 |
-| `client_secret` | `string` | Client Secret             |
-| `code`          | `string` | Authorization code        |
-| `code_verifier` | `string` | Code verifier (with PKCE) |
+| Field           | Type     | Description                    |
+| --------------- | -------- | ------------------------------ |
+| `grant_type`    | `string` | Must `authorization_code`      |
+| `client_id`     | `string` | Client ID                      |
+| `client_secret` | `string` | Client Secret   (without PKCE) |
+| `code`          | `string` | Authorization code             |
+| `code_verifier` | `string` | Code verifier (with PKCE)      |
 
 For example:
 

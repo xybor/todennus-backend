@@ -16,6 +16,8 @@ var (
 
 	ErrUserNotFound = errors.New("user_not_found")
 
+	ErrCredentialsInvalid = errors.New("invalid_credentials")
+
 	ErrUnauthenticated = errors.New("unauthenticated")
 	ErrForbidden       = errors.New("forbidden")
 

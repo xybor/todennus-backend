@@ -53,3 +53,19 @@ func NewUserGetByUsernameResponseDTO(ctx context.Context, user domain.User) User
 		User: resource.NewUser(ctx, user, true),
 	}
 }
+
+// Validate
+type UserValidateCredentialsRequestDTO struct {
+	Username string
+	Password string
+}
+
+type UserValidateCredentialsResponseDTO struct {
+	User resource.User
+}
+
+func NewUserValidateCredentialsResponseDTO(ctx context.Context, user domain.User) UserValidateCredentialsResponseDTO {
+	return UserValidateCredentialsResponseDTO{
+		User: resource.NewUser(ctx, user, true),
+	}
+}

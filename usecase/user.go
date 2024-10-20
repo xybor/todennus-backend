@@ -106,6 +106,36 @@ func (usecase *UserUsecase) GetByUsername(
 	return dto.NewUserGetByUsernameResponseDTO(ctx, user), nil
 }
 
+func (usecase *UserUsecase) ValidateCredentials(
+	ctx context.Context,
+	req dto.UserValidateCredentialsRequestDTO,
+) (dto.UserValidateCredentialsResponseDTO, error) {
+	user, err := usecase.userRepo.GetByUsername(ctx, req.Username)
+	if err != nil {
+		if errors.Is(err, database.ErrRecordNotFound) {
+			return dto.UserValidateCredentialsResponseDTO{}, xerror.Wrap(ErrCredentialsInvalid,
+				"invalid username or password")
+		}
+
+		xcontext.Logger(ctx).Warn("failed-to-get-user", "err", err, "username", req.Username)
+		return dto.UserValidateCredentialsResponseDTO{}, ErrServer
+	}
+
+	ok, err := usecase.userDomain.Validate(user.HashedPass, req.Password)
+	if err != nil {
+		xcontext.Logger(ctx).Warn("failed-to-validate-user-credentials", "err", err)
+		return dto.UserValidateCredentialsResponseDTO{}, ErrServer
+	}
+
+	if !ok {
+		return dto.UserValidateCredentialsResponseDTO{}, xerror.Wrap(ErrCredentialsInvalid,
+			"invalid username or password")
+	}
+
+	ctx = xcontext.WithRequestUserID(ctx, user.ID)
+	return dto.NewUserValidateCredentialsResponseDTO(ctx, user), nil
+}
+
 func (uc *UserUsecase) createAdmin(
 	ctx context.Context,
 	user *domain.User,

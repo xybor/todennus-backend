@@ -88,7 +88,7 @@ func (h *ResponseHandler) Redirect(ctx context.Context, w http.ResponseWriter, r
 		return
 	}
 
-	http.Redirect(w, r, h.resp.(string), h.code)
+	Redirect(ctx, w, r, h.resp.(string), h.code)
 }
 
 func HandleError(ctx context.Context, w http.ResponseWriter, err error) {
