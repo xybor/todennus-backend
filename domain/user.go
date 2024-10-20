@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/xybor-x/snowflake"
-	"github.com/xybor/x"
 	"github.com/xybor/x/enum"
 	"github.com/xybor/x/scope"
+	"github.com/xybor/x/xstring"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -95,7 +95,7 @@ func (domain *UserDomain) validateDisplayName(displayname string) error {
 	}
 
 	for _, c := range displayname {
-		if !x.IsNumber(c) && !x.IsLetter(c) && !x.IsUnderscore(c) && !x.IsSpace(c) {
+		if !xstring.IsNumber(c) && !xstring.IsLetter(c) && !xstring.IsUnderscore(c) && !xstring.IsSpace(c) {
 			return Wrap(ErrUsernameInvalid, "got an invalid character %c", c)
 		}
 	}
@@ -113,7 +113,7 @@ func (domain *UserDomain) validateUsername(username string) error {
 	}
 
 	for _, c := range username {
-		if !x.IsNumber(c) && !x.IsLetter(c) && !x.IsUnderscore(c) {
+		if !xstring.IsNumber(c) && !xstring.IsLetter(c) && !xstring.IsUnderscore(c) {
 			return Wrap(ErrUsernameInvalid, "got an invalid character %c", c)
 		}
 	}
@@ -137,13 +137,13 @@ func (domain *UserDomain) validatePassword(password string) error {
 
 	for _, c := range password {
 		switch {
-		case x.IsLowerCaseLetter(c):
+		case xstring.IsLowerCaseLetter(c):
 			haveLowercase = true
-		case x.IsUpperCaseLetter(c):
+		case xstring.IsUpperCaseLetter(c):
 			haveUppercase = true
-		case x.IsNumber(c):
+		case xstring.IsNumber(c):
 			haveNumber = true
-		case x.IsSpecialCharacter(c):
+		case xstring.IsSpecialCharacter(c):
 			haveSpecial = true
 		default:
 			return Wrap(ErrPasswordInvalid, "got an invalid character %c", c)

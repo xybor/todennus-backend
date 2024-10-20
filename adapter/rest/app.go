@@ -18,19 +18,25 @@ func App(
 	r := chi.NewRouter()
 
 	r.Use(builtinMiddleware.Recoverer)
-	r.Use(builtinMiddleware.RequestID)
+	r.Use(middleware.WithRequestID(config))
 	r.Use(builtinMiddleware.RealIP)
-	r.Use(middleware.WithInfras(infras))
-	r.Use(middleware.RoundTripTime)
+	r.Use(middleware.WithInfras(config, infras))
+	r.Use(middleware.Timer)
 	r.Use(middleware.Authentication(infras.TokenEngine))
+	r.Use(middleware.WithSession(infras.SessionManager))
 
-	r.Route("/users", NewUserAdapter(usecases.UserUsecase).Router)
-	r.Route("/oauth2", NewOAuth2Adapter(usecases.OAuth2Usecase).Router)
-	r.Route("/oauth2_clients", NewOAuth2ClientAdapter(usecases.OAuth2ClientUsecase).Router)
+	userAdapter := NewUserAdapter(usecases.UserUsecase)
+	oauth2FlowAdapter := NewOAuth2Adapter(usecases.OAuth2Usecase)
+	oauth2ClientAdapter := NewOAuth2ClientAdapter(usecases.OAuth2ClientUsecase)
 
-	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-	})
+	r.Get("/session/update", oauth2FlowAdapter.SessionUpdate())
+	r.Post("/auth/callback", oauth2FlowAdapter.AuthenticationCallback())
+
+	r.Route("/users", userAdapter.Router)
+	r.Route("/oauth2", oauth2FlowAdapter.OAuth2Router)
+	r.Route("/oauth2_clients", oauth2ClientAdapter.Router)
+
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNotFound) })
 
 	return r
 }

@@ -5,8 +5,9 @@ import (
 	"time"
 
 	"github.com/xybor-x/snowflake"
-	"github.com/xybor/x"
 	"github.com/xybor/x/scope"
+	"github.com/xybor/x/xcrypto"
+	"github.com/xybor/x/xstring"
 )
 
 const (
@@ -57,7 +58,7 @@ func (domain *OAuth2ClientDomain) CreateClient(ownerID snowflake.ID, name string
 	allowedScope := scope.New(Actions.Read, Resources).AsScopes()
 	hashedSecret := []byte{}
 	if isConfidential {
-		secret = x.RandString(domain.ClientSecretLength)
+		secret = xcrypto.RandString(domain.ClientSecretLength)
 		hashedSecret, err = HashPassword(secret)
 		if err != nil {
 			return OAuth2Client{}, "", err
@@ -127,7 +128,7 @@ func (domain *OAuth2ClientDomain) validateClientName(clientName string) error {
 	}
 
 	for _, c := range clientName {
-		if !x.IsNumber(c) && !x.IsLetter(c) && !x.IsUnderscore(c) && !x.IsSpace(c) {
+		if !xstring.IsNumber(c) && !xstring.IsLetter(c) && !xstring.IsUnderscore(c) && !xstring.IsSpace(c) {
 			return Wrap(ErrClientNameInvalid, "got an invalid character %c", c)
 		}
 	}

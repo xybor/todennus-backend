@@ -1,4 +1,4 @@
-start-rest-server:
+start-rest:
 	go run ./cmd/main.go rest
 
 docker-build:

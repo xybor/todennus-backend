@@ -11,7 +11,7 @@ import (
 var _ (token.Claims) = (*OAuth2StandardClaims)(nil)
 
 type OAuth2StandardClaims struct {
-	Id        string `json:"jti,omitempty"`
+	ID        string `json:"jti,omitempty"`
 	Issuer    string `json:"iss,omitempty"`
 	Audience  string `json:"aud,omitempty"`
 	Subject   string `json:"sub,omitempty"`
@@ -21,7 +21,7 @@ type OAuth2StandardClaims struct {
 
 func OAuth2StandardClaimsFromDomain(claims domain.OAuth2TokenMedata) *OAuth2StandardClaims {
 	return &OAuth2StandardClaims{
-		Id:        claims.Id.String(),
+		ID:        claims.ID.String(),
 		Issuer:    claims.Issuer,
 		Audience:  claims.Audience,
 		Subject:   claims.Subject.String(),
@@ -31,7 +31,7 @@ func OAuth2StandardClaimsFromDomain(claims domain.OAuth2TokenMedata) *OAuth2Stan
 }
 
 func (claims *OAuth2StandardClaims) To() (domain.OAuth2TokenMedata, error) {
-	id, err := snowflake.ParseString(claims.Id)
+	id, err := snowflake.ParseString(claims.ID)
 	if err != nil {
 		return domain.OAuth2TokenMedata{}, err
 	}
@@ -42,7 +42,7 @@ func (claims *OAuth2StandardClaims) To() (domain.OAuth2TokenMedata, error) {
 	}
 
 	return domain.OAuth2TokenMedata{
-		Id:        id,
+		ID:        id,
 		Issuer:    claims.Issuer,
 		Audience:  claims.Audience,
 		Subject:   sub,
@@ -61,7 +61,7 @@ func (claims *OAuth2StandardClaims) Valid() error {
 		return token.ErrTokenNotYetValid
 	}
 
-	snowflakeID, err := snowflake.ParseString(claims.Id)
+	snowflakeID, err := snowflake.ParseString(claims.ID)
 	if err != nil {
 		return token.ErrTokenInvalidFormat
 	}
@@ -182,4 +182,90 @@ type OAuth2TokenResponseDTO struct {
 	ExpiresIn    int
 	RefreshToken string
 	Scope        string
+}
+
+type OAuth2AuthorizeRequestDTO struct {
+	ResponseType string
+	ClientID     snowflake.ID
+	RedirectURI  string
+	Scope        string
+	State        string
+
+	// Only for PKCE
+	CodeChallenge       string
+	CodeChallengeMethod string
+}
+
+type OAuth2AuthorizeResponseDTO struct {
+	// Directive
+	IdpURL          string
+	AuthorizationID string
+
+	// Authorization Code Flow
+	Code string
+
+	// Implicit Flow
+	AccessToken string
+	TokenType   string
+	ExpiresIn   int
+}
+
+func NewOAuth2AuthorizeResponseWithCode(code string) OAuth2AuthorizeResponseDTO {
+	return OAuth2AuthorizeResponseDTO{Code: code}
+}
+
+func NewOAuth2AuthorizeResponseRedirectToIdP(url, aid string) OAuth2AuthorizeResponseDTO {
+	return OAuth2AuthorizeResponseDTO{
+		IdpURL:          url,
+		AuthorizationID: aid,
+	}
+}
+
+func NewOAuth2AuthorizeResponseWithToken(token, tokenType string, expiration time.Duration) OAuth2AuthorizeResponseDTO {
+	return OAuth2AuthorizeResponseDTO{
+		AccessToken: token,
+		TokenType:   tokenType,
+		ExpiresIn:   int(expiration / time.Second),
+	}
+}
+
+type OAuth2AuthenticationCallbackRequestDTO struct {
+	Secret          string
+	AuthorizationID string
+	Success         bool
+	Error           string
+	UserID          snowflake.ID
+	Username        string
+}
+
+type OAuth2AuthenticationCallbackResponseDTO struct {
+	AuthenticationID string
+}
+
+type OAuth2SessionUpdateRequestDTO struct {
+	AuthenticationID string
+}
+
+type OAuth2SessionUpdateResponseDTO struct {
+	ResponseType string
+	ClientID     snowflake.ID
+	RedirectURI  string
+	Scope        string
+	State        string
+
+	// Only for PKCE
+	CodeChallenge       string
+	CodeChallengeMethod string
+}
+
+func NewOAuth2LoginUpdateResponseDTO(store domain.OAuth2AuthorizationStore) OAuth2SessionUpdateResponseDTO {
+	return OAuth2SessionUpdateResponseDTO{
+		ResponseType:        store.ResponseType,
+		ClientID:            store.ClientID,
+		RedirectURI:         store.RedirectURI,
+		Scope:               store.Scope.String(),
+		State:               store.State,
+		CodeChallenge:       store.CodeChallenge,
+		CodeChallengeMethod: store.CodeChallengeMethod,
+	}
 }

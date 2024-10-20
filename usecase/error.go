@@ -4,20 +4,16 @@ import (
 	"errors"
 
 	"github.com/xybor/todennus-backend/domain"
-	"github.com/xybor/x/errorx"
+	"github.com/xybor/x/xerror"
 )
 
 var (
-	ErrUsernameExisted         = errors.New("username is existed")
-	ErrUsernameNotFound        = errors.New("username is not found")
-	ErrUsernamePasswordInvalid = errors.New("username or password is invalid")
+	ErrRequestInvalid = errors.New("request is invalid")
+
+	ErrUsernameExisted  = errors.New("username is existed")
+	ErrUsernameNotFound = errors.New("username is not found")
 
 	ErrUserNotFound = errors.New("user not found")
-
-	ErrRefreshTokenInvalid = errors.New("token is invalid")
-	ErrRefreshTokenStolen  = errors.New("IMPORTANT: refresh token was stolen, we will remove it")
-
-	ErrGrantTypeInvalid = errors.New("grant type is not supported by provider")
 
 	ErrUnauthorized = errors.New("unauthorized")
 	ErrForbidden    = errors.New("forbidden")
@@ -25,24 +21,30 @@ var (
 	ErrClientInvalid  = errors.New("client is invalid")
 	ErrClientNotFound = errors.New("client is not found")
 
-	ErrScopeInvalid = errors.New("scope is invalid")
+	ErrIdPInvalid = errors.New("idp is invalid")
 
-	ErrRequestInvalid = errors.New("request is invalid")
+	ErrScopeInvalid = errors.New("invalid scope")
+
+	ErrAuthorizationAccessDenied        = errors.New("access denined")
+	ErrAuthorizationResponseTypeInvalid = errors.New("invalid response type")
+
+	ErrTokenInvalidGrant     = errors.New("invalid grant")
+	ErrTokenInvalidGrantType = errors.New("invalid grant type")
 )
 
-func wrapDomainError(err error) errorx.ServiceError {
+func wrapDomainError(err error) xerror.ServiceError {
 	switch {
 	case errors.Is(err, domain.ErrUnknownRecoverable):
-		return wrapNonDomainError(errorx.ServerityWarn, err)
+		return wrapNonDomainError(xerror.ServerityWarn, err)
 	case errors.Is(err, domain.ErrUnknownCritical):
-		return wrapNonDomainError(errorx.ServerityCritical, err)
+		return wrapNonDomainError(xerror.ServerityCritical, err)
 	case errors.Is(err, domain.ErrKnown):
-		return errorx.WrapDebug(err)
+		return xerror.WrapDebug(err)
 	default:
-		return errorx.WrapCritical(err).WithMessage("[invalid] internal server error")
+		return xerror.WrapCritical(err).WithMessage("[invalid] internal server error")
 	}
 }
 
-func wrapNonDomainError(serverity errorx.Serverity, err error) errorx.ServiceError {
-	return errorx.Wrap(err, serverity).WithMessage("internal server error")
+func wrapNonDomainError(serverity xerror.Serverity, err error) xerror.ServiceError {
+	return xerror.Wrap(err, serverity).WithMessage("internal server error")
 }

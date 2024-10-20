@@ -30,6 +30,8 @@ func Authentication(engine token.Engine) func(http.Handler) http.Handler {
 						} else {
 							ctx = xcontext.WithRequestUserID(ctx, domainAccessToken.Metadata.Subject)
 							ctx = xcontext.WithScope(ctx, domainAccessToken.Scope)
+							ctx = xcontext.WithLogger(ctx,
+								xcontext.Logger(ctx).With("request_user_id", xcontext.RequestUserID(ctx)))
 						}
 					}
 				}

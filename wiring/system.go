@@ -40,12 +40,12 @@ func InitializeSystem(paths ...string) (System, context.Context, error) {
 		return System{}, nil, fmt.Errorf("cannot initialize databases, err=%w", err)
 	}
 
-	repositories, err := InitializeRepositories(ctx, databases)
+	repositories, err := InitializeRepositories(ctx, config, databases)
 	if err != nil {
 		return System{}, nil, fmt.Errorf("cannot initialize repositories, err=%w", err)
 	}
 
-	usecases, err := InitializeUsecases(ctx, infras, domains, repositories)
+	usecases, err := InitializeUsecases(ctx, config, infras, databases, domains, repositories)
 	if err != nil {
 		return System{}, nil, fmt.Errorf("cannot initialize usecases, err=%w", err)
 	}

@@ -9,7 +9,8 @@ import (
 	"github.com/xybor/todennus-backend/adapter/rest/response"
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/usecase"
-	"github.com/xybor/x"
+	"github.com/xybor/x/xcontext"
+	"github.com/xybor/x/xhttp"
 )
 
 type UserRESTAdapter struct {
@@ -31,7 +32,7 @@ func (a *UserRESTAdapter) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		request, err := x.ParseHTTPRequest[dto.UserRegisterRequestDTO](r)
+		request, err := xhttp.ParseHTTPRequest[dto.UserRegisterRequestDTO](r)
 		if err != nil {
 			response.HandleParseError(ctx, w, err)
 			return
@@ -49,7 +50,7 @@ func (a *UserRESTAdapter) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := x.ParseHTTPRequest[dto.UserGetByIDRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.UserGetByIDRequestDTO](r)
 		if err != nil {
 			response.HandleParseError(ctx, w, err)
 			return
@@ -57,7 +58,8 @@ func (a *UserRESTAdapter) GetByID() http.HandlerFunc {
 
 		ucReq, err := req.To(ctx)
 		if err != nil {
-			response.WriteErrorMsg(ctx, w, http.StatusBadRequest, err.Error())
+			xcontext.Logger(ctx).Debug("failed-to-convert-req", "err", err)
+			response.WriteError(ctx, w, http.StatusBadRequest, err)
 			return
 		}
 
@@ -72,7 +74,7 @@ func (a *UserRESTAdapter) GetByUsername() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := x.ParseHTTPRequest[dto.UserGetByUsernameRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.UserGetByUsernameRequestDTO](r)
 		if err != nil {
 			response.HandleParseError(ctx, w, err)
 			return
