@@ -4,15 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"net/url"
 	"strconv"
 
 	"github.com/xybor-x/snowflake"
-	"github.com/xybor/todennus-backend/domain"
+	"github.com/xybor/todennus-backend/adapter/rest/standard"
 	"github.com/xybor/todennus-backend/usecase"
 	"github.com/xybor/todennus-backend/usecase/dto"
-	"github.com/xybor/x/logging"
 	"github.com/xybor/x/xcontext"
 	"github.com/xybor/x/xerror"
 	"github.com/xybor/x/xhttp"
@@ -65,11 +63,6 @@ type OAuth2TokenResponseDTO struct {
 	Scope        string `json:"scope,omitempty"`
 }
 
-type OAuth2TokenErrorResponseDTO struct {
-	Error            string `json:"error"`
-	ErrorDescription string `json:"error_description"`
-}
-
 func NewOAuth2TokenResponseDTO(resp dto.OAuth2TokenResponseDTO) OAuth2TokenResponseDTO {
 	return OAuth2TokenResponseDTO{
 		AccessToken:  resp.AccessToken,
@@ -77,37 +70,6 @@ func NewOAuth2TokenResponseDTO(resp dto.OAuth2TokenResponseDTO) OAuth2TokenRespo
 		ExpiresIn:    resp.ExpiresIn,
 		RefreshToken: resp.RefreshToken,
 		Scope:        resp.Scope,
-	}
-}
-
-func NewOAuth2TokenErrorResponseDTO(err error) (int, OAuth2TokenErrorResponseDTO) {
-	switch {
-	case xerror.Is(err, usecase.ErrTokenInvalidGrantType):
-		return http.StatusBadRequest, OAuth2TokenErrorResponseDTO{
-			Error:            "unsupported_grant_type",
-			ErrorDescription: xerror.MessageOf(err),
-		}
-
-	case xerror.Is(err, usecase.ErrClientInvalid, domain.ErrClientInvalid, domain.ErrClientUnauthorized):
-		return http.StatusBadRequest, OAuth2TokenErrorResponseDTO{
-			Error:            "invalid_client",
-			ErrorDescription: xerror.MessageOf(err),
-		}
-
-	case xerror.Is(err, usecase.ErrScopeInvalid):
-		return http.StatusBadRequest, OAuth2TokenErrorResponseDTO{
-			Error:            "invalid_scope",
-			ErrorDescription: xerror.MessageOf(err),
-		}
-
-	case xerror.Is(err, usecase.ErrTokenInvalidGrant):
-		return http.StatusUnauthorized, OAuth2TokenErrorResponseDTO{
-			Error:            "invalid_grant",
-			ErrorDescription: xerror.MessageOf(err),
-		}
-
-	default:
-		return 0, OAuth2TokenErrorResponseDTO{}
 	}
 }
 
@@ -135,10 +97,11 @@ func (req OAuth2AuthorizeRequestDTO) To() dto.OAuth2AuthorizeRequestDTO {
 	}
 }
 
-func NewOAuth2AuthorizeRedirectURI(req OAuth2AuthorizeRequestDTO, resp dto.OAuth2AuthorizeResponseDTO) (string, error) {
+func NewOAuth2AuthorizeRedirectURI(ctx context.Context, req OAuth2AuthorizeRequestDTO, resp dto.OAuth2AuthorizeResponseDTO) (string, error) {
 	if resp.IdpURL != "" {
 		u, err := url.Parse(resp.IdpURL)
 		if err != nil {
+			xcontext.Logger(ctx).Warn("invalid-idp-url", "err", err, "url", resp.IdpURL)
 			return "", err
 		}
 
@@ -151,6 +114,7 @@ func NewOAuth2AuthorizeRedirectURI(req OAuth2AuthorizeRequestDTO, resp dto.OAuth
 
 	u, err := url.Parse(req.RedirectURI)
 	if err != nil {
+		xcontext.Logger(ctx).Debug("invalid-redirect-url", "err", err, "url", req.RedirectURI)
 		return "", err
 	}
 
@@ -180,32 +144,14 @@ func NewOAuth2AuthorizeRedirectURI(req OAuth2AuthorizeRequestDTO, resp dto.OAuth
 func NewOAuth2AuthorizeRedirectURIWithError(ctx context.Context, req OAuth2AuthorizeRequestDTO, err error) (string, error) {
 	u, uerr := xhttp.ParseURL(req.RedirectURI)
 	if uerr != nil {
-		return "", err
+		xcontext.Logger(ctx).Debug("invalid-redirect-uri", "err", err, "uri", req.RedirectURI)
+		return "", xerror.Wrap(usecase.ErrRequestInvalid, "invalid redirect uri")
 	}
 
 	q := u.Query()
-
+	standard.SetQuery(ctx, q, err)
 	if req.State != "" {
 		q.Set("state", req.State)
-	}
-
-	switch {
-	case xerror.Is(err, domain.ErrClientInvalid, usecase.ErrClientInvalid):
-		q.Set("error", "invalid_client")
-		q.Set("error_description", xerror.MessageOf(err))
-	case xerror.Is(err, usecase.ErrAuthorizationAccessDenied):
-		q.Set("error", "access_denied")
-		q.Set("error_description", xerror.MessageOf(err))
-	case xerror.Is(err,
-		usecase.ErrRequestInvalid,
-		usecase.ErrAuthorizationResponseTypeInvalid,
-	):
-		q.Set("error", "invalid_request")
-		q.Set("error_description", xerror.MessageOf(err))
-	default:
-		q.Set("error", "server_error")
-		q.Set("error_description", "the authorization server encountered an unexpected condition")
-		logging.LogError(xcontext.Logger(ctx), err)
 	}
 
 	u.RawQuery = q.Encode()
@@ -221,10 +167,11 @@ type OAuth2AuthenticationCallbackRequestDTO struct {
 	Error           string `json:"error"`
 }
 
-func (req OAuth2AuthenticationCallbackRequestDTO) To() (dto.OAuth2AuthenticationCallbackRequestDTO, error) {
+func (req OAuth2AuthenticationCallbackRequestDTO) To(ctx context.Context) (dto.OAuth2AuthenticationCallbackRequestDTO, error) {
 	uid, err := snowflake.ParseString(req.UserID)
 	if err != nil {
-		return dto.OAuth2AuthenticationCallbackRequestDTO{}, err
+		xcontext.Logger(ctx).Debug("invalid-user-id", "err", err, "uid", req.UserID)
+		return dto.OAuth2AuthenticationCallbackRequestDTO{}, xerror.Wrap(usecase.ErrRequestInvalid, "invalid user id")
 	}
 
 	return dto.OAuth2AuthenticationCallbackRequestDTO{

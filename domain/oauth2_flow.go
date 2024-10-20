@@ -185,37 +185,33 @@ func (domain *OAuth2FlowDomain) CreateAuthenticationResultFailure(authID string,
 	}
 }
 
-func (domain *OAuth2FlowDomain) CreateAccessToken(aud string, scope scope.Scopes, user User) (OAuth2AccessToken, error) {
+func (domain *OAuth2FlowDomain) CreateAccessToken(aud string, scope scope.Scopes, user User) OAuth2AccessToken {
 	return OAuth2AccessToken{
 		Metadata: domain.createMedata(aud, user.ID, domain.AccessTokenExpiration),
 		Scope:    scope,
-	}, nil
+	}
 }
 
-func (domain *OAuth2FlowDomain) CreateRefreshToken(aud string, scope scope.Scopes, userID snowflake.ID) (OAuth2RefreshToken, error) {
+func (domain *OAuth2FlowDomain) CreateRefreshToken(aud string, scope scope.Scopes, userID snowflake.ID) OAuth2RefreshToken {
 	return OAuth2RefreshToken{
 		Metadata:       domain.createMedata(aud, userID, domain.RefreshTokenExpiration),
 		SequenceNumber: 0,
 		Scope:          scope,
-	}, nil
+	}
 }
 
-func (domain *OAuth2FlowDomain) NextRefreshToken(current OAuth2RefreshToken) (OAuth2RefreshToken, error) {
-	next, err := domain.CreateRefreshToken(current.Metadata.Audience, current.Scope, current.Metadata.Subject)
-	if err != nil {
-		return OAuth2RefreshToken{}, err
-	}
-
+func (domain *OAuth2FlowDomain) NextRefreshToken(current OAuth2RefreshToken) OAuth2RefreshToken {
+	next := domain.CreateRefreshToken(current.Metadata.Audience, current.Scope, current.Metadata.Subject)
 	next.Metadata.ID = current.Metadata.ID
 	next.SequenceNumber = current.SequenceNumber + 1
-	return next, nil
+	return next
 }
 
-func (domain *OAuth2FlowDomain) CreateIDToken(aud string, user User) (OAuth2IDToken, error) {
+func (domain *OAuth2FlowDomain) CreateIDToken(aud string, user User) OAuth2IDToken {
 	return OAuth2IDToken{
 		Metadata: domain.createMedata(aud, user.ID, domain.IDTokenExpiration),
 		User:     user,
-	}, nil
+	}
 }
 
 func (domain *OAuth2FlowDomain) ValidateCodeChallenge(verifier, challenge, method string) bool {

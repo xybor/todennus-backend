@@ -8,8 +8,6 @@ import (
 	"github.com/xybor/todennus-backend/adapter/rest/dto"
 	"github.com/xybor/todennus-backend/adapter/rest/response"
 	"github.com/xybor/todennus-backend/usecase"
-	"github.com/xybor/x/logging"
-	"github.com/xybor/x/xcontext"
 	"github.com/xybor/x/xhttp"
 )
 
@@ -32,14 +30,14 @@ func (a *OAuth2Adapter) Authorize() http.HandlerFunc {
 
 		req, err := xhttp.ParseHTTPRequest[dto.OAuth2AuthorizeRequestDTO](r)
 		if err != nil {
-			response.HandleParseError(ctx, w, err)
+			response.HandleError(ctx, w, err)
 			return
 		}
 
 		resp, err := a.oauth2Usecase.Authorize(ctx, req.To())
 		if err != nil {
 			if url, err := dto.NewOAuth2AuthorizeRedirectURIWithError(ctx, req, err); err != nil {
-				response.WriteAndWarnError(ctx, w, http.StatusInternalServerError, err)
+				response.HandleError(ctx, w, err)
 			} else {
 				response.Redirect(ctx, w, r, url, http.StatusSeeOther)
 			}
@@ -47,9 +45,9 @@ func (a *OAuth2Adapter) Authorize() http.HandlerFunc {
 			return
 		}
 
-		redirectURI, err := dto.NewOAuth2AuthorizeRedirectURI(req, resp)
+		redirectURI, err := dto.NewOAuth2AuthorizeRedirectURI(ctx, req, resp)
 		if err != nil {
-			response.WriteAndWarnError(ctx, w, http.StatusInternalServerError, err)
+			response.HandleError(ctx, w, err)
 			return
 		}
 
@@ -63,23 +61,17 @@ func (a *OAuth2Adapter) Token() http.HandlerFunc {
 
 		req, err := xhttp.ParseHTTPRequest[dto.OAuth2TokenRequestDTO](r)
 		if err != nil {
-			response.HandleParseError(ctx, w, err)
+			response.HandleError(ctx, w, err)
 			return
 		}
 
 		resp, err := a.oauth2Usecase.Token(ctx, req.To())
-		if err != nil {
-			if code, errResp := dto.NewOAuth2TokenErrorResponseDTO(err); code != 0 {
-				response.Write(ctx, w, code, errResp)
-			} else {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-
-			logging.LogError(xcontext.Logger(ctx), err)
-			return
-		}
-
-		response.Write(ctx, w, http.StatusOK, dto.NewOAuth2TokenResponseDTO(resp))
+		response.NewResponseHandler(dto.NewOAuth2TokenResponseDTO(resp), err).
+			Map(http.StatusBadRequest,
+				usecase.ErrRequestInvalid, usecase.ErrClientInvalid,
+				usecase.ErrScopeInvalid, usecase.ErrTokenInvalidGrant,
+			).
+			WriteHTTPResponseWithoutWrap(ctx, w)
 	}
 }
 
@@ -89,14 +81,13 @@ func (a *OAuth2Adapter) AuthenticationCallback() http.HandlerFunc {
 
 		req, err := xhttp.ParseHTTPRequest[dto.OAuth2AuthenticationCallbackRequestDTO](r)
 		if err != nil {
-			response.HandleParseError(ctx, w, err)
+			response.HandleError(ctx, w, err)
 			return
 		}
 
-		usecaseReq, err := req.To()
+		usecaseReq, err := req.To(ctx)
 		if err != nil {
-			xcontext.Logger(ctx).Debug("failed-to-parse-req", "err", err)
-			response.WriteError(ctx, w, http.StatusBadRequest, err)
+			response.HandleError(ctx, w, err)
 			return
 		}
 
@@ -114,16 +105,12 @@ func (a *OAuth2Adapter) SessionUpdate() http.HandlerFunc {
 
 		req, err := xhttp.ParseHTTPRequest[dto.OAuth2SessionUpdateRequestDTO](r)
 		if err != nil {
-			response.HandleParseError(ctx, w, err)
+			response.HandleError(ctx, w, err)
 			return
 		}
 
 		resp, err := a.oauth2Usecase.SessionUpdate(ctx, req.To())
-		if err != nil {
-			response.WriteAndWarnError(ctx, w, http.StatusInternalServerError, err)
-			return
-		}
-
-		response.Redirect(ctx, w, r, dto.NewOAuth2SessionUpdateRedirectURI(resp), http.StatusSeeOther)
+		response.NewResponseHandler(dto.NewOAuth2SessionUpdateRedirectURI(resp), err).
+			Redirect(ctx, w, r, http.StatusSeeOther)
 	}
 }
