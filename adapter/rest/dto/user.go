@@ -2,12 +2,13 @@ package dto
 
 import (
 	"context"
-	"errors"
 
 	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/adapter/rest/dto/resource"
+	"github.com/xybor/todennus-backend/usecase"
 	"github.com/xybor/todennus-backend/usecase/dto"
 	"github.com/xybor/x/xcontext"
+	"github.com/xybor/x/xerror"
 )
 
 func ParseUserID(ctx context.Context, s string) (snowflake.ID, error) {
@@ -49,8 +50,8 @@ type UserGetByIDRequestDTO struct {
 func (req UserGetByIDRequestDTO) To(ctx context.Context) (dto.UserGetByIDRequestDTO, error) {
 	userID, err := ParseUserID(ctx, req.UserID)
 	if err != nil {
-		xcontext.Logger(ctx).Debug("failed-to-parse-userid", "err", err)
-		return dto.UserGetByIDRequestDTO{}, errors.New("invalid userid")
+		xcontext.Logger(ctx).Debug("failed-to-parse-user-id", "err", err, "uid", req.UserID)
+		return dto.UserGetByIDRequestDTO{}, xerror.Wrap(usecase.ErrRequestInvalid, "user id is invalid")
 	}
 
 	return dto.UserGetByIDRequestDTO{UserID: userID}, nil

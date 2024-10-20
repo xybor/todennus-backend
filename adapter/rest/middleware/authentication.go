@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/xybor/todennus-backend/adapter/rest/response"
+	"github.com/xybor/todennus-backend/adapter/rest/standard"
 	"github.com/xybor/todennus-backend/usecase/dto"
 	"github.com/xybor/x/token"
 	"github.com/xybor/x/xcontext"
@@ -30,8 +32,11 @@ func Authentication(engine token.Engine) func(http.Handler) http.Handler {
 						} else {
 							ctx = xcontext.WithRequestUserID(ctx, domainAccessToken.Metadata.Subject)
 							ctx = xcontext.WithScope(ctx, domainAccessToken.Scope)
-							ctx = xcontext.WithLogger(ctx,
-								xcontext.Logger(ctx).With("request_user_id", xcontext.RequestUserID(ctx)))
+
+							xcontext.Logger(ctx).Debug("request-auth",
+								"user-id", domainAccessToken.Metadata.Subject,
+								"scope", domainAccessToken.Scope.String(),
+							)
 						}
 					}
 				}
@@ -39,5 +44,17 @@ func Authentication(engine token.Engine) func(http.Handler) http.Handler {
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
+	}
+}
+
+func RequireAuthentication(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		if xcontext.RequestUserID(ctx) == 0 {
+			response.Write(ctx, w, http.StatusUnauthorized,
+				standard.NewErrorResponseWithMessage(ctx, "unauthenticated", "require authentication to access api"))
+		} else {
+			handler(w, r)
+		}
 	}
 }

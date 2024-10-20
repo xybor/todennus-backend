@@ -6,10 +6,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/xybor/todennus-backend/adapter/rest/abstraction"
 	"github.com/xybor/todennus-backend/adapter/rest/dto"
+	"github.com/xybor/todennus-backend/adapter/rest/middleware"
 	"github.com/xybor/todennus-backend/adapter/rest/response"
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/usecase"
-	"github.com/xybor/x/xcontext"
 	"github.com/xybor/x/xhttp"
 )
 
@@ -24,8 +24,8 @@ func NewUserAdapter(userUsecase abstraction.UserUsecase) *UserRESTAdapter {
 func (a *UserRESTAdapter) Router(r chi.Router) {
 	r.Post("/", a.Register())
 
-	r.Get("/{user_id}", a.GetByID())
-	r.Get("/username/{username}", a.GetByUsername())
+	r.Get("/{user_id}", middleware.RequireAuthentication(a.GetByID()))
+	r.Get("/username/{username}", middleware.RequireAuthentication(a.GetByUsername()))
 }
 
 func (a *UserRESTAdapter) Register() http.HandlerFunc {
@@ -34,7 +34,7 @@ func (a *UserRESTAdapter) Register() http.HandlerFunc {
 
 		request, err := xhttp.ParseHTTPRequest[dto.UserRegisterRequestDTO](r)
 		if err != nil {
-			response.HandleParseError(ctx, w, err)
+			response.HandleError(ctx, w, err)
 			return
 		}
 
@@ -52,14 +52,13 @@ func (a *UserRESTAdapter) GetByID() http.HandlerFunc {
 
 		req, err := xhttp.ParseHTTPRequest[dto.UserGetByIDRequestDTO](r)
 		if err != nil {
-			response.HandleParseError(ctx, w, err)
+			response.HandleError(ctx, w, err)
 			return
 		}
 
 		ucReq, err := req.To(ctx)
 		if err != nil {
-			xcontext.Logger(ctx).Debug("failed-to-convert-req", "err", err)
-			response.WriteError(ctx, w, http.StatusBadRequest, err)
+			response.HandleError(ctx, w, err)
 			return
 		}
 
@@ -76,7 +75,7 @@ func (a *UserRESTAdapter) GetByUsername() http.HandlerFunc {
 
 		req, err := xhttp.ParseHTTPRequest[dto.UserGetByUsernameRequestDTO](r)
 		if err != nil {
-			response.HandleParseError(ctx, w, err)
+			response.HandleError(ctx, w, err)
 			return
 		}
 

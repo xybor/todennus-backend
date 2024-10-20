@@ -1,5 +1,40 @@
 # OAuth2 Endpoints
 
+
+## Authorization Code Flow (With or Without PKCE)
+
+`POST /oauth2/token`
+
+
+| Field           | Type     | Description               |
+| --------------- | -------- | ------------------------- |
+| `grant_type`    | `string` | Must `authorization_code` |
+| `client_id`     | `string` | Client ID                 |
+| `client_secret` | `string` | Client Secret             |
+| `code`          | `string` | Authorization code        |
+| `code_verifier` | `string` | Code verifier (with PKCE) |
+
+For example:
+
+```json
+{
+    "grant_type": "authorization_code",
+    "client_id": "308994132968210433",
+    "client_secret": "xnHjds...",
+    "code": "baFPke..."
+}
+```
+
+```json
+{
+    "grant_type": "authorization_code",
+    "client_id": "308994132968210433",
+    "client_secret": "xnHjds...",
+    "code": "baFPke...",
+    "code_verifier": "AgKTX..."
+}
+```
+
 ## Resource Owner Password Flow
 
 `POST /oauth2/token`

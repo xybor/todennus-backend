@@ -19,12 +19,12 @@ type System struct {
 func InitializeSystem(paths ...string) (System, context.Context, error) {
 	config, err := config.Load(sources(paths)...)
 	if err != nil {
-		return System{}, nil, fmt.Errorf("cannot load variable and secrets, err=%w", err)
+		return System{}, nil, fmt.Errorf("failed to load variable and secrets, err=%w", err)
 	}
 
 	infras, err := InitializeInfras(config)
 	if err != nil {
-		return System{}, nil, fmt.Errorf("cannot initialize context, err=%w", err)
+		return System{}, nil, fmt.Errorf("failed to initialize context, err=%w", err)
 	}
 
 	ctx := context.Background()
@@ -32,22 +32,22 @@ func InitializeSystem(paths ...string) (System, context.Context, error) {
 
 	domains, err := InitializeDomains(ctx, config, infras)
 	if err != nil {
-		return System{}, nil, fmt.Errorf("cannot initialize domains, err=%w", err)
+		return System{}, nil, fmt.Errorf("failed to initialize domains, err=%w", err)
 	}
 
 	databases, err := InitializeDatabases(ctx, config)
 	if err != nil {
-		return System{}, nil, fmt.Errorf("cannot initialize databases, err=%w", err)
+		return System{}, nil, fmt.Errorf("failed to initialize databases, err=%w", err)
 	}
 
 	repositories, err := InitializeRepositories(ctx, config, databases)
 	if err != nil {
-		return System{}, nil, fmt.Errorf("cannot initialize repositories, err=%w", err)
+		return System{}, nil, fmt.Errorf("failed to initialize repositories, err=%w", err)
 	}
 
 	usecases, err := InitializeUsecases(ctx, config, infras, databases, domains, repositories)
 	if err != nil {
-		return System{}, nil, fmt.Errorf("cannot initialize usecases, err=%w", err)
+		return System{}, nil, fmt.Errorf("failed to initialize usecases, err=%w", err)
 	}
 
 	return System{

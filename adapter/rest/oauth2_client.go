@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/xybor/todennus-backend/adapter/rest/abstraction"
 	"github.com/xybor/todennus-backend/adapter/rest/dto"
+	"github.com/xybor/todennus-backend/adapter/rest/middleware"
 	"github.com/xybor/todennus-backend/adapter/rest/response"
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/usecase"
@@ -23,9 +24,9 @@ func NewOAuth2ClientAdapter(oauth2ClientUsecase abstraction.OAuth2ClientUsecase)
 }
 
 func (a *OAuth2ClientAdapter) Router(r chi.Router) {
-	r.Get("/{client_id}", a.Get())
+	r.Get("/{client_id}", middleware.RequireAuthentication(a.Get()))
 
-	r.Post("/", a.Create())
+	r.Post("/", middleware.RequireAuthentication(a.Create()))
 	r.Post("/first", a.CreateByAdmin())
 }
 
@@ -35,13 +36,13 @@ func (a *OAuth2ClientAdapter) Get() http.HandlerFunc {
 
 		req, err := xhttp.ParseHTTPRequest[dto.OAuth2ClientGetRequestDTO](r)
 		if err != nil {
-			response.HandleParseError(ctx, w, err)
+			response.HandleError(ctx, w, err)
 			return
 		}
 
 		resp, err := a.oauth2ClientUsecase.Get(ctx, req.To())
 		response.NewResponseHandler(dto.NewOAuth2ClientGetResponseDTO(resp), err).
-			Map(http.StatusNotFound, usecase.ErrClientNotFound).
+			Map(http.StatusNotFound, usecase.ErrClientInvalid).
 			WriteHTTPResponse(ctx, w)
 	}
 }
@@ -52,7 +53,7 @@ func (a *OAuth2ClientAdapter) Create() http.HandlerFunc {
 
 		req, err := xhttp.ParseHTTPRequest[dto.OAuth2ClientCreateRequestDTO](r)
 		if err != nil {
-			response.HandleParseError(ctx, w, err)
+			response.HandleError(ctx, w, err)
 			return
 		}
 
@@ -69,7 +70,7 @@ func (a *OAuth2ClientAdapter) CreateByAdmin() http.HandlerFunc {
 
 		req, err := xhttp.ParseHTTPRequest[dto.OAuth2ClientCreateFirstRequestDTO](r)
 		if err != nil {
-			response.HandleParseError(ctx, w, err)
+			response.HandleError(ctx, w, err)
 			return
 		}
 

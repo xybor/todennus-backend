@@ -26,10 +26,10 @@ type OAuth2FlowDomain interface {
 	CreateAuthenticationResultSuccess(authID string, userID snowflake.ID, username string) domain.OAuth2AuthenticationResult
 	CreateAuthenticationResultFailure(authID string, err string) domain.OAuth2AuthenticationResult
 
-	CreateAccessToken(aud string, scope scope.Scopes, user domain.User) (domain.OAuth2AccessToken, error)
-	CreateRefreshToken(aud string, scope scope.Scopes, userID snowflake.ID) (domain.OAuth2RefreshToken, error)
-	NextRefreshToken(current domain.OAuth2RefreshToken) (domain.OAuth2RefreshToken, error)
-	CreateIDToken(aud string, user domain.User) (domain.OAuth2IDToken, error)
+	CreateAccessToken(aud string, scope scope.Scopes, user domain.User) domain.OAuth2AccessToken
+	CreateRefreshToken(aud string, scope scope.Scopes, userID snowflake.ID) domain.OAuth2RefreshToken
+	NextRefreshToken(current domain.OAuth2RefreshToken) domain.OAuth2RefreshToken
+	CreateIDToken(aud string, user domain.User) domain.OAuth2IDToken
 
 	ValidateCodeChallenge(verifier, challenge, method string) bool
 
