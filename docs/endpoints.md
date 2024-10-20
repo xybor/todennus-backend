@@ -28,6 +28,19 @@ JSON Params:
 
 Returns a [user](./resources.md#user) object.
 
+
+### Validate user
+`POST /users/validate`
+
+Returns a [user](./resources.md#user) object.
+
+JSON Params:
+
+| Field       | Type     | Description |
+| ----------- | -------- | ----------- |
+| `username`  | `string` | Username    |
+| `passsword` | `string` | Password    |
+
 ## Clients
 
 ### Create first client (*no-auth*)

@@ -33,7 +33,7 @@ func Authentication(engine token.Engine) func(http.Handler) http.Handler {
 							ctx = xcontext.WithRequestUserID(ctx, domainAccessToken.Metadata.Subject)
 							ctx = xcontext.WithScope(ctx, domainAccessToken.Scope)
 
-							xcontext.Logger(ctx).Debug("request-auth",
+							xcontext.Logger(ctx).Debug("auth-info",
 								"user-id", domainAccessToken.Metadata.Subject,
 								"scope", domainAccessToken.Scope.String(),
 							)

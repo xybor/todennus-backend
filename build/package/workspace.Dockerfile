@@ -4,11 +4,12 @@ WORKDIR /todennus-backend
 
 RUN apk add -U --no-cache ca-certificates
 
-COPY . /
+COPY ./todennus-backend/go.mod .
+COPY ./todennus-backend/go.sum .
 
 RUN go mod download
 
-COPY . ./
+COPY . /
 
 RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o /todennus ./cmd/main.go
 

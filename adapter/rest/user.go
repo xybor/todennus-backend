@@ -23,6 +23,7 @@ func NewUserAdapter(userUsecase abstraction.UserUsecase) *UserRESTAdapter {
 
 func (a *UserRESTAdapter) Router(r chi.Router) {
 	r.Post("/", a.Register())
+	r.Post("/validate", a.Validate())
 
 	r.Get("/{user_id}", middleware.RequireAuthentication(a.GetByID()))
 	r.Get("/username/{username}", middleware.RequireAuthentication(a.GetByUsername()))
@@ -82,6 +83,23 @@ func (a *UserRESTAdapter) GetByUsername() http.HandlerFunc {
 		resp, err := a.userUsecase.GetByUsername(ctx, req.To())
 		response.NewResponseHandler(dto.NewUserGetByUsernameResponseDTO(resp), err).
 			Map(http.StatusNotFound, usecase.ErrUserNotFound).
+			WriteHTTPResponse(ctx, w)
+	}
+}
+
+func (a *UserRESTAdapter) Validate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		req, err := xhttp.ParseHTTPRequest[dto.UserValidateRequestDTO](r)
+		if err != nil {
+			response.HandleError(ctx, w, err)
+			return
+		}
+
+		resp, err := a.userUsecase.ValidateCredentials(ctx, req.To())
+		response.NewResponseHandler(dto.NewUserValidateResponseDTO(resp), err).
+			Map(http.StatusUnauthorized, usecase.ErrCredentialsInvalid).
 			WriteHTTPResponse(ctx, w)
 	}
 }

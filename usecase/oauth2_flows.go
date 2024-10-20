@@ -236,6 +236,7 @@ func (usecase *OAuth2FlowUsecase) SessionUpdate(ctx context.Context, req dto.OAu
 		session = usecase.oauth2FlowDomain.InvalidateSession(domain.SessionStateFailedAuthentication)
 	}
 
+	xcontext.Logger(ctx).Debug("save-session", "state", session.State)
 	if err = usecase.sessionRepo.Save(ctx, session); err != nil {
 		xcontext.Logger(ctx).Warn("failed-to-save-session", "err", err, "aid", authResult.AuthorizationID)
 		return dto.OAuth2SessionUpdateResponseDTO{}, ErrServer
@@ -502,11 +503,13 @@ func (usecase *OAuth2FlowUsecase) getAuthenticatedUser(
 	scope scope.Scopes,
 ) (snowflake.ID, string, error) {
 	session, err := usecase.sessionRepo.Load(ctx)
-	if err != nil || session.ExpiresAt.Before(time.Now()) || session.State == domain.SessionStateUnauthenticated {
-		if err != nil {
-			xcontext.Logger(ctx).Debug("failed-to-retrieve-session", "err", err)
-		}
+	if err == nil {
+		xcontext.Logger(ctx).Debug("session-state", "state", session.State, "expires_at", session.ExpiresAt)
+	} else {
+		xcontext.Logger(ctx).Debug("failed-to-load-session", "err", err)
+	}
 
+	if err != nil || session.ExpiresAt.Before(time.Now()) || session.State == domain.SessionStateUnauthenticated {
 		store := usecase.oauth2FlowDomain.CreateAuthorizationStore(
 			req.ResponseType, req.ClientID, scope, req.RedirectURI,
 			req.State, req.CodeChallenge, req.CodeChallengeMethod,
@@ -519,8 +522,6 @@ func (usecase *OAuth2FlowUsecase) getAuthenticatedUser(
 
 		return 0, store.ID, nil
 	}
-
-	xcontext.Logger(ctx).Debug("session-state", "value", session.State)
 
 	if session.State == domain.SessionStateFailedAuthentication {
 		session := usecase.oauth2FlowDomain.InvalidateSession(domain.SessionStateUnauthenticated)
