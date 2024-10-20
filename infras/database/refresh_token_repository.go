@@ -21,7 +21,7 @@ func (repo *RefreshTokenRepository) Create(
 	accessTokenID int64,
 	seq int,
 ) error {
-	return convertGormError(repo.db.Create(&model.RefreshTokenModel{
+	return ConvertError(repo.db.Create(&model.RefreshTokenModel{
 		RefreshTokenID: refreshTokenId,
 		AccessTokenID:  accessTokenID,
 		Seq:            seq,
@@ -44,11 +44,11 @@ func (repo *RefreshTokenRepository) UpdateByRefreshTokenID(
 		return ErrRecordNotFound
 	}
 
-	return convertGormError(result.Error)
+	return ConvertError(result.Error)
 }
 
 func (repo *RefreshTokenRepository) DeleteByRefreshTokenID(
 	ctx context.Context, refreshTokenID int64,
 ) error {
-	return convertGormError(repo.db.Delete(&model.RefreshTokenModel{}, refreshTokenID).Error)
+	return ConvertError(repo.db.Delete(&model.RefreshTokenModel{}, refreshTokenID).Error)
 }

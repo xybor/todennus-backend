@@ -8,10 +8,10 @@ import (
 	"github.com/xybor/todennus-backend/infras/database"
 	"github.com/xybor/todennus-backend/usecase/abstraction"
 	"github.com/xybor/todennus-backend/usecase/dto"
-	"github.com/xybor/x/errorx"
 	"github.com/xybor/x/lock"
 	"github.com/xybor/x/scope"
 	"github.com/xybor/x/xcontext"
+	"github.com/xybor/x/xerror"
 )
 
 type OAuth2ClientUsecase struct {
@@ -47,12 +47,12 @@ func (usecase *OAuth2ClientUsecase) Create(
 ) (dto.OAuth2ClientCreateResponseDTO, error) {
 	userID := xcontext.RequestUserID(ctx)
 	if userID == 0 {
-		return dto.OAuth2ClientCreateResponseDTO{}, errorx.WrapDebug(ErrUnauthorized)
+		return dto.OAuth2ClientCreateResponseDTO{}, xerror.WrapDebug(ErrUnauthorized)
 	}
 
 	requiredScope := scope.New(domain.Actions.Write.Create, domain.Resources.Client)
 	if !xcontext.Scope(ctx).Contains(requiredScope) {
-		return dto.OAuth2ClientCreateResponseDTO{}, errorx.WrapDebug(ErrForbidden).
+		return dto.OAuth2ClientCreateResponseDTO{}, xerror.WrapDebug(ErrForbidden).
 			WithMessage("insufficient scope %s", requiredScope.String())
 	}
 
@@ -63,7 +63,7 @@ func (usecase *OAuth2ClientUsecase) Create(
 
 	err = usecase.oauth2ClientRepo.Create(ctx, client)
 	if err != nil {
-		return dto.OAuth2ClientCreateResponseDTO{}, wrapNonDomainError(errorx.ServerityCritical, err)
+		return dto.OAuth2ClientCreateResponseDTO{}, wrapNonDomainError(xerror.ServerityCritical, err)
 	}
 
 	return dto.NewOAuth2ClientCreateResponseDTO(ctx, client, secret), nil
@@ -74,45 +74,45 @@ func (usecase *OAuth2ClientUsecase) CreateByAdmin(
 	req dto.OAuth2ClientCreateFirstRequestDTO,
 ) (dto.OAuth2ClientCreateByAdminResponseDTO, error) {
 	if !usecase.isNoClient {
-		return dto.OAuth2ClientCreateByAdminResponseDTO{}, errorx.WrapDebug(ErrRequestInvalid)
+		return dto.OAuth2ClientCreateByAdminResponseDTO{}, xerror.WrapDebug(ErrRequestInvalid)
 	}
 
 	if err := usecase.firstClientLock.Lock(ctx); err != nil {
-		return dto.OAuth2ClientCreateByAdminResponseDTO{}, wrapNonDomainError(errorx.ServerityWarn, err)
+		return dto.OAuth2ClientCreateByAdminResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
 	}
 	defer usecase.firstClientLock.Unlock(ctx)
 
 	count, err := usecase.oauth2ClientRepo.Count(ctx)
 	if err != nil {
-		return dto.OAuth2ClientCreateByAdminResponseDTO{}, wrapNonDomainError(errorx.ServerityWarn, err)
+		return dto.OAuth2ClientCreateByAdminResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
 	}
 
 	if count > 0 {
 		usecase.isNoClient = false
-		return dto.OAuth2ClientCreateByAdminResponseDTO{}, errorx.WrapDebug(ErrRequestInvalid)
+		return dto.OAuth2ClientCreateByAdminResponseDTO{}, xerror.WrapDebug(ErrRequestInvalid)
 	}
 
 	user, err := usecase.userRepo.GetByUsername(ctx, req.Username)
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
-			return dto.OAuth2ClientCreateByAdminResponseDTO{}, errorx.WrapDebug(ErrUserNotFound)
+			return dto.OAuth2ClientCreateByAdminResponseDTO{}, xerror.WrapDebug(ErrUserNotFound)
 		}
 
-		return dto.OAuth2ClientCreateByAdminResponseDTO{}, wrapNonDomainError(errorx.ServerityCritical, err)
+		return dto.OAuth2ClientCreateByAdminResponseDTO{}, wrapNonDomainError(xerror.ServerityCritical, err)
 	}
 
 	ok, err := usecase.userDomain.Validate(user.HashedPass, req.Password)
 	if err != nil {
-		return dto.OAuth2ClientCreateByAdminResponseDTO{}, wrapNonDomainError(errorx.ServerityCritical, err)
+		return dto.OAuth2ClientCreateByAdminResponseDTO{}, wrapNonDomainError(xerror.ServerityCritical, err)
 	}
 
 	if !ok {
-		return dto.OAuth2ClientCreateByAdminResponseDTO{}, errorx.WrapDebug(ErrUnauthorized).
+		return dto.OAuth2ClientCreateByAdminResponseDTO{}, xerror.WrapDebug(ErrUnauthorized).
 			WithMessage("invalid password")
 	}
 
 	if user.Role != domain.UserRoleAdmin {
-		return dto.OAuth2ClientCreateByAdminResponseDTO{}, errorx.WrapDebug(ErrForbidden).
+		return dto.OAuth2ClientCreateByAdminResponseDTO{}, xerror.WrapDebug(ErrForbidden).
 			WithMessage("require admin")
 	}
 
@@ -123,7 +123,7 @@ func (usecase *OAuth2ClientUsecase) CreateByAdmin(
 
 	err = usecase.oauth2ClientRepo.Create(ctx, client)
 	if err != nil {
-		return dto.OAuth2ClientCreateByAdminResponseDTO{}, wrapNonDomainError(errorx.ServerityCritical, err)
+		return dto.OAuth2ClientCreateByAdminResponseDTO{}, wrapNonDomainError(xerror.ServerityCritical, err)
 	}
 
 	usecase.isNoClient = false
@@ -137,10 +137,10 @@ func (usecase *OAuth2ClientUsecase) Get(
 	client, err := usecase.oauth2ClientRepo.GetByID(ctx, req.ClientID.Int64())
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
-			return dto.OAuth2ClientGetResponseDTO{}, errorx.WrapDebug(ErrClientNotFound)
+			return dto.OAuth2ClientGetResponseDTO{}, xerror.WrapDebug(ErrClientNotFound)
 		}
 
-		return dto.OAuth2ClientGetResponseDTO{}, wrapNonDomainError(errorx.ServerityWarn, err)
+		return dto.OAuth2ClientGetResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
 	}
 
 	return dto.NewOAuth2ClientGetResponse(ctx, client), nil

@@ -3,6 +3,8 @@ package database
 import (
 	"errors"
 
+	"github.com/redis/go-redis/v9"
+	"github.com/xybor/x/xerror"
 	"gorm.io/gorm"
 )
 
@@ -11,9 +13,9 @@ var (
 	ErrRecordDuplicate = errors.New("duplicated record")
 )
 
-func convertGormError(err error) error {
+func ConvertError(err error) error {
 	switch {
-	case errors.Is(err, gorm.ErrRecordNotFound):
+	case xerror.Is(err, gorm.ErrRecordNotFound, redis.Nil):
 		return ErrRecordNotFound
 	case errors.Is(err, gorm.ErrDuplicatedKey):
 		return ErrRecordDuplicate

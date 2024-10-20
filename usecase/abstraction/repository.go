@@ -25,3 +25,21 @@ type OAuth2ClientRepository interface {
 	GetByID(ctx context.Context, clientID int64) (domain.OAuth2Client, error)
 	Count(ctx context.Context) (int64, error)
 }
+
+type SessionRepository interface {
+	Save(ctx context.Context, session domain.Session) error
+	Load(ctx context.Context) (domain.Session, error)
+}
+
+type OAuth2AuthorizationCodeRepository interface {
+	SaveAuthorizationCode(ctx context.Context, info domain.OAuth2AuthorizationCode) error
+	LoadAuthorizationCode(ctx context.Context, code string) (domain.OAuth2AuthorizationCode, error)
+	DeleteAuthorizationCode(ctx context.Context, code string) error
+
+	SaveAuthorizationStore(ctx context.Context, store domain.OAuth2AuthorizationStore) error
+	LoadAuthorizationStore(ctx context.Context, id string) (domain.OAuth2AuthorizationStore, error)
+
+	SaveAuthenticationResult(ctx context.Context, result domain.OAuth2AuthenticationResult) error
+	LoadAuthenticationResult(ctx context.Context, id string) (domain.OAuth2AuthenticationResult, error)
+	DeleteAuthenticationResult(ctx context.Context, id string) error
+}

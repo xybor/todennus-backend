@@ -8,9 +8,9 @@ import (
 	"github.com/xybor/todennus-backend/infras/database"
 	"github.com/xybor/todennus-backend/usecase/abstraction"
 	"github.com/xybor/todennus-backend/usecase/dto"
-	"github.com/xybor/x/errorx"
 	"github.com/xybor/x/lock"
 	"github.com/xybor/x/xcontext"
+	"github.com/xybor/x/xerror"
 )
 
 type UserUsecase struct {
@@ -40,12 +40,12 @@ func (uc *UserUsecase) Register(
 ) (dto.UserRegisterResponseDTO, error) {
 	_, err := uc.userRepo.GetByUsername(ctx, req.Username)
 	if err == nil {
-		return dto.UserRegisterResponseDTO{}, errorx.WrapDebug(ErrUsernameExisted).
+		return dto.UserRegisterResponseDTO{}, xerror.WrapDebug(ErrUsernameExisted).
 			WithMessage("username %s has already taken before", req.Username)
 	}
 
 	if !errors.Is(err, database.ErrRecordNotFound) {
-		return dto.UserRegisterResponseDTO{}, wrapNonDomainError(errorx.ServerityCritical, err)
+		return dto.UserRegisterResponseDTO{}, wrapNonDomainError(xerror.ServerityCritical, err)
 	}
 
 	user, err := uc.userDomain.Create(req.Username, req.Password)
@@ -60,7 +60,7 @@ func (uc *UserUsecase) Register(
 
 	if !created {
 		if err = uc.userRepo.Create(ctx, user); err != nil {
-			return dto.UserRegisterResponseDTO{}, wrapNonDomainError(errorx.ServerityWarn, err)
+			return dto.UserRegisterResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
 		}
 	}
 
@@ -72,17 +72,17 @@ func (usecase *UserUsecase) GetByID(
 	req dto.UserGetByIDRequestDTO,
 ) (dto.UserGetByIDResponseDTO, error) {
 	if xcontext.RequestUserID(ctx) == 0 {
-		return dto.UserGetByIDResponseDTO{}, errorx.WrapDebug(ErrUnauthorized)
+		return dto.UserGetByIDResponseDTO{}, xerror.WrapDebug(ErrUnauthorized)
 	}
 
 	user, err := usecase.userRepo.GetByID(ctx, req.UserID.Int64())
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
-			return dto.UserGetByIDResponseDTO{}, errorx.WrapDebug(ErrUserNotFound).
+			return dto.UserGetByIDResponseDTO{}, xerror.WrapDebug(ErrUserNotFound).
 				WithMessage("not found user with id %d", req.UserID)
 		}
 
-		return dto.UserGetByIDResponseDTO{}, wrapNonDomainError(errorx.ServerityWarn, err)
+		return dto.UserGetByIDResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
 	}
 
 	return dto.NewUserGetByIDResponseDTO(ctx, user), nil
@@ -93,17 +93,17 @@ func (usecase *UserUsecase) GetByUsername(
 	req dto.UserGetByUsernameRequestDTO,
 ) (dto.UserGetByUsernameResponseDTO, error) {
 	if xcontext.RequestUserID(ctx) == 0 {
-		return dto.UserGetByUsernameResponseDTO{}, errorx.WrapDebug(ErrUnauthorized)
+		return dto.UserGetByUsernameResponseDTO{}, xerror.WrapDebug(ErrUnauthorized)
 	}
 
 	user, err := usecase.userRepo.GetByUsername(ctx, req.Username)
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
-			return dto.UserGetByUsernameResponseDTO{}, errorx.WrapDebug(ErrUserNotFound).
+			return dto.UserGetByUsernameResponseDTO{}, xerror.WrapDebug(ErrUserNotFound).
 				WithMessage("not found user %s", req.Username)
 		}
 
-		return dto.UserGetByUsernameResponseDTO{}, wrapNonDomainError(errorx.ServerityWarn, err)
+		return dto.UserGetByUsernameResponseDTO{}, wrapNonDomainError(xerror.ServerityWarn, err)
 	}
 
 	return dto.NewUserGetByUsernameResponseDTO(ctx, user), nil
@@ -120,7 +120,7 @@ func (uc *UserUsecase) createAdmin(
 	err := lock.Func(uc.adminLocker, ctx, func() error {
 		adminCount, err := uc.userRepo.CountByRole(ctx, domain.UserRoleAdmin)
 		if err != nil {
-			return wrapNonDomainError(errorx.ServerityCritical, err)
+			return wrapNonDomainError(xerror.ServerityCritical, err)
 		}
 
 		if adminCount > 0 {
@@ -131,7 +131,7 @@ func (uc *UserUsecase) createAdmin(
 		user.Role = domain.UserRoleAdmin
 		err = uc.userRepo.Create(ctx, *user)
 		if err != nil {
-			return wrapNonDomainError(errorx.ServerityWarn, err)
+			return wrapNonDomainError(xerror.ServerityWarn, err)
 		}
 
 		uc.shouldCreateAdmin = false

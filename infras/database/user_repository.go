@@ -19,13 +19,13 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 
 func (repo *UserRepository) Create(ctx context.Context, user domain.User) error {
 	model := model.NewUser(user)
-	return convertGormError(repo.db.Create(&model).Error)
+	return ConvertError(repo.db.Create(&model).Error)
 }
 
 func (repo *UserRepository) GetByUsername(ctx context.Context, username string) (domain.User, error) {
 	model := model.UserModel{}
 	if err := repo.db.Take(&model, "username=?", username).Error; err != nil {
-		return domain.User{}, convertGormError(err)
+		return domain.User{}, ConvertError(err)
 	}
 
 	return model.To()
@@ -34,7 +34,7 @@ func (repo *UserRepository) GetByUsername(ctx context.Context, username string) 
 func (repo *UserRepository) GetByID(ctx context.Context, userID int64) (domain.User, error) {
 	model := model.UserModel{}
 	if err := repo.db.Take(&model, "id=?", userID).Error; err != nil {
-		return domain.User{}, convertGormError(err)
+		return domain.User{}, ConvertError(err)
 	}
 
 	return model.To()
@@ -43,5 +43,5 @@ func (repo *UserRepository) GetByID(ctx context.Context, userID int64) (domain.U
 func (repo *UserRepository) CountByRole(ctx context.Context, role enum.Enum[domain.UserRole]) (int64, error) {
 	var n int64
 	err := repo.db.Model(&model.UserModel{}).Where("role=?", role.String()).Count(&n).Error
-	return n, convertGormError(err)
+	return n, ConvertError(err)
 }

@@ -59,7 +59,7 @@ Please refer the [.env.example](./.env.example).
 4. Start the server.
 
 ```shell
-$ make start-rest-server
+$ make start-rest
 ```
 
 ### Run with Docker

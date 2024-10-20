@@ -7,7 +7,7 @@ import (
 
 	"github.com/xybor/todennus-backend/domain"
 	"github.com/xybor/todennus-backend/usecase/abstraction"
-	"github.com/xybor/todennus-config"
+	config "github.com/xybor/todennus-config"
 )
 
 type Domains struct {
@@ -28,6 +28,10 @@ func InitializeDomains(ctx context.Context, config config.Config, infras Infras)
 	domains.OAuth2FlowDomain, err = domain.NewOAuth2FlowDomain(
 		infras.NewSnowflakeNode(),
 		config.Variable.Authentication.TokenIssuer,
+		time.Duration(config.Variable.OAuth2.AuthorizationCodeFlowExpiration)*time.Second,
+		time.Duration(config.Variable.OAuth2.AuthenticationCallbackExpiration)*time.Second,
+		time.Duration(config.Variable.OAuth2.SessionUpdateExpiration)*time.Second,
+		time.Duration(config.Variable.Session.Expiration)*time.Second,
 		time.Duration(config.Variable.Authentication.AccessTokenExpiration)*time.Second,
 		time.Duration(config.Variable.Authentication.RefreshTokenExpiration)*time.Second,
 		time.Duration(config.Variable.Authentication.IDTokenExpiration)*time.Second,

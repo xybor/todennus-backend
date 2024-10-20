@@ -3,14 +3,13 @@ package response
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/xybor/todennus-backend/usecase"
-	"github.com/xybor/x"
-	"github.com/xybor/x/errorx"
 	"github.com/xybor/x/logging"
 	"github.com/xybor/x/xcontext"
+	"github.com/xybor/x/xerror"
+	"github.com/xybor/x/xhttp"
 )
 
 type ErrorResponse struct {
@@ -58,7 +57,7 @@ func (h *ResponseHandler) WriteHTTPResponse(ctx context.Context, w http.Response
 	var resp any = h.resp
 
 	if h.err != nil {
-		var serviceErr errorx.ServiceError
+		var serviceErr xerror.ServiceError
 		switch {
 		case errors.As(h.err, &serviceErr):
 			resp = ErrorResponse{ErrMsg: serviceErr.Message}
@@ -79,11 +78,11 @@ func HandleParseError(ctx context.Context, w http.ResponseWriter, err error) {
 
 	var code int
 	response := ErrorResponse{}
-	if errors.Is(err, x.ErrHTTPBadRequest) {
+	if errors.Is(err, xhttp.ErrHTTPBadRequest) {
 		code = http.StatusBadRequest
 		response.ErrMsg = err.Error()
 	} else {
-		xcontext.Logger(ctx).Debug("failed to parse data", "err", err.Error())
+		xcontext.Logger(ctx).Debug("failed-to-parse-data", "err", err.Error())
 		code = http.StatusInternalServerError
 		response.ErrMsg = "Internal Server Error"
 	}
@@ -91,14 +90,43 @@ func HandleParseError(ctx context.Context, w http.ResponseWriter, err error) {
 	Write(ctx, w, code, response)
 }
 
-func WriteErrorMsg(ctx context.Context, w http.ResponseWriter, code int, msg string, a ...any) {
-	response := ErrorResponse{ErrMsg: fmt.Sprintf(msg, a...)}
-	Write(ctx, w, code, response)
+func WriteAndWarnError(ctx context.Context, w http.ResponseWriter, code int, err error) {
+	var resp ErrorResponse
+	var serviceErr xerror.ServiceError
+	switch {
+	case errors.As(err, &serviceErr):
+		resp = ErrorResponse{ErrMsg: serviceErr.Message}
+	default:
+		resp = ErrorResponse{ErrMsg: http.StatusText(code)}
+	}
+
+	logging.LogError(xcontext.Logger(ctx), err)
+
+	Write(ctx, w, code, resp)
+}
+
+func WriteError(ctx context.Context, w http.ResponseWriter, code int, err error) {
+	var resp ErrorResponse
+	var serviceErr xerror.ServiceError
+	switch {
+	case errors.As(err, &serviceErr):
+		resp = ErrorResponse{ErrMsg: serviceErr.Message}
+	default:
+		resp = ErrorResponse{ErrMsg: http.StatusText(code)}
+	}
+
+	Write(ctx, w, code, resp)
 }
 
 func Write(ctx context.Context, w http.ResponseWriter, code int, obj any) {
-	if err := x.WriteHTTPResponseJSON(w, code, obj); err != nil {
+	xcontext.SessionManager(ctx).Save(w, xcontext.Session(ctx))
+	if err := xhttp.WriteResponseJSON(w, code, obj); err != nil {
 		xcontext.Logger(ctx).Critical("failed to write response", "err", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
+}
+
+func Redirect(ctx context.Context, w http.ResponseWriter, r *http.Request, url string, code int) {
+	xcontext.SessionManager(ctx).Save(w, xcontext.Session(ctx))
+	http.Redirect(w, r, url, code)
 }
