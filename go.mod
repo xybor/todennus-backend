@@ -9,7 +9,7 @@ require (
 	github.com/xybor-x/snowflake v1.0.0
 	github.com/xybor/todennus-config v1.0.0
 	github.com/xybor/todennus-migration v1.0.0
-	github.com/xybor/x v1.7.0
+	github.com/xybor/x v1.8.0
 	golang.org/x/crypto v0.28.0
 	gorm.io/gorm v1.25.12
 )
