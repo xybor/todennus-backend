@@ -20,8 +20,8 @@ type Repositories struct {
 	abstraction.OAuth2AuthorizationCodeRepository
 }
 
-func InitializeRepositories(ctx context.Context, config config.Config, db Databases) (Repositories, error) {
-	r := Repositories{}
+func InitializeRepositories(ctx context.Context, config *config.Config, db *Databases) (*Repositories, error) {
+	r := &Repositories{}
 
 	r.UserRepository = database.NewUserRepository(db.GormPostgres)
 	r.RefreshTokenRepository = database.NewRefreshTokenRepository(db.GormPostgres)

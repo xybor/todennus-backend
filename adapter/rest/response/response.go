@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"reflect"
 
 	"github.com/xybor/todennus-backend/adapter/rest/standard"
 	"github.com/xybor/todennus-backend/usecase"
@@ -14,12 +15,13 @@ import (
 
 type ResponseHandler struct {
 	err  error
+	f    any
 	resp any
 	code int
 }
 
-func NewResponseHandler(val any, err error) *ResponseHandler {
-	return (&ResponseHandler{resp: val, err: err, code: -1}).
+func NewResponseHandler(f any, resp any, err error) *ResponseHandler {
+	return (&ResponseHandler{f: f, resp: resp, err: err, code: -1}).
 		Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
 		Map(http.StatusUnauthorized, usecase.ErrUnauthenticated).
 		Map(http.StatusForbidden, usecase.ErrForbidden)
@@ -51,9 +53,16 @@ func (h *ResponseHandler) WriteHTTPResponse(ctx context.Context, w http.Response
 		h.code = http.StatusOK
 	}
 
-	resp := standard.NewResponse(h.resp)
+	var resp any
 	if h.err != nil {
 		resp = standard.NewErrorResponse(ctx, h.err)
+	} else if h.resp != nil {
+		if h.f == nil {
+			resp = standard.NewResponse(h.resp)
+		} else {
+			fValue := reflect.ValueOf(h.f)
+			resp = standard.NewResponse(fValue.Call([]reflect.Value{reflect.ValueOf(h.resp)})[0].Interface())
+		}
 	}
 
 	Write(ctx, w, h.code, resp)
@@ -66,11 +75,18 @@ func (h *ResponseHandler) WriteHTTPResponseWithoutWrap(ctx context.Context, w ht
 		h.code = http.StatusOK
 	}
 
-	var resp any = h.resp
+	var resp any
 	if h.err != nil {
 		errResp := standard.NewErrorResponse(ctx, h.err)
 		errResp.Status = ""
 		resp = errResp
+	} else if h.resp != nil {
+		if h.f == nil {
+			resp = h.resp
+		} else {
+			fValue := reflect.ValueOf(h.f)
+			resp = fValue.Call([]reflect.Value{reflect.ValueOf(h.resp)})[0].Interface()
+		}
 	}
 
 	Write(ctx, w, h.code, resp)
@@ -83,12 +99,20 @@ func (h *ResponseHandler) Redirect(ctx context.Context, w http.ResponseWriter, r
 		h.code = code
 	}
 
+	var redirect string
 	if h.err != nil {
 		Write(ctx, w, h.code, standard.NewErrorResponse(ctx, h.err))
 		return
+	} else if h.resp != nil {
+		if h.f == nil {
+			redirect = h.resp.(string)
+		} else {
+			fValue := reflect.ValueOf(h.f)
+			redirect = fValue.Call([]reflect.Value{reflect.ValueOf(h.resp)})[0].Interface().(string)
+		}
 	}
 
-	Redirect(ctx, w, r, h.resp.(string), h.code)
+	Redirect(ctx, w, r, redirect, h.code)
 }
 
 func HandleError(ctx context.Context, w http.ResponseWriter, err error) {

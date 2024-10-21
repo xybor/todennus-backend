@@ -12,8 +12,8 @@ type User struct {
 	Role         string `json:"role,omitempty"`
 }
 
-func NewUser(user resource.User) User {
-	return User{
+func NewUser(user *resource.User) *User {
+	return &User{
 		ID:           user.ID.String(),
 		Username:     user.Username,
 		DisplayName:  user.DisplayName,

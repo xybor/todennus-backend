@@ -22,8 +22,8 @@ func (UserModel) TableName() string {
 	return "users"
 }
 
-func NewUser(d domain.User) UserModel {
-	return UserModel{
+func NewUser(d *domain.User) *UserModel {
+	return &UserModel{
 		ID:           d.ID.Int64(),
 		DisplayName:  d.DisplayName,
 		Username:     d.Username,
@@ -34,8 +34,8 @@ func NewUser(d domain.User) UserModel {
 	}
 }
 
-func (u *UserModel) To() (domain.User, error) {
-	return domain.User{
+func (u UserModel) To() (*domain.User, error) {
+	return &domain.User{
 		ID:           snowflake.ID(u.ID),
 		DisplayName:  u.DisplayName,
 		Username:     u.Username,

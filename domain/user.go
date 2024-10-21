@@ -48,21 +48,21 @@ func NewUserDomain(snowflake *snowflake.Node) (*UserDomain, error) {
 	return &UserDomain{Snowflake: snowflake}, nil
 }
 
-func (domain *UserDomain) Create(username, password string) (User, error) {
+func (domain *UserDomain) Create(username, password string) (*User, error) {
 	if err := domain.validateUsername(username); err != nil {
-		return User{}, err
+		return nil, err
 	}
 
 	if err := domain.validatePassword(password); err != nil {
-		return User{}, err
+		return nil, err
 	}
 
 	hashedPass, err := HashPassword(password)
 	if err != nil {
-		return User{}, err
+		return nil, err
 	}
 
-	return User{
+	return &User{
 		ID:           domain.Snowflake.Generate(),
 		DisplayName:  username,
 		Username:     username,
@@ -72,7 +72,7 @@ func (domain *UserDomain) Create(username, password string) (User, error) {
 	}, nil
 }
 
-func (domain *UserDomain) Validate(hashedPassword, password string) (bool, error) {
+func (domain *UserDomain) Validate(hashedPassword, password string) error {
 	return ValidatePassword(hashedPassword, password)
 }
 

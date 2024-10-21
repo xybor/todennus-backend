@@ -11,14 +11,14 @@ import (
 )
 
 func App(
-	config config.Config,
-	infras wiring.Infras,
-	usecases wiring.Usecases,
+	config *config.Config,
+	infras *wiring.Infras,
+	usecases *wiring.Usecases,
 ) chi.Router {
 	r := chi.NewRouter()
 
 	r.Use(builtinMiddleware.Recoverer)
-	r.Use(middleware.WithRequestID(config))
+	r.Use(middleware.WithRequestID())
 	r.Use(builtinMiddleware.RealIP)
 	r.Use(middleware.WithInfras(config, infras))
 	r.Use(middleware.Timer)

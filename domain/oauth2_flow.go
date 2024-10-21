@@ -72,19 +72,19 @@ type OAuth2TokenMedata struct {
 }
 
 type OAuth2AccessToken struct {
-	Metadata OAuth2TokenMedata
+	Metadata *OAuth2TokenMedata
 	Scope    scope.Scopes
 }
 
 type OAuth2RefreshToken struct {
-	Metadata       OAuth2TokenMedata
+	Metadata       *OAuth2TokenMedata
 	SequenceNumber int
 	Scope          scope.Scopes
 }
 
 type OAuth2IDToken struct {
-	Metadata OAuth2TokenMedata
-	User     User
+	Metadata *OAuth2TokenMedata
+	User     *User
 }
 
 type OAuth2FlowDomain struct {
@@ -132,8 +132,8 @@ func (domain *OAuth2FlowDomain) CreateAuthorizationCode(
 	userID, clientID snowflake.ID,
 	scope scope.Scopes,
 	codeChallenge, codeChallengeMethod string,
-) OAuth2AuthorizationCode {
-	return OAuth2AuthorizationCode{
+) *OAuth2AuthorizationCode {
+	return &OAuth2AuthorizationCode{
 		Code:                xcrypto.RandString(32),
 		Scope:               scope,
 		UserID:              userID,
@@ -149,8 +149,8 @@ func (domain *OAuth2FlowDomain) CreateAuthorizationStore(
 	clientID snowflake.ID,
 	scope scope.Scopes,
 	redirectURI, state, codeChallenge, codeChallengeMethod string,
-) OAuth2AuthorizationStore {
-	return OAuth2AuthorizationStore{
+) *OAuth2AuthorizationStore {
+	return &OAuth2AuthorizationStore{
 		ID:                  xcrypto.RandString(32),
 		ResponseType:        respType,
 		HasAuthenticated:    false,
@@ -164,8 +164,12 @@ func (domain *OAuth2FlowDomain) CreateAuthorizationStore(
 	}
 }
 
-func (domain *OAuth2FlowDomain) CreateAuthenticationResultSuccess(authID string, userID snowflake.ID, username string) OAuth2AuthenticationResult {
-	return OAuth2AuthenticationResult{
+func (domain *OAuth2FlowDomain) CreateAuthenticationResultSuccess(
+	authID string,
+	userID snowflake.ID,
+	username string,
+) *OAuth2AuthenticationResult {
+	return &OAuth2AuthenticationResult{
 		ID:              xcrypto.RandString(32),
 		Ok:              true,
 		AuthorizationID: authID,
@@ -175,8 +179,8 @@ func (domain *OAuth2FlowDomain) CreateAuthenticationResultSuccess(authID string,
 	}
 }
 
-func (domain *OAuth2FlowDomain) CreateAuthenticationResultFailure(authID string, err string) OAuth2AuthenticationResult {
-	return OAuth2AuthenticationResult{
+func (domain *OAuth2FlowDomain) CreateAuthenticationResultFailure(authID string, err string) *OAuth2AuthenticationResult {
+	return &OAuth2AuthenticationResult{
 		ID:              xcrypto.RandString(32),
 		Ok:              false,
 		AuthorizationID: authID,
@@ -185,30 +189,30 @@ func (domain *OAuth2FlowDomain) CreateAuthenticationResultFailure(authID string,
 	}
 }
 
-func (domain *OAuth2FlowDomain) CreateAccessToken(aud string, scope scope.Scopes, user User) OAuth2AccessToken {
-	return OAuth2AccessToken{
+func (domain *OAuth2FlowDomain) CreateAccessToken(aud string, scope scope.Scopes, user *User) *OAuth2AccessToken {
+	return &OAuth2AccessToken{
 		Metadata: domain.createMedata(aud, user.ID, domain.AccessTokenExpiration),
 		Scope:    scope,
 	}
 }
 
-func (domain *OAuth2FlowDomain) CreateRefreshToken(aud string, scope scope.Scopes, userID snowflake.ID) OAuth2RefreshToken {
-	return OAuth2RefreshToken{
+func (domain *OAuth2FlowDomain) CreateRefreshToken(aud string, scope scope.Scopes, userID snowflake.ID) *OAuth2RefreshToken {
+	return &OAuth2RefreshToken{
 		Metadata:       domain.createMedata(aud, userID, domain.RefreshTokenExpiration),
 		SequenceNumber: 0,
 		Scope:          scope,
 	}
 }
 
-func (domain *OAuth2FlowDomain) NextRefreshToken(current OAuth2RefreshToken) OAuth2RefreshToken {
+func (domain *OAuth2FlowDomain) NextRefreshToken(current *OAuth2RefreshToken) *OAuth2RefreshToken {
 	next := domain.CreateRefreshToken(current.Metadata.Audience, current.Scope, current.Metadata.Subject)
 	next.Metadata.ID = current.Metadata.ID
 	next.SequenceNumber = current.SequenceNumber + 1
 	return next
 }
 
-func (domain *OAuth2FlowDomain) CreateIDToken(aud string, user User) OAuth2IDToken {
-	return OAuth2IDToken{
+func (domain *OAuth2FlowDomain) CreateIDToken(aud string, user *User) *OAuth2IDToken {
+	return &OAuth2IDToken{
 		Metadata: domain.createMedata(aud, user.ID, domain.IDTokenExpiration),
 		User:     user,
 	}
@@ -225,26 +229,26 @@ func (domain *OAuth2FlowDomain) ValidateCodeChallenge(verifier, challenge, metho
 	}
 }
 
-func (domain *OAuth2FlowDomain) NewSession(userID snowflake.ID) Session {
-	return Session{
+func (domain *OAuth2FlowDomain) NewSession(userID snowflake.ID) *Session {
+	return &Session{
 		State:     SessionStateAuthenticated,
 		UserID:    userID,
 		ExpiresAt: time.Now().Add(domain.SessionExpiration),
 	}
 }
 
-func (domain *OAuth2FlowDomain) InvalidateSession(state SessionState) Session {
+func (domain *OAuth2FlowDomain) InvalidateSession(state SessionState) *Session {
 	if state != SessionStateFailedAuthentication && state != SessionStateUnauthenticated {
 		panic("invalid call")
 	}
 
-	return Session{State: state, ExpiresAt: time.Now().Add(domain.SessionExpiration)}
+	return &Session{State: state, ExpiresAt: time.Now().Add(domain.SessionExpiration)}
 }
 
-func (domain *OAuth2FlowDomain) createMedata(aud string, sub snowflake.ID, expiration time.Duration) OAuth2TokenMedata {
+func (domain *OAuth2FlowDomain) createMedata(aud string, sub snowflake.ID, expiration time.Duration) *OAuth2TokenMedata {
 	id := domain.Snowflake.Generate()
 
-	return OAuth2TokenMedata{
+	return &OAuth2TokenMedata{
 		ID:        id,
 		Issuer:    domain.Issuer,
 		Audience:  aud,

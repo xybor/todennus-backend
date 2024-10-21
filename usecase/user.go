@@ -36,34 +36,30 @@ func NewUserUsecase(
 
 func (uc *UserUsecase) Register(
 	ctx context.Context,
-	req dto.UserRegisterRequestDTO,
-) (dto.UserRegisterResponseDTO, error) {
+	req *dto.UserRegisterRequestDTO,
+) (*dto.UserRegisterResponseDTO, error) {
 	_, err := uc.userRepo.GetByUsername(ctx, req.Username)
 	if err == nil {
-		return dto.UserRegisterResponseDTO{}, xerror.Wrap(ErrUsernameExisted,
-			"username %s has already taken before", req.Username)
+		return nil, xerror.Enrich(ErrUsernameExisted, "username %s has already taken before", req.Username)
 	}
 
 	if !errors.Is(err, database.ErrRecordNotFound) {
-		xcontext.Logger(ctx).Critical("failed-to-get-user", "err", err, "username", req.Username)
-		return dto.UserRegisterResponseDTO{}, ErrServer
+		return nil, ErrServer.Hide(err, "failed-to-get-user")
 	}
 
 	user, err := uc.userDomain.Create(req.Username, req.Password)
 	if err != nil {
-		xcontext.Logger(ctx).Warn("failed-to-new-user", "err", err)
-		return dto.UserRegisterResponseDTO{}, ErrServer
+		return nil, errcfg.Event(err, "failed-to-new-user").Enrich(ErrRequestInvalid).Error()
 	}
 
-	created, err := uc.createAdmin(ctx, &user)
+	shouldCreateUser, err := uc.createAdmin(ctx, user)
 	if err != nil {
-		return dto.UserRegisterResponseDTO{}, err
+		return nil, err
 	}
 
-	if !created {
+	if shouldCreateUser {
 		if err = uc.userRepo.Create(ctx, user); err != nil {
-			xcontext.Logger(ctx).Warn("failed-to-create-user", "err", err)
-			return dto.UserRegisterResponseDTO{}, ErrServer
+			return nil, ErrServer.Hide(err, "failed-to-create-user")
 		}
 	}
 
@@ -72,17 +68,15 @@ func (uc *UserUsecase) Register(
 
 func (usecase *UserUsecase) GetByID(
 	ctx context.Context,
-	req dto.UserGetByIDRequestDTO,
-) (dto.UserGetByIDResponseDTO, error) {
+	req *dto.UserGetByIDRequestDTO,
+) (*dto.UserGetByIDResponseDTO, error) {
 	user, err := usecase.userRepo.GetByID(ctx, req.UserID.Int64())
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
-			return dto.UserGetByIDResponseDTO{}, xerror.Wrap(ErrUserNotFound,
-				"not found user with id %d", req.UserID)
+			return nil, xerror.Enrich(ErrUserNotFound, "not found user with id %d", req.UserID)
 		}
 
-		xcontext.Logger(ctx).Warn("failed-to-get-user", "err", err, "uid", req.UserID)
-		return dto.UserGetByIDResponseDTO{}, ErrServer
+		return nil, ErrServer.Hide(err, "failed-to-get-user", "uid", req.UserID)
 	}
 
 	return dto.NewUserGetByIDResponseDTO(ctx, user), nil
@@ -90,17 +84,15 @@ func (usecase *UserUsecase) GetByID(
 
 func (usecase *UserUsecase) GetByUsername(
 	ctx context.Context,
-	req dto.UserGetByUsernameRequestDTO,
-) (dto.UserGetByUsernameResponseDTO, error) {
+	req *dto.UserGetByUsernameRequestDTO,
+) (*dto.UserGetByUsernameResponseDTO, error) {
 	user, err := usecase.userRepo.GetByUsername(ctx, req.Username)
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
-			return dto.UserGetByUsernameResponseDTO{}, xerror.Wrap(ErrUserNotFound,
-				"not found user with username %s", req.Username)
+			return nil, xerror.Enrich(ErrUserNotFound, "not found user with username %s", req.Username)
 		}
 
-		xcontext.Logger(ctx).Warn("failed-to-get-user", "err", err, "username", req.Username)
-		return dto.UserGetByUsernameResponseDTO{}, ErrServer
+		return nil, ErrServer.Hide(err, "failed-to-get-user", "username", req.Username)
 	}
 
 	return dto.NewUserGetByUsernameResponseDTO(ctx, user), nil
@@ -108,28 +100,21 @@ func (usecase *UserUsecase) GetByUsername(
 
 func (usecase *UserUsecase) ValidateCredentials(
 	ctx context.Context,
-	req dto.UserValidateCredentialsRequestDTO,
-) (dto.UserValidateCredentialsResponseDTO, error) {
+	req *dto.UserValidateCredentialsRequestDTO,
+) (*dto.UserValidateCredentialsResponseDTO, error) {
 	user, err := usecase.userRepo.GetByUsername(ctx, req.Username)
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
-			return dto.UserValidateCredentialsResponseDTO{}, xerror.Wrap(ErrCredentialsInvalid,
-				"invalid username or password")
+			return nil, xerror.Enrich(ErrCredentialsInvalid, "invalid username or password")
 		}
 
-		xcontext.Logger(ctx).Warn("failed-to-get-user", "err", err, "username", req.Username)
-		return dto.UserValidateCredentialsResponseDTO{}, ErrServer
+		return nil, ErrServer.Hide(err, "failed-to-get-user", "username", req.Username)
 	}
 
-	ok, err := usecase.userDomain.Validate(user.HashedPass, req.Password)
-	if err != nil {
-		xcontext.Logger(ctx).Warn("failed-to-validate-user-credentials", "err", err)
-		return dto.UserValidateCredentialsResponseDTO{}, ErrServer
-	}
-
-	if !ok {
-		return dto.UserValidateCredentialsResponseDTO{}, xerror.Wrap(ErrCredentialsInvalid,
-			"invalid username or password")
+	if err := usecase.userDomain.Validate(user.HashedPass, req.Password); err != nil {
+		return nil, errcfg.Event(err, "failed-to-validate-user-credentials").
+			EnrichWith(ErrCredentialsInvalid, "invalid username or password").
+			Error()
 	}
 
 	ctx = xcontext.WithRequestUserID(ctx, user.ID)
@@ -141,16 +126,16 @@ func (uc *UserUsecase) createAdmin(
 	user *domain.User,
 ) (bool, error) {
 	if !uc.shouldCreateAdmin {
-		return false, nil
+		return true, nil
 	}
 
+	shouldCreateUser := true
 	xcontext.Logger(ctx).Info("check-create-admin")
 
 	err := lock.Func(uc.adminLocker, ctx, func() error {
 		adminCount, err := uc.userRepo.CountByRole(ctx, domain.UserRoleAdmin)
 		if err != nil {
-			xcontext.Logger(ctx).Warn("failed-to-count-by-admin-role", "err", err)
-			return ErrServer
+			return ErrServer.Hide(err, "failed-to-count-by-admin-role")
 		}
 
 		if adminCount > 0 {
@@ -162,15 +147,15 @@ func (uc *UserUsecase) createAdmin(
 		xcontext.Logger(ctx).Info("create-admin", "username", user.Username, "uid", user.ID)
 
 		user.Role = domain.UserRoleAdmin
-		err = uc.userRepo.Create(ctx, *user)
+		err = uc.userRepo.Create(ctx, user)
 		if err != nil {
-			xcontext.Logger(ctx).Warn("failed-to-create-admin-user", "err", err)
-			return ErrServer
+			return ErrServer.Hide(err, "failed-to-create-admin-user")
 		}
 
+		shouldCreateUser = false
 		uc.shouldCreateAdmin = false
 		return nil
 	})
 
-	return uc.shouldCreateAdmin, err
+	return shouldCreateUser, err
 }

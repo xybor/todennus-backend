@@ -11,8 +11,8 @@ type OAuth2Client struct {
 	AllowedScope string `json:"allowed_scope,omitempty"`
 }
 
-func NewOAuth2Client(client resource.OAuth2Client) OAuth2Client {
-	return OAuth2Client{
+func NewOAuth2Client(client *resource.OAuth2Client) *OAuth2Client {
+	return &OAuth2Client{
 		OwnerID:      client.OwnerID.String(),
 		ClientID:     client.ClientID.String(),
 		Name:         client.Name,

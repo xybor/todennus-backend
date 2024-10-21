@@ -5,23 +5,22 @@ import (
 )
 
 type Resource struct {
-	scope.BaseResource
+	*scope.BaseResource
 
-	User   UserResource
-	Client OAuth2ClientResource
+	User   *UserResource
+	Client *OAuth2ClientResource
 }
 
 type UserResource struct {
-	scope.BaseResource
+	*scope.BaseResource
 
-	DisplayName  scope.BaseResource
-	AllowedScope scope.BaseResource `resource:"allowed_scope"`
-	Role         scope.BaseResource
+	AllowedScope *scope.BaseResource `resource:"allowed_scope"`
+	Role         *scope.BaseResource `resource:"role"`
 }
 
 type OAuth2ClientResource struct {
-	scope.BaseResource
+	*scope.BaseResource
 
-	Owner        scope.BaseResource
-	AllowedScope scope.BaseResource `resource:"allowed_scope"`
+	Owner        *scope.BaseResource `resource:"owner"`
+	AllowedScope *scope.BaseResource `resource:"allowed_scope"`
 }

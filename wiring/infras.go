@@ -18,8 +18,8 @@ type Infras struct {
 	SessionManager *session.Manager
 }
 
-func InitializeInfras(config config.Config) (Infras, error) {
-	infras := Infras{}
+func InitializeInfras(config *config.Config) (*Infras, error) {
+	infras := &Infras{}
 
 	// Logger
 	infras.Logger = logging.NewSLogger(logging.Level(config.Server.LogLevel))
@@ -50,7 +50,7 @@ func InitializeInfras(config config.Config) (Infras, error) {
 	return infras, nil
 }
 
-func WithInfras(ctx context.Context, infras Infras) context.Context {
+func WithInfras(ctx context.Context, infras *Infras) context.Context {
 	ctx = xcontext.WithLogger(ctx, infras.Logger)
 	ctx = xcontext.WithSessionManager(ctx, infras.SessionManager)
 	return ctx

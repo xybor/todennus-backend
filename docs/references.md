@@ -22,8 +22,7 @@ Authorization: Bearer {ACCESS_TOKEN}
 
 ## @me
 
-`@me` can be used to replace `{user_id}` in all API requests to represent the
-`{user_id}` of the authorized user.
+`@me` can be used to replace `{user_id}` in all API requests requiring authentication to represent the `{user_id}` of the authorized user.
 
 ## Scope
 

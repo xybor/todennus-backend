@@ -11,7 +11,6 @@ import (
 	"github.com/xybor/todennus-backend/adapter/rest/standard"
 	"github.com/xybor/todennus-backend/usecase"
 	"github.com/xybor/todennus-backend/usecase/dto"
-	"github.com/xybor/x/xcontext"
 	"github.com/xybor/x/xerror"
 	"github.com/xybor/x/xhttp"
 )
@@ -36,8 +35,8 @@ type OAuth2TokenRequestDTO struct {
 	RefreshToken string `form:"refresh_token"`
 }
 
-func (req OAuth2TokenRequestDTO) To() dto.OAuth2TokenRequestDTO {
-	return dto.OAuth2TokenRequestDTO{
+func (req OAuth2TokenRequestDTO) To() *dto.OAuth2TokenRequestDTO {
+	return &dto.OAuth2TokenRequestDTO{
 		GrantType: req.GrantType,
 
 		ClientID:     snowflake.ID(req.ClientID),
@@ -63,8 +62,8 @@ type OAuth2TokenResponseDTO struct {
 	Scope        string `json:"scope,omitempty"`
 }
 
-func NewOAuth2TokenResponseDTO(resp dto.OAuth2TokenResponseDTO) OAuth2TokenResponseDTO {
-	return OAuth2TokenResponseDTO{
+func NewOAuth2TokenResponseDTO(resp *dto.OAuth2TokenResponseDTO) *OAuth2TokenResponseDTO {
+	return &OAuth2TokenResponseDTO{
 		AccessToken:  resp.AccessToken,
 		TokenType:    resp.TokenType,
 		ExpiresIn:    resp.ExpiresIn,
@@ -85,8 +84,8 @@ type OAuth2AuthorizeRequestDTO struct {
 	CodeChallengeMethod string `query:"code_challenge_method"`
 }
 
-func (req OAuth2AuthorizeRequestDTO) To() dto.OAuth2AuthorizeRequestDTO {
-	return dto.OAuth2AuthorizeRequestDTO{
+func (req OAuth2AuthorizeRequestDTO) To() *dto.OAuth2AuthorizeRequestDTO {
+	return &dto.OAuth2AuthorizeRequestDTO{
 		ResponseType:        req.ResponseType,
 		ClientID:            snowflake.ID(req.ClientID),
 		RedirectURI:         req.RedirectURI,
@@ -97,12 +96,14 @@ func (req OAuth2AuthorizeRequestDTO) To() dto.OAuth2AuthorizeRequestDTO {
 	}
 }
 
-func NewOAuth2AuthorizeRedirectURI(ctx context.Context, req OAuth2AuthorizeRequestDTO, resp dto.OAuth2AuthorizeResponseDTO) (string, error) {
+func NewOAuth2AuthorizeRedirectURI(
+	req *OAuth2AuthorizeRequestDTO,
+	resp *dto.OAuth2AuthorizeResponseDTO,
+) (string, error) {
 	if resp.IdpURL != "" {
 		u, err := url.Parse(resp.IdpURL)
 		if err != nil {
-			xcontext.Logger(ctx).Warn("invalid-idp-url", "err", err, "url", resp.IdpURL)
-			return "", err
+			return "", usecase.ErrServer.Hide(err, "invalid-idp-url", "url", resp.IdpURL)
 		}
 
 		q := u.Query()
@@ -114,8 +115,8 @@ func NewOAuth2AuthorizeRedirectURI(ctx context.Context, req OAuth2AuthorizeReque
 
 	u, err := url.Parse(req.RedirectURI)
 	if err != nil {
-		xcontext.Logger(ctx).Debug("invalid-redirect-url", "err", err, "url", req.RedirectURI)
-		return "", err
+		return "", xerror.Enrich(usecase.ErrRequestInvalid, "invalid redirect uri").
+			Hide(err, "invalid-redirect-url", "url", req.RedirectURI)
 	}
 
 	q := u.Query()
@@ -141,11 +142,15 @@ func NewOAuth2AuthorizeRedirectURI(ctx context.Context, req OAuth2AuthorizeReque
 	return u.String(), nil
 }
 
-func NewOAuth2AuthorizeRedirectURIWithError(ctx context.Context, req OAuth2AuthorizeRequestDTO, err error) (string, error) {
+func NewOAuth2AuthorizeRedirectURIWithError(
+	ctx context.Context,
+	req *OAuth2AuthorizeRequestDTO,
+	err error,
+) (string, error) {
 	u, uerr := xhttp.ParseURL(req.RedirectURI)
 	if uerr != nil {
-		xcontext.Logger(ctx).Debug("invalid-redirect-uri", "err", err, "uri", req.RedirectURI)
-		return "", xerror.Wrap(usecase.ErrRequestInvalid, "invalid redirect uri")
+		return "", xerror.Enrich(usecase.ErrRequestInvalid, "invalid redirect uri").
+			Hide(err, "invalid-redirect-uri", "uri", req.RedirectURI)
 	}
 
 	q := u.Query()
@@ -167,14 +172,14 @@ type OAuth2AuthenticationCallbackRequestDTO struct {
 	Error           string `json:"error"`
 }
 
-func (req OAuth2AuthenticationCallbackRequestDTO) To(ctx context.Context) (dto.OAuth2AuthenticationCallbackRequestDTO, error) {
+func (req OAuth2AuthenticationCallbackRequestDTO) To() (*dto.OAuth2AuthenticationCallbackRequestDTO, error) {
 	uid, err := snowflake.ParseString(req.UserID)
 	if err != nil {
-		xcontext.Logger(ctx).Debug("invalid-user-id", "err", err, "uid", req.UserID)
-		return dto.OAuth2AuthenticationCallbackRequestDTO{}, xerror.Wrap(usecase.ErrRequestInvalid, "invalid user id")
+		return nil, xerror.Enrich(usecase.ErrRequestInvalid, "invalid user id").
+			Hide(err, "invalid-user-id", "uid", req.UserID)
 	}
 
-	return dto.OAuth2AuthenticationCallbackRequestDTO{
+	return &dto.OAuth2AuthenticationCallbackRequestDTO{
 		Secret:          req.IdPSecret,
 		Success:         req.Success,
 		AuthorizationID: req.AuthorizationID,
@@ -188,8 +193,8 @@ type OAuth2AuthenticationCallbackResponseDTO struct {
 	AuthenticationID string `json:"authentication_id"`
 }
 
-func NewOAuth2AuthenticationCallbackResponseDTO(resp dto.OAuth2AuthenticationCallbackResponseDTO) OAuth2AuthenticationCallbackResponseDTO {
-	return OAuth2AuthenticationCallbackResponseDTO{
+func NewOAuth2AuthenticationCallbackResponseDTO(resp *dto.OAuth2AuthenticationCallbackResponseDTO) *OAuth2AuthenticationCallbackResponseDTO {
+	return &OAuth2AuthenticationCallbackResponseDTO{
 		AuthenticationID: resp.AuthenticationID,
 	}
 }
@@ -198,13 +203,13 @@ type OAuth2SessionUpdateRequestDTO struct {
 	AuthenticationID string `query:"authentication_id"`
 }
 
-func (req OAuth2SessionUpdateRequestDTO) To() dto.OAuth2SessionUpdateRequestDTO {
-	return dto.OAuth2SessionUpdateRequestDTO{
+func (req OAuth2SessionUpdateRequestDTO) To() *dto.OAuth2SessionUpdateRequestDTO {
+	return &dto.OAuth2SessionUpdateRequestDTO{
 		AuthenticationID: req.AuthenticationID,
 	}
 }
 
-func NewOAuth2SessionUpdateRedirectURI(resp dto.OAuth2SessionUpdateResponseDTO) string {
+func NewOAuth2SessionUpdateRedirectURI(resp *dto.OAuth2SessionUpdateResponseDTO) string {
 	q := url.Values{}
 	q.Set("response_type", resp.ResponseType)
 	q.Set("client_id", resp.ClientID.String())

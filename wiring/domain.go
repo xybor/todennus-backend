@@ -2,7 +2,6 @@ package wiring
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/xybor/todennus-backend/domain"
@@ -16,14 +15,14 @@ type Domains struct {
 	abstraction.OAuth2ClientDomain
 }
 
-func InitializeDomains(ctx context.Context, config config.Config, infras Infras) (Domains, error) {
-	domains := Domains{}
-
-	var finalErr error
+func InitializeDomains(ctx context.Context, config *config.Config, infras *Infras) (*Domains, error) {
 	var err error
+	domains := &Domains{}
 
 	domains.UserDomain, err = domain.NewUserDomain(infras.NewSnowflakeNode())
-	finalErr = errors.Join(finalErr, err)
+	if err != nil {
+		return nil, err
+	}
 
 	domains.OAuth2FlowDomain, err = domain.NewOAuth2FlowDomain(
 		infras.NewSnowflakeNode(),
@@ -36,13 +35,17 @@ func InitializeDomains(ctx context.Context, config config.Config, infras Infras)
 		time.Duration(config.Variable.Authentication.RefreshTokenExpiration)*time.Second,
 		time.Duration(config.Variable.Authentication.IDTokenExpiration)*time.Second,
 	)
-	finalErr = errors.Join(finalErr, err)
+	if err != nil {
+		return nil, err
+	}
 
 	domains.OAuth2ClientDomain, err = domain.NewOAuth2ClientDomain(
 		infras.NewSnowflakeNode(),
 		config.Variable.OAuth2.ClientSecretLength,
 	)
-	finalErr = errors.Join(finalErr, err)
+	if err != nil {
+		return nil, err
+	}
 
-	return domains, finalErr
+	return domains, nil
 }

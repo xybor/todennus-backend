@@ -18,13 +18,13 @@ type Usecases struct {
 
 func InitializeUsecases(
 	ctx context.Context,
-	config config.Config,
-	infras Infras,
-	databases Databases,
-	domains Domains,
-	repositories Repositories,
-) (Usecases, error) {
-	uc := Usecases{}
+	config *config.Config,
+	infras *Infras,
+	databases *Databases,
+	domains *Domains,
+	repositories *Repositories,
+) (*Usecases, error) {
+	uc := &Usecases{}
 
 	uc.UserUsecase = usecase.NewUserUsecase(
 		lock.NewRedisLock(databases.Redis, "user-lock", 10*time.Second),

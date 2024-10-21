@@ -9,21 +9,21 @@ import (
 func HashPassword(secret string) ([]byte, error) {
 	hashedSecret, err := bcrypt.GenerateFromPassword([]byte(secret), HashingCost)
 	if err != nil {
-		return nil, Wrap(ErrUnknownCritical, err.Error())
+		return nil, Wrap(ErrUnknown, err.Error())
 	}
 
 	return hashedSecret, nil
 }
 
-func ValidatePassword(hashedSecret, secret string) (bool, error) {
+func ValidatePassword(hashedSecret, secret string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedSecret), []byte(secret))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return false, nil
+			return ErrMismatchedPassword
 		}
 
-		return false, Wrap(ErrUnknownRecoverable, err.Error())
+		return Wrap(ErrUnknown, err.Error())
 	}
 
-	return true, nil
+	return nil
 }

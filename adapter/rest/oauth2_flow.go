@@ -36,7 +36,7 @@ func (a *OAuth2Adapter) Authorize() http.HandlerFunc {
 
 		resp, err := a.oauth2Usecase.Authorize(ctx, req.To())
 		if err != nil {
-			if url, err := dto.NewOAuth2AuthorizeRedirectURIWithError(ctx, req, err); err != nil {
+			if url, err := dto.NewOAuth2AuthorizeRedirectURIWithError(ctx, &req, err); err != nil {
 				response.HandleError(ctx, w, err)
 			} else {
 				response.Redirect(ctx, w, r, url, http.StatusSeeOther)
@@ -45,7 +45,7 @@ func (a *OAuth2Adapter) Authorize() http.HandlerFunc {
 			return
 		}
 
-		redirectURI, err := dto.NewOAuth2AuthorizeRedirectURI(ctx, req, resp)
+		redirectURI, err := dto.NewOAuth2AuthorizeRedirectURI(&req, resp)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
@@ -66,7 +66,7 @@ func (a *OAuth2Adapter) Token() http.HandlerFunc {
 		}
 
 		resp, err := a.oauth2Usecase.Token(ctx, req.To())
-		response.NewResponseHandler(dto.NewOAuth2TokenResponseDTO(resp), err).
+		response.NewResponseHandler(dto.NewOAuth2TokenResponseDTO, resp, err).
 			Map(http.StatusBadRequest,
 				usecase.ErrRequestInvalid, usecase.ErrClientInvalid,
 				usecase.ErrScopeInvalid, usecase.ErrTokenInvalidGrant,
@@ -85,14 +85,14 @@ func (a *OAuth2Adapter) AuthenticationCallback() http.HandlerFunc {
 			return
 		}
 
-		usecaseReq, err := req.To(ctx)
+		usecaseReq, err := req.To()
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
 		}
 
 		resp, err := a.oauth2Usecase.AuthenticationCallback(ctx, usecaseReq)
-		response.NewResponseHandler(dto.NewOAuth2AuthenticationCallbackResponseDTO(resp), err).
+		response.NewResponseHandler(dto.NewOAuth2AuthenticationCallbackResponseDTO, resp, err).
 			Map(http.StatusUnauthorized, usecase.ErrIdPInvalid).
 			Map(http.StatusBadRequest, usecase.ErrUserNotFound, usecase.ErrRequestInvalid).
 			WriteHTTPResponse(ctx, w)
@@ -110,7 +110,7 @@ func (a *OAuth2Adapter) SessionUpdate() http.HandlerFunc {
 		}
 
 		resp, err := a.oauth2Usecase.SessionUpdate(ctx, req.To())
-		response.NewResponseHandler(dto.NewOAuth2SessionUpdateRedirectURI(resp), err).
+		response.NewResponseHandler(dto.NewOAuth2SessionUpdateRedirectURI, resp, err).
 			Redirect(ctx, w, r, http.StatusSeeOther)
 	}
 }
