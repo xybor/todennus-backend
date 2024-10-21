@@ -14,13 +14,13 @@ type Databases struct {
 	Redis        *redis.Client
 }
 
-func InitializeDatabases(ctx context.Context, config config.Config) (Databases, error) {
+func InitializeDatabases(ctx context.Context, config *config.Config) (*Databases, error) {
 	db := Databases{}
 	var err error
 
 	db.GormPostgres, err = postgres.Initialize(ctx, config)
 	if err != nil {
-		return db, err
+		return nil, err
 	}
 
 	db.Redis = redis.NewClient(&redis.Options{
@@ -30,5 +30,5 @@ func InitializeDatabases(ctx context.Context, config config.Config) (Databases, 
 		Password: config.Secret.Redis.Password,
 	})
 
-	return db, nil
+	return &db, nil
 }

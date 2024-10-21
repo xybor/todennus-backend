@@ -21,8 +21,8 @@ func (OAuth2ClientModel) TableName() string {
 	return "oauth2_clients"
 }
 
-func NewOAuth2Client(domain domain.OAuth2Client) OAuth2ClientModel {
-	return OAuth2ClientModel{
+func NewOAuth2Client(domain *domain.OAuth2Client) *OAuth2ClientModel {
+	return &OAuth2ClientModel{
 		ID:             domain.ID.Int64(),
 		UserID:         domain.OwnerUserID.Int64(),
 		Name:           domain.Name,
@@ -33,8 +33,8 @@ func NewOAuth2Client(domain domain.OAuth2Client) OAuth2ClientModel {
 	}
 }
 
-func (client *OAuth2ClientModel) To() (domain.OAuth2Client, error) {
-	return domain.OAuth2Client{
+func (client OAuth2ClientModel) To() *domain.OAuth2Client {
+	return &domain.OAuth2Client{
 		ID:             snowflake.ID(client.ID),
 		OwnerUserID:    snowflake.ID(client.UserID),
 		Name:           client.Name,
@@ -42,5 +42,5 @@ func (client *OAuth2ClientModel) To() (domain.OAuth2Client, error) {
 		IsConfidential: client.IsConfidential,
 		AllowedScope:   domain.ScopeEngine.ParseScopes(client.AllowedScope),
 		UpdatedAt:      client.UpdatedAt,
-	}, nil
+	}
 }

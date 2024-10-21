@@ -1,19 +1,16 @@
 package dto
 
 import (
-	"context"
-
 	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/adapter/rest/dto/resource"
 	"github.com/xybor/todennus-backend/usecase"
 	"github.com/xybor/todennus-backend/usecase/dto"
-	"github.com/xybor/x/xcontext"
 	"github.com/xybor/x/xerror"
 )
 
-func ParseUserID(ctx context.Context, s string) (snowflake.ID, error) {
+func ParseUserID(meID snowflake.ID, s string) (snowflake.ID, error) {
 	if s == "@me" {
-		return xcontext.RequestUserID(ctx), nil
+		return meID, nil
 	}
 
 	return snowflake.ParseString(s)
@@ -25,19 +22,19 @@ type UserRegisterRequestDTO struct {
 	Password string `json:"password"`
 }
 
-func (req UserRegisterRequestDTO) To() dto.UserRegisterRequestDTO {
-	return dto.UserRegisterRequestDTO{
+func (req UserRegisterRequestDTO) To() *dto.UserRegisterRequestDTO {
+	return &dto.UserRegisterRequestDTO{
 		Username: req.Username,
 		Password: req.Password,
 	}
 }
 
 type UserRegisterResponseDTO struct {
-	resource.User
+	*resource.User
 }
 
-func NewUserRegisterResponseDTO(resp dto.UserRegisterResponseDTO) UserRegisterResponseDTO {
-	return UserRegisterResponseDTO{
+func NewUserRegisterResponseDTO(resp *dto.UserRegisterResponseDTO) *UserRegisterResponseDTO {
+	return &UserRegisterResponseDTO{
 		User: resource.NewUser(resp.User),
 	}
 }
@@ -47,22 +44,22 @@ type UserGetByIDRequestDTO struct {
 	UserID string `param:"user_id"`
 }
 
-func (req UserGetByIDRequestDTO) To(ctx context.Context) (dto.UserGetByIDRequestDTO, error) {
-	userID, err := ParseUserID(ctx, req.UserID)
+func (req UserGetByIDRequestDTO) To(meID snowflake.ID) (*dto.UserGetByIDRequestDTO, error) {
+	userID, err := ParseUserID(meID, req.UserID)
 	if err != nil {
-		xcontext.Logger(ctx).Debug("failed-to-parse-user-id", "err", err, "uid", req.UserID)
-		return dto.UserGetByIDRequestDTO{}, xerror.Wrap(usecase.ErrRequestInvalid, "user id is invalid")
+		return nil, xerror.Enrich(usecase.ErrRequestInvalid, "user id is invalid").
+			Hide(err, "failed-to-parse-user-id", "uid", req.UserID)
 	}
 
-	return dto.UserGetByIDRequestDTO{UserID: userID}, nil
+	return &dto.UserGetByIDRequestDTO{UserID: userID}, nil
 }
 
 type UserGetByIDResponseDTO struct {
-	resource.User
+	*resource.User
 }
 
-func NewUserGetByIDResponseDTO(resp dto.UserGetByIDResponseDTO) UserGetByIDResponseDTO {
-	return UserGetByIDResponseDTO{
+func NewUserGetByIDResponseDTO(resp *dto.UserGetByIDResponseDTO) *UserGetByIDResponseDTO {
+	return &UserGetByIDResponseDTO{
 		User: resource.NewUser(resp.User),
 	}
 }
@@ -72,18 +69,18 @@ type UserGetByUsernameRequestDTO struct {
 	Username string `param:"username"`
 }
 
-func (req UserGetByUsernameRequestDTO) To() dto.UserGetByUsernameRequestDTO {
-	return dto.UserGetByUsernameRequestDTO{
+func (req UserGetByUsernameRequestDTO) To() *dto.UserGetByUsernameRequestDTO {
+	return &dto.UserGetByUsernameRequestDTO{
 		Username: req.Username,
 	}
 }
 
 type UserGetByUsernameResponseDTO struct {
-	resource.User
+	*resource.User
 }
 
-func NewUserGetByUsernameResponseDTO(resp dto.UserGetByUsernameResponseDTO) UserGetByUsernameResponseDTO {
-	return UserGetByUsernameResponseDTO{
+func NewUserGetByUsernameResponseDTO(resp *dto.UserGetByUsernameResponseDTO) *UserGetByUsernameResponseDTO {
+	return &UserGetByUsernameResponseDTO{
 		User: resource.NewUser(resp.User),
 	}
 }
@@ -94,19 +91,19 @@ type UserValidateRequestDTO struct {
 	Password string `json:"password"`
 }
 
-func (req UserValidateRequestDTO) To() dto.UserValidateCredentialsRequestDTO {
-	return dto.UserValidateCredentialsRequestDTO{
+func (req UserValidateRequestDTO) To() *dto.UserValidateCredentialsRequestDTO {
+	return &dto.UserValidateCredentialsRequestDTO{
 		Username: req.Username,
 		Password: req.Password,
 	}
 }
 
 type UserValidateResponseDTO struct {
-	resource.User
+	*resource.User
 }
 
-func NewUserValidateResponseDTO(resp dto.UserValidateCredentialsResponseDTO) UserValidateResponseDTO {
-	return UserValidateResponseDTO{
+func NewUserValidateResponseDTO(resp *dto.UserValidateCredentialsResponseDTO) *UserValidateResponseDTO {
+	return &UserValidateResponseDTO{
 		User: resource.NewUser(resp.User),
 	}
 }

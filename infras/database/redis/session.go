@@ -34,29 +34,29 @@ func NewRedisSessionStore(client *redis.Client, expiration time.Duration) *Redis
 	return &RedisSessionStore{client: client, expiration: expiration}
 }
 
-func (store *RedisSessionStore) Load(ctx context.Context, session *session.Session) (model.SessionModel, error) {
+func (store *RedisSessionStore) Load(ctx context.Context, session *session.Session) (*model.SessionModel, error) {
 	if session.ID() == "" {
-		return model.SessionModel{}, nil
+		return &model.SessionModel{}, nil
 	}
 
 	value, err := store.client.Get(ctx, sessionKey(session.ID())).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			return model.SessionModel{}, nil
+			return &model.SessionModel{}, nil
 		}
 
-		return model.SessionModel{}, err
+		return nil, err
 	}
 
 	sessionModel := model.SessionModel{}
 	if err := json.Unmarshal([]byte(value), &sessionModel); err != nil {
-		return model.SessionModel{}, err
+		return nil, err
 	}
 
-	return sessionModel, nil
+	return &sessionModel, nil
 }
 
-func (store *RedisSessionStore) Save(ctx context.Context, session *session.Session, obj model.SessionModel) error {
+func (store *RedisSessionStore) Save(ctx context.Context, session *session.Session, obj *model.SessionModel) error {
 	modelJSON, err := json.Marshal(obj)
 	if err != nil {
 		return err

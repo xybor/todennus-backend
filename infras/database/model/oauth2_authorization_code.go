@@ -17,8 +17,8 @@ type OAuth2AuthorizationCodeModel struct {
 	ExpiresAt           int64  `json:"exp"`
 }
 
-func NewOAuth2AuthorizationCode(code domain.OAuth2AuthorizationCode) OAuth2AuthorizationCodeModel {
-	return OAuth2AuthorizationCodeModel{
+func NewOAuth2AuthorizationCode(code *domain.OAuth2AuthorizationCode) *OAuth2AuthorizationCodeModel {
+	return &OAuth2AuthorizationCodeModel{
 		Code:                code.Code,
 		UserID:              code.UserID.Int64(),
 		ClientID:            code.ClientID.Int64(),
@@ -29,8 +29,8 @@ func NewOAuth2AuthorizationCode(code domain.OAuth2AuthorizationCode) OAuth2Autho
 	}
 }
 
-func (code *OAuth2AuthorizationCodeModel) To() domain.OAuth2AuthorizationCode {
-	return domain.OAuth2AuthorizationCode{
+func (code OAuth2AuthorizationCodeModel) To() *domain.OAuth2AuthorizationCode {
+	return &domain.OAuth2AuthorizationCode{
 		Code:                code.Code,
 		UserID:              snowflake.ID(code.UserID),
 		ClientID:            snowflake.ID(code.ClientID),
@@ -54,8 +54,8 @@ type OAuth2AuthorizationStoreModel struct {
 	ExpiresAt           int64  `json:"exp"`
 }
 
-func NewOAuth2AuthorizationStore(store domain.OAuth2AuthorizationStore) OAuth2AuthorizationStoreModel {
-	return OAuth2AuthorizationStoreModel{
+func NewOAuth2AuthorizationStore(store *domain.OAuth2AuthorizationStore) *OAuth2AuthorizationStoreModel {
+	return &OAuth2AuthorizationStoreModel{
 		ID:                  store.ID,
 		HasAuthenticated:    store.HasAuthenticated,
 		ResponseType:        store.ResponseType,
@@ -69,8 +69,8 @@ func NewOAuth2AuthorizationStore(store domain.OAuth2AuthorizationStore) OAuth2Au
 	}
 }
 
-func (store *OAuth2AuthorizationStoreModel) To() domain.OAuth2AuthorizationStore {
-	return domain.OAuth2AuthorizationStore{
+func (store OAuth2AuthorizationStoreModel) To() *domain.OAuth2AuthorizationStore {
+	return &domain.OAuth2AuthorizationStore{
 		ID:                  store.ID,
 		HasAuthenticated:    store.HasAuthenticated,
 		ResponseType:        store.ResponseType,
@@ -94,8 +94,8 @@ type OAuth2LoginResultModel struct {
 	ExpiresAt       int64  `json:"exp"`
 }
 
-func NewOAuth2LoginResult(result domain.OAuth2AuthenticationResult) OAuth2LoginResultModel {
-	return OAuth2LoginResultModel{
+func NewOAuth2LoginResult(result *domain.OAuth2AuthenticationResult) *OAuth2LoginResultModel {
+	return &OAuth2LoginResultModel{
 		ID:              result.ID,
 		AuthorizationID: result.AuthorizationID,
 		Ok:              result.Ok,
@@ -106,8 +106,8 @@ func NewOAuth2LoginResult(result domain.OAuth2AuthenticationResult) OAuth2LoginR
 	}
 }
 
-func (result *OAuth2LoginResultModel) To() domain.OAuth2AuthenticationResult {
-	return domain.OAuth2AuthenticationResult{
+func (result OAuth2LoginResultModel) To() *domain.OAuth2AuthenticationResult {
+	return &domain.OAuth2AuthenticationResult{
 		ID:              result.ID,
 		AuthorizationID: result.AuthorizationID,
 		Ok:              result.Ok,

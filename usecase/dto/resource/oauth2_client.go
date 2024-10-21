@@ -15,8 +15,8 @@ type OAuth2Client struct {
 	AllowedScope string
 }
 
-func NewOAuth2Client(ctx context.Context, client domain.OAuth2Client, needFilter bool) OAuth2Client {
-	usecaseClient := OAuth2Client{
+func NewOAuth2Client(ctx context.Context, client *domain.OAuth2Client, needFilter bool) *OAuth2Client {
+	usecaseClient := &OAuth2Client{
 		ClientID:     client.ID,
 		OwnerID:      client.OwnerUserID,
 		Name:         client.Name,

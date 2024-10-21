@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/xybor/todennus-backend/usecase"
 	"github.com/xybor/x/xcontext"
 	"github.com/xybor/x/xerror"
 )
@@ -45,9 +46,19 @@ func NewResponse(data any) *Response {
 }
 
 func NewErrorResponse(ctx context.Context, err error) *Response {
-	serviceErr := xerror.ServiceError{}
+	var serviceErr xerror.RichError
 	if errors.As(err, &serviceErr) {
-		return NewErrorResponseWithMessage(ctx, serviceErr.Error(), serviceErr.Message())
+		if serviceErr.Detail() != nil {
+			attrs := []any{"err", serviceErr.Detail()}
+			attrs = append(attrs, serviceErr.Attributes()...)
+			if errors.Is(err, usecase.ErrServer) {
+				xcontext.Logger(ctx).Warn(serviceErr.Event(), attrs...)
+			} else {
+				xcontext.Logger(ctx).Debug(serviceErr.Event(), attrs...)
+			}
+		}
+
+		return NewErrorResponseWithMessage(ctx, serviceErr.Code().Error(), serviceErr.Description())
 	}
 
 	xcontext.Logger(ctx).Critical("internal-error", "err", err)

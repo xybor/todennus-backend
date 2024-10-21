@@ -17,8 +17,8 @@ type User struct {
 	Role         enum.Enum[domain.UserRole]
 }
 
-func NewUser(ctx context.Context, user domain.User, needFilter bool) User {
-	usecaseUser := User{
+func NewUser(ctx context.Context, user *domain.User, needFilter bool) *User {
+	usecaseUser := &User{
 		ID:           user.ID,
 		Username:     user.Username,
 		DisplayName:  user.DisplayName,

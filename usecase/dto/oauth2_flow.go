@@ -19,7 +19,7 @@ type OAuth2StandardClaims struct {
 	NotBefore int    `json:"nbf,omitempty"`
 }
 
-func OAuth2StandardClaimsFromDomain(claims domain.OAuth2TokenMedata) *OAuth2StandardClaims {
+func OAuth2StandardClaimsFromDomain(claims *domain.OAuth2TokenMedata) *OAuth2StandardClaims {
 	return &OAuth2StandardClaims{
 		ID:        claims.ID.String(),
 		Issuer:    claims.Issuer,
@@ -30,18 +30,18 @@ func OAuth2StandardClaimsFromDomain(claims domain.OAuth2TokenMedata) *OAuth2Stan
 	}
 }
 
-func (claims *OAuth2StandardClaims) To() (domain.OAuth2TokenMedata, error) {
+func (claims *OAuth2StandardClaims) To() (*domain.OAuth2TokenMedata, error) {
 	id, err := snowflake.ParseString(claims.ID)
 	if err != nil {
-		return domain.OAuth2TokenMedata{}, err
+		return nil, err
 	}
 
 	sub, err := snowflake.ParseString(claims.Subject)
 	if err != nil {
-		return domain.OAuth2TokenMedata{}, err
+		return nil, err
 	}
 
-	return domain.OAuth2TokenMedata{
+	return &domain.OAuth2TokenMedata{
 		ID:        id,
 		Issuer:    claims.Issuer,
 		Audience:  claims.Audience,
@@ -79,20 +79,20 @@ type OAuth2AccessToken struct {
 	Scope string `json:"scope"`
 }
 
-func OAuth2AccessTokenFromDomain(token domain.OAuth2AccessToken) OAuth2AccessToken {
-	return OAuth2AccessToken{
+func OAuth2AccessTokenFromDomain(token *domain.OAuth2AccessToken) *OAuth2AccessToken {
+	return &OAuth2AccessToken{
 		OAuth2StandardClaims: OAuth2StandardClaimsFromDomain(token.Metadata),
 		Scope:                token.Scope.String(),
 	}
 }
 
-func (token *OAuth2AccessToken) To() (domain.OAuth2AccessToken, error) {
+func (token *OAuth2AccessToken) To() (*domain.OAuth2AccessToken, error) {
 	metadata, err := token.OAuth2StandardClaims.To()
 	if err != nil {
-		return domain.OAuth2AccessToken{}, err
+		return nil, err
 	}
 
-	return domain.OAuth2AccessToken{
+	return &domain.OAuth2AccessToken{
 		Metadata: metadata,
 		Scope:    domain.ScopeEngine.ParseScopes(token.Scope),
 	}, nil
@@ -104,21 +104,21 @@ type OAuth2RefreshToken struct {
 	Scope          string `json:"scope"`
 }
 
-func OAuth2RefreshTokenFromDomain(token domain.OAuth2RefreshToken) OAuth2RefreshToken {
-	return OAuth2RefreshToken{
+func OAuth2RefreshTokenFromDomain(token *domain.OAuth2RefreshToken) *OAuth2RefreshToken {
+	return &OAuth2RefreshToken{
 		OAuth2StandardClaims: OAuth2StandardClaimsFromDomain(token.Metadata),
 		SequenceNumber:       token.SequenceNumber,
 		Scope:                token.Scope.String(),
 	}
 }
 
-func (token *OAuth2RefreshToken) To() (domain.OAuth2RefreshToken, error) {
+func (token *OAuth2RefreshToken) To() (*domain.OAuth2RefreshToken, error) {
 	metadata, err := token.OAuth2StandardClaims.To()
 	if err != nil {
-		return domain.OAuth2RefreshToken{}, err
+		return nil, err
 	}
 
-	return domain.OAuth2RefreshToken{
+	return &domain.OAuth2RefreshToken{
 		Metadata:       metadata,
 		SequenceNumber: token.SequenceNumber,
 		Scope:          domain.ScopeEngine.ParseScopes(token.Scope),
@@ -132,23 +132,23 @@ type OAuth2IDToken struct {
 	Displayname string `json:"display_name"`
 }
 
-func OAuth2IDTokenFromDomain(token domain.OAuth2IDToken) OAuth2IDToken {
-	return OAuth2IDToken{
+func OAuth2IDTokenFromDomain(token *domain.OAuth2IDToken) *OAuth2IDToken {
+	return &OAuth2IDToken{
 		OAuth2StandardClaims: OAuth2StandardClaimsFromDomain(token.Metadata),
 		Username:             token.User.Username,
 		Displayname:          token.User.DisplayName,
 	}
 }
 
-func (token *OAuth2IDToken) To() (domain.OAuth2IDToken, error) {
+func (token *OAuth2IDToken) To() (*domain.OAuth2IDToken, error) {
 	metadata, err := token.OAuth2StandardClaims.To()
 	if err != nil {
-		return domain.OAuth2IDToken{}, err
+		return nil, err
 	}
 
-	return domain.OAuth2IDToken{
+	return &domain.OAuth2IDToken{
 		Metadata: metadata,
-		User: domain.User{
+		User: &domain.User{
 			ID:          metadata.Subject,
 			Username:    token.Username,
 			DisplayName: token.Displayname,
@@ -210,19 +210,19 @@ type OAuth2AuthorizeResponseDTO struct {
 	ExpiresIn   int
 }
 
-func NewOAuth2AuthorizeResponseWithCode(code string) OAuth2AuthorizeResponseDTO {
-	return OAuth2AuthorizeResponseDTO{Code: code}
+func NewOAuth2AuthorizeResponseWithCode(code string) *OAuth2AuthorizeResponseDTO {
+	return &OAuth2AuthorizeResponseDTO{Code: code}
 }
 
-func NewOAuth2AuthorizeResponseRedirectToIdP(url, aid string) OAuth2AuthorizeResponseDTO {
-	return OAuth2AuthorizeResponseDTO{
+func NewOAuth2AuthorizeResponseRedirectToIdP(url, aid string) *OAuth2AuthorizeResponseDTO {
+	return &OAuth2AuthorizeResponseDTO{
 		IdpURL:          url,
 		AuthorizationID: aid,
 	}
 }
 
-func NewOAuth2AuthorizeResponseWithToken(token, tokenType string, expiration time.Duration) OAuth2AuthorizeResponseDTO {
-	return OAuth2AuthorizeResponseDTO{
+func NewOAuth2AuthorizeResponseWithToken(token, tokenType string, expiration time.Duration) *OAuth2AuthorizeResponseDTO {
+	return &OAuth2AuthorizeResponseDTO{
 		AccessToken: token,
 		TokenType:   tokenType,
 		ExpiresIn:   int(expiration / time.Second),
@@ -258,8 +258,8 @@ type OAuth2SessionUpdateResponseDTO struct {
 	CodeChallengeMethod string
 }
 
-func NewOAuth2LoginUpdateResponseDTO(store domain.OAuth2AuthorizationStore) OAuth2SessionUpdateResponseDTO {
-	return OAuth2SessionUpdateResponseDTO{
+func NewOAuth2LoginUpdateResponseDTO(store *domain.OAuth2AuthorizationStore) *OAuth2SessionUpdateResponseDTO {
+	return &OAuth2SessionUpdateResponseDTO{
 		ResponseType:        store.ResponseType,
 		ClientID:            store.ClientID,
 		RedirectURI:         store.RedirectURI,

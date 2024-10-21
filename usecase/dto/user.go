@@ -15,11 +15,11 @@ type UserRegisterRequestDTO struct {
 }
 
 type UserRegisterResponseDTO struct {
-	User resource.User
+	User *resource.User
 }
 
-func NewUserRegisterResponseDTO(ctx context.Context, user domain.User) UserRegisterResponseDTO {
-	return UserRegisterResponseDTO{
+func NewUserRegisterResponseDTO(ctx context.Context, user *domain.User) *UserRegisterResponseDTO {
+	return &UserRegisterResponseDTO{
 		User: resource.NewUser(ctx, user, false),
 	}
 }
@@ -30,11 +30,11 @@ type UserGetByIDRequestDTO struct {
 }
 
 type UserGetByIDResponseDTO struct {
-	User resource.User
+	User *resource.User
 }
 
-func NewUserGetByIDResponseDTO(ctx context.Context, user domain.User) UserGetByIDResponseDTO {
-	return UserGetByIDResponseDTO{
+func NewUserGetByIDResponseDTO(ctx context.Context, user *domain.User) *UserGetByIDResponseDTO {
+	return &UserGetByIDResponseDTO{
 		User: resource.NewUser(ctx, user, true),
 	}
 }
@@ -45,11 +45,11 @@ type UserGetByUsernameRequestDTO struct {
 }
 
 type UserGetByUsernameResponseDTO struct {
-	User resource.User
+	User *resource.User
 }
 
-func NewUserGetByUsernameResponseDTO(ctx context.Context, user domain.User) UserGetByUsernameResponseDTO {
-	return UserGetByUsernameResponseDTO{
+func NewUserGetByUsernameResponseDTO(ctx context.Context, user *domain.User) *UserGetByUsernameResponseDTO {
+	return &UserGetByUsernameResponseDTO{
 		User: resource.NewUser(ctx, user, true),
 	}
 }
@@ -61,11 +61,11 @@ type UserValidateCredentialsRequestDTO struct {
 }
 
 type UserValidateCredentialsResponseDTO struct {
-	User resource.User
+	User *resource.User
 }
 
-func NewUserValidateCredentialsResponseDTO(ctx context.Context, user domain.User) UserValidateCredentialsResponseDTO {
-	return UserValidateCredentialsResponseDTO{
+func NewUserValidateCredentialsResponseDTO(ctx context.Context, user *domain.User) *UserValidateCredentialsResponseDTO {
+	return &UserValidateCredentialsResponseDTO{
 		User: resource.NewUser(ctx, user, true),
 	}
 }

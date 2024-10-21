@@ -48,10 +48,10 @@ func NewOAuth2ClientDomain(
 	}, nil
 }
 
-func (domain *OAuth2ClientDomain) CreateClient(ownerID snowflake.ID, name string, isConfidential bool) (OAuth2Client, string, error) {
+func (domain *OAuth2ClientDomain) CreateClient(ownerID snowflake.ID, name string, isConfidential bool) (*OAuth2Client, string, error) {
 	err := domain.validateClientName(name)
 	if err != nil {
-		return OAuth2Client{}, "", err
+		return nil, "", err
 	}
 
 	secret := ""
@@ -61,13 +61,13 @@ func (domain *OAuth2ClientDomain) CreateClient(ownerID snowflake.ID, name string
 		secret = xcrypto.RandString(domain.ClientSecretLength)
 		hashedSecret, err = HashPassword(secret)
 		if err != nil {
-			return OAuth2Client{}, "", err
+			return nil, "", err
 		}
 
 		allowedScope = scope.New(Actions, Resources).AsScopes()
 	}
 
-	return OAuth2Client{
+	return &OAuth2Client{
 		ID:             domain.Snowflake.Generate(),
 		Name:           name,
 		OwnerUserID:    ownerID,
@@ -78,7 +78,7 @@ func (domain *OAuth2ClientDomain) CreateClient(ownerID snowflake.ID, name string
 }
 
 func (domain *OAuth2ClientDomain) ValidateClient(
-	client OAuth2Client,
+	client *OAuth2Client,
 	clientID snowflake.ID,
 	clientSecret string,
 	confidentialRequirement ConfidentialRequirementType,
@@ -93,24 +93,16 @@ func (domain *OAuth2ClientDomain) ValidateClient(
 			return Wrap(ErrClientInvalid, "require a confidential client")
 		}
 
-		ok, err := ValidatePassword(client.HashedSecret, clientSecret)
+		err := ValidatePassword(client.HashedSecret, clientSecret)
 		if err != nil {
 			return err
 		}
 
-		if !ok {
-			return Wrap(ErrClientInvalid, "client secret is invalid")
-		}
-
 	case DependOnClientConfidential:
 		if client.IsConfidential {
-			ok, err := ValidatePassword(client.HashedSecret, clientSecret)
+			err := ValidatePassword(client.HashedSecret, clientSecret)
 			if err != nil {
 				return err
-			}
-
-			if !ok {
-				return Wrap(ErrClientInvalid, "client secret is invalid")
 			}
 		}
 	}
