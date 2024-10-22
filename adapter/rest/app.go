@@ -22,6 +22,7 @@ func App(
 	r.Use(builtinMiddleware.RealIP)
 	r.Use(middleware.WithInfras(config, infras))
 	r.Use(middleware.Timer)
+	r.Use(middleware.Timeout(config))
 	r.Use(middleware.Authentication(infras.TokenEngine))
 	r.Use(middleware.WithSession(infras.SessionManager))
 
