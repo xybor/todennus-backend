@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	ErrServer = xerror.Enrich(errors.New("server_error"), "an unexpected error occurred")
+	ErrServer        = xerror.Enrich(errors.New("server_error"), "an unexpected error occurred")
+	ErrServerTimeout = xerror.Enrich(errors.New("server_timeout"), "request timeout")
 
 	ErrRequestInvalid = errors.New("invalid_request")
 

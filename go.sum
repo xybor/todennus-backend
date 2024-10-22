@@ -95,8 +95,8 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/xybor-x/snowflake v1.0.0 h1:cpBLbuBeUrHeBN7behThldVqJ0ZTtQD/M87Vk67Xpl4=
 github.com/xybor-x/snowflake v1.0.0/go.mod h1:oriPbmMgpBuLkAU1kcwP+JWWvis7NWWN5YAM/B2J95w=
-github.com/xybor/todennus-config v1.1.0 h1:4xme1uErLR0V6Q3SRWLoYoK4taGnp2d5tUvTcF+sJlw=
-github.com/xybor/todennus-config v1.1.0/go.mod h1:N70vp9VN4GYI8qu93vh4u4tN9yan92AGi7wTPVeRy6I=
+github.com/xybor/todennus-config v1.2.0 h1:QloYu35iRRQmH8KaYElnRX6I4OnaoqiDEFFj4XJF5ro=
+github.com/xybor/todennus-config v1.2.0/go.mod h1:N70vp9VN4GYI8qu93vh4u4tN9yan92AGi7wTPVeRy6I=
 github.com/xybor/todennus-migration v1.0.3 h1:D0kSjb/tzAg9RUqbwWp9XnqU4HXOUdmUbqxpzvBN+Pk=
 github.com/xybor/todennus-migration v1.0.3/go.mod h1:o+ic8iJgpowPjt7PYZ78y0WftnnwHD80Kq0jPElGbN4=
 github.com/xybor/x v1.9.0 h1:gMOXqNXQK3UCLQfhIpq6Gfncnprpb69y1vm/nEEv+jk=

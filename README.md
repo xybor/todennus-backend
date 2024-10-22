@@ -35,6 +35,7 @@ Strictly follow Clean Architecture and DDD.
   + Refresh Token Flow ***\*completed\****.
   + Device Flow (low priority).
 
+- Support Open ID Connect.
 - Allow integrate with external Identity/OAuth2 Provider ***\*completed\****.
 
 ### User traffic

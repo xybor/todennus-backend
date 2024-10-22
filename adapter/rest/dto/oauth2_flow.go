@@ -153,6 +153,10 @@ func NewOAuth2AuthorizeRedirectURIWithError(
 			Hide(err, "invalid-redirect-uri", "uri", req.RedirectURI)
 	}
 
+	if timeoutErr := context.Cause(ctx); timeoutErr != nil && errors.Is(timeoutErr, usecase.ErrServerTimeout) {
+		err = usecase.ErrServerTimeout.Hide(err, "timeout")
+	}
+
 	q := u.Query()
 	standard.SetQuery(ctx, q, err)
 	if req.State != "" {

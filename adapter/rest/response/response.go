@@ -14,17 +14,33 @@ import (
 )
 
 type ResponseHandler struct {
-	err  error
-	f    any
-	resp any
-	code int
+	err         error
+	f           any
+	resp        any
+	code        int
+	defaultCode int
 }
 
-func NewResponseHandler(f any, resp any, err error) *ResponseHandler {
-	return (&ResponseHandler{f: f, resp: resp, err: err, code: -1}).
+func NewResponseHandler(ctx context.Context, f any, resp any, err error) *ResponseHandler {
+	if timeoutErr := context.Cause(ctx); timeoutErr != nil && errors.Is(timeoutErr, usecase.ErrServerTimeout) {
+		err = usecase.ErrServerTimeout.Hide(err, "timeout")
+	}
+
+	return (&ResponseHandler{
+		err: err,
+		f:   f, resp: resp,
+		code: -1,
+	}).
+		WithDefaultCode(http.StatusOK).
 		Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
 		Map(http.StatusUnauthorized, usecase.ErrUnauthenticated).
-		Map(http.StatusForbidden, usecase.ErrForbidden)
+		Map(http.StatusForbidden, usecase.ErrForbidden).
+		Map(http.StatusGatewayTimeout, usecase.ErrServerTimeout)
+}
+
+func (h *ResponseHandler) WithDefaultCode(code int) *ResponseHandler {
+	h.defaultCode = code
+	return h
 }
 
 func (h *ResponseHandler) Map(code int, errs ...error) *ResponseHandler {
@@ -50,7 +66,7 @@ func (h *ResponseHandler) WriteHTTPResponse(ctx context.Context, w http.Response
 	h.Map(http.StatusInternalServerError)
 
 	if h.code == -1 {
-		h.code = http.StatusOK
+		h.code = h.defaultCode
 	}
 
 	var resp any
@@ -72,7 +88,7 @@ func (h *ResponseHandler) WriteHTTPResponseWithoutWrap(ctx context.Context, w ht
 	h.Map(http.StatusInternalServerError)
 
 	if h.code == -1 {
-		h.code = http.StatusOK
+		h.code = h.defaultCode
 	}
 
 	var resp any
@@ -96,7 +112,7 @@ func (h *ResponseHandler) Redirect(ctx context.Context, w http.ResponseWriter, r
 	h.Map(http.StatusInternalServerError)
 
 	if h.code == -1 {
-		h.code = code
+		h.code = h.defaultCode
 	}
 
 	var redirect string

@@ -40,7 +40,7 @@ func (a *UserRESTAdapter) Register() http.HandlerFunc {
 		}
 
 		user, err := a.userUsecase.Register(ctx, request.To())
-		response.NewResponseHandler(dto.NewUserRegisterResponseDTO, user, err).
+		response.NewResponseHandler(ctx, dto.NewUserRegisterResponseDTO, user, err).
 			Map(http.StatusConflict, usecase.ErrUsernameExisted).
 			WriteHTTPResponse(ctx, w)
 	}
@@ -63,7 +63,7 @@ func (a *UserRESTAdapter) GetByID() http.HandlerFunc {
 		}
 
 		resp, err := a.userUsecase.GetByID(ctx, ucReq)
-		response.NewResponseHandler(dto.NewUserGetByIDResponseDTO, resp, err).
+		response.NewResponseHandler(ctx, dto.NewUserGetByIDResponseDTO, resp, err).
 			Map(http.StatusNotFound, usecase.ErrUserNotFound).
 			WriteHTTPResponse(ctx, w)
 	}
@@ -80,7 +80,7 @@ func (a *UserRESTAdapter) GetByUsername() http.HandlerFunc {
 		}
 
 		resp, err := a.userUsecase.GetByUsername(ctx, req.To())
-		response.NewResponseHandler(dto.NewUserGetByUsernameResponseDTO, resp, err).
+		response.NewResponseHandler(ctx, dto.NewUserGetByUsernameResponseDTO, resp, err).
 			Map(http.StatusNotFound, usecase.ErrUserNotFound).
 			WriteHTTPResponse(ctx, w)
 	}
@@ -97,7 +97,7 @@ func (a *UserRESTAdapter) Validate() http.HandlerFunc {
 		}
 
 		resp, err := a.userUsecase.ValidateCredentials(ctx, req.To())
-		response.NewResponseHandler(dto.NewUserValidateResponseDTO, resp, err).
+		response.NewResponseHandler(ctx, dto.NewUserValidateResponseDTO, resp, err).
 			Map(http.StatusUnauthorized, usecase.ErrCredentialsInvalid).
 			WriteHTTPResponse(ctx, w)
 	}
