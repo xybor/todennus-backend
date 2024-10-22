@@ -22,10 +22,10 @@ func InitializeInfras(config *config.Config) (*Infras, error) {
 	infras := &Infras{}
 
 	// Logger
-	infras.Logger = logging.NewSLogger(logging.Level(config.Server.LogLevel))
+	infras.Logger = logging.NewSLogger(logging.Level(config.Variable.Server.LogLevel))
 
 	// Snowflake node
-	infras.SnowflakeNode = int64(config.Server.NodeID)
+	infras.SnowflakeNode = int64(config.Variable.Server.NodeID)
 
 	// Token engine
 	tokenEngine := token.NewJWTEngine()

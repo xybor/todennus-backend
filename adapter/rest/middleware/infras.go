@@ -15,7 +15,7 @@ func WithInfras(config *config.Config, infras *wiring.Infras) func(http.Handler)
 			ctx = wiring.WithInfras(ctx, infras)
 
 			logger := xcontext.Logger(ctx).With("request_id", xcontext.RequestID(ctx)).
-				With("node_id", config.Server.NodeID)
+				With("node_id", config.Variable.Server.NodeID)
 			ctx = xcontext.WithLogger(ctx, logger)
 
 			h.ServeHTTP(w, r.WithContext(ctx))
