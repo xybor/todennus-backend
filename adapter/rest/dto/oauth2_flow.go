@@ -173,12 +173,12 @@ func NewOAuth2AuthorizeRedirectURIWithError(
 }
 
 type OAuth2AuthenticationCallbackRequestDTO struct {
-	IdPSecret       string `json:"idp_secret"`
-	AuthorizationID string `json:"authorization_id"`
-	Success         bool   `json:"success"`
-	UserID          string `json:"user_id"`
-	Username        string `json:"username"`
-	Error           string `json:"error"`
+	IdPSecret       string `json:"idp_secret" example:"Sde3kl..."`
+	AuthorizationID string `json:"authorization_id" example:"djG4l..."`
+	Success         bool   `json:"success" example:"true"`
+	UserID          string `json:"user_id" example:"329780019283901"`
+	Username        string `json:"username" example:"huykingsofm"`
+	Error           string `json:"error" example:""`
 }
 
 func (req OAuth2AuthenticationCallbackRequestDTO) To() (*dto.OAuth2AuthenticationCallbackRequestDTO, error) {
@@ -199,7 +199,7 @@ func (req OAuth2AuthenticationCallbackRequestDTO) To() (*dto.OAuth2Authenticatio
 }
 
 type OAuth2AuthenticationCallbackResponseDTO struct {
-	AuthenticationID string `json:"authentication_id"`
+	AuthenticationID string `json:"authentication_id" example:"hlqWe..."`
 }
 
 func NewOAuth2AuthenticationCallbackResponseDTO(resp *dto.OAuth2AuthenticationCallbackResponseDTO) *OAuth2AuthenticationCallbackResponseDTO {
@@ -268,7 +268,7 @@ func NewOAuth2GetConsentPageResponseDTO(resp *dto.OAuth2GetConsentResponseDTO) *
 type OAuth2UpdateConsentRequestDTO struct {
 	AuthorizationID string `query:"authorization_id"`
 	Consent         string `form:"consent"`
-	UserScope       string `form:"scopes"`
+	UserScope       string `form:"scope"`
 }
 
 func (req OAuth2UpdateConsentRequestDTO) To() *dto.OAuth2UpdateConsentRequestDTO {

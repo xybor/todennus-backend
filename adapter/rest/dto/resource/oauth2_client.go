@@ -5,10 +5,10 @@ import (
 )
 
 type OAuth2Client struct {
-	OwnerID      string `json:"owner_id,omitempty"`
-	ClientID     string `json:"client_id,omitempty"`
-	Name         string `json:"name,omitempty"`
-	AllowedScope string `json:"allowed_scope,omitempty"`
+	OwnerID      string `json:"owner_id,omitempty" example:"330559330522759168"`
+	ClientID     string `json:"client_id,omitempty" example:"332974701238012989"`
+	Name         string `json:"name,omitempty" example:"Example Client"`
+	AllowedScope string `json:"allowed_scope,omitempty" example:"read:user"`
 }
 
 func NewOAuth2Client(client *resource.OAuth2Client) *OAuth2Client {

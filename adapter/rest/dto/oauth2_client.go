@@ -7,8 +7,8 @@ import (
 )
 
 type OAuth2ClientCreateRequestDTO struct {
-	Name           string `json:"name"`
-	IsConfidential bool   `json:"is_confidential"`
+	Name           string `json:"name" example:"Example Client"`
+	IsConfidential bool   `json:"is_confidential" example:"true"`
 }
 
 func (req OAuth2ClientCreateRequestDTO) To() *dto.OAuth2ClientCreateRequestDTO {
@@ -20,7 +20,7 @@ func (req OAuth2ClientCreateRequestDTO) To() *dto.OAuth2ClientCreateRequestDTO {
 
 type OAuth2ClientCreateResponseDTO struct {
 	*resource.OAuth2Client
-	ClientSecret string `json:"client_secret"`
+	ClientSecret string `json:"client_secret" example:"ElBacv..."`
 }
 
 func NewOauth2ClientCreateResponseDTO(resp *dto.OAuth2ClientCreateResponseDTO) *OAuth2ClientCreateResponseDTO {
@@ -31,9 +31,9 @@ func NewOauth2ClientCreateResponseDTO(resp *dto.OAuth2ClientCreateResponseDTO) *
 }
 
 type OAuth2ClientCreateFirstRequestDTO struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Name     string `json:"name"`
+	Username string `json:"username" example:"huykingsofm"`
+	Password string `json:"password" example:"s3Cr3tP@ssW0rD"`
+	Name     string `json:"name" example:"First Client"`
 }
 
 func (req *OAuth2ClientCreateFirstRequestDTO) To() *dto.OAuth2ClientCreateFirstRequestDTO {
@@ -46,7 +46,7 @@ func (req *OAuth2ClientCreateFirstRequestDTO) To() *dto.OAuth2ClientCreateFirstR
 
 type OAuth2ClientCreateFirstResponseDTO struct {
 	*resource.OAuth2Client
-	ClientSecret string `json:"client_secret"`
+	ClientSecret string `json:"client_secret" example:"ElBacv..."`
 }
 
 func NewOauth2ClientCreateFirstResponseDTO(resp *dto.OAuth2ClientCreateByAdminResponseDTO) *OAuth2ClientCreateFirstResponseDTO {

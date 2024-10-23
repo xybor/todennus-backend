@@ -40,7 +40,7 @@ func (uc *UserUsecase) Register(
 ) (*dto.UserRegisterResponseDTO, error) {
 	_, err := uc.userRepo.GetByUsername(ctx, req.Username)
 	if err == nil {
-		return nil, xerror.Enrich(ErrUsernameExisted, "username %s has already taken before", req.Username)
+		return nil, xerror.Enrich(ErrDuplicated, "username %s has already existed", req.Username)
 	}
 
 	if !errors.Is(err, database.ErrRecordNotFound) {
@@ -70,10 +70,14 @@ func (usecase *UserUsecase) GetByID(
 	ctx context.Context,
 	req *dto.UserGetByIDRequestDTO,
 ) (*dto.UserGetByIDResponseDTO, error) {
+	if req.UserID == 0 {
+		return nil, xerror.Enrich(ErrClientInvalid, "require user id")
+	}
+
 	user, err := usecase.userRepo.GetByID(ctx, req.UserID.Int64())
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
-			return nil, xerror.Enrich(ErrUserNotFound, "not found user with id %d", req.UserID)
+			return nil, xerror.Enrich(ErrNotFound, "not found user with id %d", req.UserID)
 		}
 
 		return nil, ErrServer.Hide(err, "failed-to-get-user", "uid", req.UserID)
@@ -89,7 +93,7 @@ func (usecase *UserUsecase) GetByUsername(
 	user, err := usecase.userRepo.GetByUsername(ctx, req.Username)
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
-			return nil, xerror.Enrich(ErrUserNotFound, "not found user with username %s", req.Username)
+			return nil, xerror.Enrich(ErrNotFound, "not found user with username %s", req.Username)
 		}
 
 		return nil, ErrServer.Hide(err, "failed-to-get-user", "username", req.Username)

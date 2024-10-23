@@ -9,14 +9,11 @@ import (
 
 var (
 	ErrServer        = xerror.Enrich(errors.New("server_error"), "an unexpected error occurred")
-	ErrServerTimeout = xerror.Enrich(errors.New("server_timeout"), "request timeout")
+	ErrServerTimeout = xerror.Enrich(errors.New("server_timeout"), "server timeout")
 
 	ErrRequestInvalid = errors.New("invalid_request")
-
-	ErrUsernameExisted  = errors.New("username_exists")
-	ErrUsernameNotFound = errors.New("username_not_found")
-
-	ErrUserNotFound = errors.New("user_not_found")
+	ErrDuplicated     = errors.New("duplicated")
+	ErrNotFound       = errors.New("not_found")
 
 	ErrCredentialsInvalid = errors.New("invalid_credentials")
 
@@ -24,8 +21,6 @@ var (
 	ErrForbidden       = errors.New("forbidden")
 
 	ErrClientInvalid = errors.New("invalid_client")
-
-	ErrIdPInvalid = errors.New("invalid_idp")
 
 	ErrScopeInvalid = errors.New("invalid_scope")
 

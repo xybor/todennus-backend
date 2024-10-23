@@ -6,13 +6,12 @@ to have a permission on that field.
 
 ## User
 
-| Field           | Type        | Scope                     | Description        |
-| --------------- | ----------- | ------------------------- | ------------------ |
-| `id`            | `snowflake` |                           | User ID            |
-| `username`      | `string`    |                           | Username (unique)  |
-| `display_name`  | `string`    |                           | User display name  |
-| `role`          | `string`    | `read:user.role`          | User role          |
-| `allowed_scope` | `string`    | `read:user.allowed_scope` | User allowed scope |
+| Field          | Type        | Scope            | Description       |
+| -------------- | ----------- | ---------------- | ----------------- |
+| `id`           | `snowflake` |                  | User ID           |
+| `username`     | `string`    |                  | Username (unique) |
+| `display_name` | `string`    |                  | User display name |
+| `role`         | `string`    | `read:user.role` | User role         |
 
 
 ## OAuth2 Client

@@ -19,7 +19,9 @@ WORKDIR /
 
 COPY --from=build /todennus /
 COPY --from=build /todennus-backend/template /template
+COPY --from=build /todennus-backend/docs /docs
 
 EXPOSE 8080
+EXPOSE 8083
 
-ENTRYPOINT [ "/todennus", "rest", "--env", ""]
+ENTRYPOINT [ "/todennus", "--env", ""]

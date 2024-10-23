@@ -1,0 +1,765 @@
+definitions:
+  dto.OAuth2AuthenticationCallbackRequestDTO:
+    properties:
+      authorization_id:
+        example: djG4l...
+        type: string
+      error:
+        example: ""
+        type: string
+      idp_secret:
+        example: Sde3kl...
+        type: string
+      success:
+        example: true
+        type: boolean
+      user_id:
+        example: "329780019283901"
+        type: string
+      username:
+        example: huykingsofm
+        type: string
+    type: object
+  dto.OAuth2AuthenticationCallbackResponseDTO:
+    properties:
+      authentication_id:
+        example: hlqWe...
+        type: string
+    type: object
+  dto.OAuth2ClientCreateFirstRequestDTO:
+    properties:
+      name:
+        example: First Client
+        type: string
+      password:
+        example: s3Cr3tP@ssW0rD
+        type: string
+      username:
+        example: huykingsofm
+        type: string
+    type: object
+  dto.OAuth2ClientCreateFirstResponseDTO:
+    properties:
+      allowed_scope:
+        example: read:user
+        type: string
+      client_id:
+        example: "332974701238012989"
+        type: string
+      client_secret:
+        example: ElBacv...
+        type: string
+      name:
+        example: Example Client
+        type: string
+      owner_id:
+        example: "330559330522759168"
+        type: string
+    type: object
+  dto.OAuth2ClientCreateRequestDTO:
+    properties:
+      is_confidential:
+        example: true
+        type: boolean
+      name:
+        example: Example Client
+        type: string
+    type: object
+  dto.OAuth2ClientCreateResponseDTO:
+    properties:
+      allowed_scope:
+        example: read:user
+        type: string
+      client_id:
+        example: "332974701238012989"
+        type: string
+      client_secret:
+        example: ElBacv...
+        type: string
+      name:
+        example: Example Client
+        type: string
+      owner_id:
+        example: "330559330522759168"
+        type: string
+    type: object
+  dto.OAuth2ClientGetResponseDTO:
+    properties:
+      allowed_scope:
+        example: read:user
+        type: string
+      client_id:
+        example: "332974701238012989"
+        type: string
+      name:
+        example: Example Client
+        type: string
+      owner_id:
+        example: "330559330522759168"
+        type: string
+    type: object
+  dto.OAuth2TokenResponseDTO:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      scope:
+        type: string
+      token_type:
+        type: string
+    type: object
+  dto.UserGetByIDResponseDTO:
+    properties:
+      display_name:
+        example: Huy Le Ngoc
+        type: string
+      id:
+        example: "330559330522759168"
+        type: string
+      role:
+        example: admin
+        type: string
+      username:
+        example: huykingsofm
+        type: string
+    type: object
+  dto.UserGetByUsernameResponseDTO:
+    properties:
+      display_name:
+        example: Huy Le Ngoc
+        type: string
+      id:
+        example: "330559330522759168"
+        type: string
+      role:
+        example: admin
+        type: string
+      username:
+        example: huykingsofm
+        type: string
+    type: object
+  dto.UserRegisterRequestDTO:
+    properties:
+      password:
+        example: s3Cr3tP@ssW0rD
+        type: string
+      username:
+        example: huykingsofm
+        type: string
+    type: object
+  dto.UserRegisterResponseDTO:
+    properties:
+      display_name:
+        example: Huy Le Ngoc
+        type: string
+      id:
+        example: "330559330522759168"
+        type: string
+      role:
+        example: admin
+        type: string
+      username:
+        example: huykingsofm
+        type: string
+    type: object
+  dto.UserValidateRequestDTO:
+    properties:
+      password:
+        example: s3Cr3tP@ssW0rD
+        type: string
+      username:
+        example: huykingsofm
+        type: string
+    type: object
+  dto.UserValidateResponseDTO:
+    properties:
+      display_name:
+        example: Huy Le Ngoc
+        type: string
+      id:
+        example: "330559330522759168"
+        type: string
+      role:
+        example: admin
+        type: string
+      username:
+        example: huykingsofm
+        type: string
+    type: object
+  standard.SwaggerBadRequestErrorResponse:
+    properties:
+      error:
+        example: invalid_request
+        type: string
+      error_description:
+        example: 'invalid field: require string but got int'
+        type: string
+      metadata:
+        $ref: '#/definitions/standard.SwaggerMetadata'
+      status:
+        example: error
+        type: string
+    type: object
+  standard.SwaggerDuplicatedErrorResponse:
+    properties:
+      error:
+        example: duplicated
+        type: string
+      error_description:
+        example: something has already existed
+        type: string
+      metadata:
+        $ref: '#/definitions/standard.SwaggerMetadata'
+      status:
+        example: error
+        type: string
+    type: object
+  standard.SwaggerForbiddenErrorResponse:
+    properties:
+      error:
+        example: forbidden
+        type: string
+      error_description:
+        example: not enough permission to access
+        type: string
+      metadata:
+        $ref: '#/definitions/standard.SwaggerMetadata'
+      status:
+        example: error
+        type: string
+    type: object
+  standard.SwaggerInvalidCredentialsErrorResponse:
+    properties:
+      error:
+        example: invalid_credentials
+        type: string
+      error_description:
+        example: username or password is invalid
+        type: string
+      metadata:
+        $ref: '#/definitions/standard.SwaggerMetadata'
+      status:
+        example: error
+        type: string
+    type: object
+  standard.SwaggerMetadata:
+    properties:
+      request_id:
+        example: IIJORWQpIvDMzzNf
+        type: string
+      timestamp:
+        example: "2024-10-23T13:52:29.459752901+07:00"
+        type: string
+    type: object
+  standard.SwaggerNotFoundErrorResponse:
+    properties:
+      error:
+        example: not_found
+        type: string
+      error_description:
+        example: not found user with id 323979471029873
+        type: string
+      metadata:
+        $ref: '#/definitions/standard.SwaggerMetadata'
+      status:
+        example: error
+        type: string
+    type: object
+  standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateFirstResponseDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dto.OAuth2ClientCreateFirstResponseDTO'
+      status:
+        example: success
+        type: string
+    type: object
+  standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateResponseDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dto.OAuth2ClientCreateResponseDTO'
+      status:
+        example: success
+        type: string
+    type: object
+  standard.SwaggerSuccessResponse-dto_OAuth2ClientGetResponseDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dto.OAuth2ClientGetResponseDTO'
+      status:
+        example: success
+        type: string
+    type: object
+  standard.SwaggerSuccessResponse-dto_UserGetByIDResponseDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dto.UserGetByIDResponseDTO'
+      status:
+        example: success
+        type: string
+    type: object
+  standard.SwaggerSuccessResponse-dto_UserGetByUsernameResponseDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dto.UserGetByUsernameResponseDTO'
+      status:
+        example: success
+        type: string
+    type: object
+  standard.SwaggerSuccessResponse-dto_UserRegisterResponseDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dto.UserRegisterResponseDTO'
+      status:
+        example: success
+        type: string
+    type: object
+  standard.SwaggerSuccessResponse-dto_UserValidateResponseDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dto.UserValidateResponseDTO'
+      status:
+        example: success
+        type: string
+    type: object
+  standard.SwaggerUnauthorizedErrorResponse:
+    properties:
+      error:
+        example: forbidden
+        type: string
+      error_description:
+        example: require authentication
+        type: string
+      metadata:
+        $ref: '#/definitions/standard.SwaggerMetadata'
+      status:
+        example: error
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is Todennus - An Open ID Connect and OAuth2 Provider
+  title: Todennus API Endpoints
+  version: "1.0"
+paths:
+  /auth/callback:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        This endpoint is called by the IdP after it validated the user.
+        It notifies to the server about the authentication result (success or failure) and the inforamtion of user.
+      parameters:
+      - description: Authentication result
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.OAuth2AuthenticationCallbackRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully accept the result
+          schema:
+            $ref: '#/definitions/dto.OAuth2AuthenticationCallbackResponseDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+        "401":
+          description: Not found
+          schema:
+            $ref: '#/definitions/standard.SwaggerNotFoundErrorResponse'
+      summary: Authentication Callback Endpoint
+      tags:
+      - OAuth2
+  /oauth2/authorize:
+    get:
+      description: |-
+        The authorization endpoint is used to interact with the resource owner and obtain an authorization grant.
+        This is the entry point for starting an OAuth2 flow, such as Authorization Code or Implicit.
+      parameters:
+      - description: The type of response requested, typically 'code' or 'token'.
+        in: query
+        name: response_type
+        required: true
+        type: string
+      - description: The client ID of the application making the authorization request.
+        in: query
+        name: client_id
+        required: true
+        type: string
+      - description: The URI to which the response will be sent after the authorization.
+        in: query
+        name: redirect_uri
+        required: true
+        type: string
+      - description: The scope of the access request. It defines the level of access
+          the application is requesting.
+        in: query
+        name: scope
+        type: string
+      - description: An opaque value used by the client to maintain state between
+          the request and callback.
+        in: query
+        name: state
+        type: string
+      responses:
+        "303":
+          description: Redirect to client application with authorization code or error
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+      summary: OAuth2 Authorization Endpoint
+      tags:
+      - OAuth2
+  /oauth2/consent:
+    get:
+      description: This endpoint serves a consent page when the server needs the user
+        consent for client.
+      parameters:
+      - description: Authorization ID
+        in: query
+        name: authorization_id
+        required: true
+        type: string
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: Consent page rendered successfully
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+      summary: Consent page
+      tags:
+      - OAuth2
+    post:
+      description: This endpoint updates the consent result of user then redirect
+        back to the oauth2 authorization endpoint.
+      parameters:
+      - description: Authorization ID
+        in: query
+        name: authorization_id
+        required: true
+        type: string
+      - description: The consent result (accepted or denied)
+        in: formData
+        name: consent
+        type: string
+      - description: The accepted scopes of user (usually less than the requested
+          scope).
+        in: formData
+        name: scope
+        type: string
+      responses:
+        "303":
+          description: Redirect back to oauth2 authorization endpoint
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+      summary: Update consent
+      tags:
+      - OAuth2
+  /oauth2/token:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: |-
+        The token endpoint is used to exchange an authorization code, client credentials, or refresh token for an access token and optionally a refresh token.
+        This is part of the OAuth2 flow to grant access tokens to clients.
+      parameters:
+      - description: The OAuth2 grant type (authorization_code, client_credentials,
+          refresh_token)
+        in: formData
+        name: grant_type
+        required: true
+        type: string
+      - description: The authorization code received from the authorize endpoint (required
+          for authorization_code grant type)
+        in: formData
+        name: code
+        type: string
+      - description: The redirect URI used in the authorization request (required
+          for authorization_code grant type)
+        in: formData
+        name: redirect_uri
+        type: string
+      - description: The client ID of the application
+        in: formData
+        name: client_id
+        required: true
+        type: string
+      - description: The client secret of the application
+        in: formData
+        name: client_secret
+        required: true
+        type: string
+      - description: The refresh token (required for refresh_token grant type)
+        in: formData
+        name: refresh_token
+        type: string
+      - description: The scope of the access request (optional, space-separated)
+        in: formData
+        name: scope
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully generated access token
+          schema:
+            $ref: '#/definitions/dto.OAuth2TokenResponseDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+      summary: OAuth2 Token Endpoint
+      tags:
+      - OAuth2
+  /oauth2_clients:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Create an new OAuth2 Client. If the `is_confidential` field is true, a secret is issued. Please carefully store this secret in a confidential place. This secret will never be retrieved by anyway. <br>
+        Require scope `create:client`.
+      parameters:
+      - description: Client Information
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.OAuth2ClientCreateRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Create client successfully
+          schema:
+            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateResponseDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+      summary: Create oauth2 client
+      tags:
+      - OAuth2 Client
+  /oauth2_clients/{client_id}:
+    get:
+      description: |-
+        Get OAuth2 Client information by ClientID. <br>
+        Require scope `read:client.allowed_scope` to get the allowed scope. <br>
+        Require scope `read:client.owner` to get Owner ID.
+      parameters:
+      - description: ClientID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Get client successfully
+          schema:
+            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientGetResponseDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/standard.SwaggerNotFoundErrorResponse'
+      summary: Get oauth2 client by id
+      tags:
+      - OAuth2 Client
+  /oauth2_clients/first:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Create the first OAuth2 Client (always a confidential Client). <br>
+        Why this API? When todennus is started, there is no existed Client, we don't have any flow to authenticate a user (all authentication flows require a Client). This API is only valid if there is no existing Client and the user is administrator.
+      parameters:
+      - description: Client Information
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.OAuth2ClientCreateFirstRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Create client successfully
+          schema:
+            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateFirstResponseDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+        "401":
+          description: unauthorized
+          schema:
+            $ref: '#/definitions/standard.SwaggerUnauthorizedErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/standard.SwaggerForbiddenErrorResponse'
+        "404":
+          description: API not found
+          schema:
+            $ref: '#/definitions/standard.SwaggerNotFoundErrorResponse'
+      summary: Create the first oauth2 client
+      tags:
+      - OAuth2 Client
+  /session/update:
+    get:
+      description: |-
+        The user will be redirected to this endpoint by the IdP after it sends the authentication result to the server. <br>
+        This endpoint updates the user session state to `authenticated`, `unauthenticated`, or `failed authentication`.
+      parameters:
+      - description: Authentication id
+        in: query
+        name: authentication_id
+        required: true
+        type: string
+      responses:
+        "303":
+          description: Redirect back to oauth2 authorization endpoint
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+      summary: Session Update Endpoint
+      tags:
+      - OAuth2
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user by providing username and password
+      parameters:
+      - description: User registration data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserRegisterRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_UserRegisterResponseDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+        "409":
+          description: Duplicated
+          schema:
+            $ref: '#/definitions/standard.SwaggerDuplicatedErrorResponse'
+      summary: Register a new user
+      tags:
+      - User
+  /users/{user_id}:
+    get:
+      description: |-
+        Get an user information by user id. <br>
+        Require scope `read:user.role` to get role of user.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Get user successfully
+          schema:
+            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_UserGetByIDResponseDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/standard.SwaggerNotFoundErrorResponse'
+      summary: Get user by id
+      tags:
+      - User
+  /users/username/{username}:
+    get:
+      description: |-
+        Get an user information by user username. <br>
+        Require scope `read:user.role` to get role of user.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Get user successfully
+          schema:
+            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_UserGetByUsernameResponseDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/standard.SwaggerNotFoundErrorResponse'
+      summary: Get user by username
+      tags:
+      - User
+  /users/validate:
+    post:
+      consumes:
+      - application/json
+      description: Validate the user credentials and returns the user information.
+      parameters:
+      - description: Validation data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserValidateRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Validate successfully
+          schema:
+            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_UserValidateResponseDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/standard.SwaggerInvalidCredentialsErrorResponse'
+      summary: Validate user credentials
+      tags:
+      - User
+swagger: "2.0"
