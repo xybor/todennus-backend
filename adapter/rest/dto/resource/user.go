@@ -5,10 +5,10 @@ import (
 )
 
 type User struct {
-	ID          string `json:"id,omitempty"`
-	Username    string `json:"username,omitempty"`
-	DisplayName string `json:"display_name,omitempty"`
-	Role        string `json:"role,omitempty"`
+	ID          string `json:"id,omitempty" example:"330559330522759168"`
+	Username    string `json:"username,omitempty" example:"huykingsofm"`
+	DisplayName string `json:"display_name,omitempty" example:"Huy Le Ngoc"`
+	Role        string `json:"role,omitempty" example:"admin"`
 }
 
 func NewUser(user *resource.User) *User {

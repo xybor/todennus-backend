@@ -30,12 +30,12 @@ func NewResponseHandler(ctx context.Context, f any, resp any, err error) *Respon
 		err: err,
 		f:   f, resp: resp,
 		code: -1,
-	}).
-		WithDefaultCode(http.StatusOK).
-		Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
-		Map(http.StatusUnauthorized, usecase.ErrUnauthenticated).
-		Map(http.StatusForbidden, usecase.ErrForbidden).
+	}).WithDefaultCode(http.StatusOK).
 		Map(http.StatusGatewayTimeout, usecase.ErrServerTimeout)
+	// Map(http.StatusGatewayTimeout, usecase.ErrServerTimeout)
+	// Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
+	// Map(http.StatusUnauthorized, usecase.ErrUnauthenticated).
+	// Map(http.StatusForbidden, usecase.ErrForbidden).
 }
 
 func (h *ResponseHandler) WithDefaultCode(code int) *ResponseHandler {

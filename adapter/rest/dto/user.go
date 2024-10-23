@@ -18,8 +18,8 @@ func ParseUserID(meID snowflake.ID, s string) (snowflake.ID, error) {
 
 // Register
 type UserRegisterRequestDTO struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" example:"huykingsofm"`
+	Password string `json:"password" example:"s3Cr3tP@ssW0rD"`
 }
 
 func (req UserRegisterRequestDTO) To() *dto.UserRegisterRequestDTO {
@@ -87,8 +87,8 @@ func NewUserGetByUsernameResponseDTO(resp *dto.UserGetByUsernameResponseDTO) *Us
 
 // Validate
 type UserValidateRequestDTO struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" example:"huykingsofm"`
+	Password string `json:"password" example:"s3Cr3tP@ssW0rD"`
 }
 
 func (req UserValidateRequestDTO) To() *dto.UserValidateCredentialsRequestDTO {

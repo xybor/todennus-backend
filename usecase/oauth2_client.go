@@ -68,7 +68,7 @@ func (usecase *OAuth2ClientUsecase) CreateByAdmin(
 	req *dto.OAuth2ClientCreateFirstRequestDTO,
 ) (*dto.OAuth2ClientCreateByAdminResponseDTO, error) {
 	if !usecase.isNoClient {
-		return nil, xerror.Enrich(ErrRequestInvalid, "this api is only openned for creating the first client")
+		return nil, xerror.Enrich(ErrNotFound, "this api is only openned for creating the first client")
 	}
 
 	if err := usecase.firstClientLock.Lock(ctx); err != nil {
@@ -83,13 +83,13 @@ func (usecase *OAuth2ClientUsecase) CreateByAdmin(
 
 	if count > 0 {
 		usecase.isNoClient = false
-		return nil, xerror.Enrich(ErrRequestInvalid, "this api is only openned for creating the first client")
+		return nil, xerror.Enrich(ErrNotFound, "this api is only openned for creating the first client")
 	}
 
 	user, err := usecase.userRepo.GetByUsername(ctx, req.Username)
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
-			return nil, xerror.Enrich(ErrForbidden, "invalid username or password")
+			return nil, xerror.Enrich(ErrUnauthenticated, "invalid username or password")
 		}
 
 		return nil, ErrServer.Hide(err, "failed-to-get-user", "username", req.Username)
@@ -97,7 +97,7 @@ func (usecase *OAuth2ClientUsecase) CreateByAdmin(
 
 	if err := usecase.userDomain.Validate(user.HashedPass, req.Password); err != nil {
 		return nil, errcfg.Event(err, "failed-to-validate-user-credentials").
-			EnrichWith(ErrForbidden, "invalid username or password").Error()
+			EnrichWith(ErrUnauthenticated, "invalid username or password").Error()
 	}
 
 	if user.Role != domain.UserRoleAdmin {

@@ -147,7 +147,7 @@ func (usecase *OAuth2FlowUsecase) AuthenticationCallback(
 	req *dto.OAuth2AuthenticationCallbackRequestDTO,
 ) (*dto.OAuth2AuthenticationCallbackResponseDTO, error) {
 	if req.Secret != usecase.idpSecret {
-		return nil, xerror.Enrich(ErrIdPInvalid, "incorrect idp secret")
+		return nil, xerror.Enrich(ErrUnauthenticated, "incorrect idp secret")
 	}
 
 	store, err := usecase.oauth2CodeRepo.LoadAuthorizationStore(ctx, req.AuthorizationID)
@@ -172,7 +172,7 @@ func (usecase *OAuth2FlowUsecase) AuthenticationCallback(
 	if req.Success {
 		if _, err := usecase.userRepo.GetByID(ctx, req.UserID.Int64()); err != nil {
 			if errors.Is(err, database.ErrRecordNotFound) {
-				return nil, xerror.Enrich(ErrUserNotFound, "not found user with id %d", req.UserID)
+				return nil, xerror.Enrich(ErrNotFound, "not found user with id %d", req.UserID)
 			}
 
 			return nil, ErrServer.Hide(err, "failed-to-get-user", "uid", req.UserID)

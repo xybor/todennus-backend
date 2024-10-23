@@ -8,15 +8,16 @@ An Identity, OpenID Connect, and OAuth2 Provider.
 
 [Resources](./docs/resources.md)
 
-[API Endpoints](./docs/endpoints.md)
-
-[OAuth2 Endpoints](./docs/oauth2_endpoints.md)
+[Swagger Endpoint](#start-swagger-server)
 
 ## Tech stack
 
 - Architecture: Clean architecture, Domain Driven Development.
 - Database: [gorm](https://github.com/go-gorm/gorm), [go-migrate](https://github.com/golang-migrate/migrate), [postgreSQL](https://www.postgresql.org/), [redis](https://redis.io/).
 - Mux: [go-chi](https://github.com/go-chi/chi).
+- Docs: [swaggo](https://github.com/swaggo/swag).
+- Container: [Docker](https://www.docker.com/).
+- Deployment: [Docker compose](https://docs.docker.com/compose/).
 
 ## Target
 
@@ -46,9 +47,15 @@ Strictly follow Clean Architecture and DDD.
 
 ## Get started
 
-### Start a server
+### Start swagger server
 
-Please refer [todennus-orchestration](https://github.com/xybor/todennus-orchestration) for starting server.
+```shell
+$ make start-swagger
+```
+
+### Start System
+
+Please refer [todennus-orchestration](https://github.com/xybor/todennus-orchestration) for starting our system.
 
 ### Create the first user and client
 
