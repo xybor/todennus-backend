@@ -18,10 +18,10 @@ func App(
 	r := chi.NewRouter()
 
 	r.Use(builtinMiddleware.Recoverer)
-	r.Use(middleware.WithRequestID())
 	r.Use(builtinMiddleware.RealIP)
-	r.Use(middleware.WithInfras(config, infras))
-	r.Use(middleware.Timer)
+	r.Use(middleware.WithRequestID())
+	r.Use(middleware.WithInfras(infras))
+	r.Use(middleware.Timer(config))
 	r.Use(middleware.Timeout(config))
 	r.Use(middleware.Authentication(infras.TokenEngine))
 	r.Use(middleware.WithSession(infras.SessionManager))

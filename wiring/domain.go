@@ -13,6 +13,7 @@ type Domains struct {
 	abstraction.UserDomain
 	abstraction.OAuth2FlowDomain
 	abstraction.OAuth2ClientDomain
+	abstraction.OAuth2ConsentDomain
 }
 
 func InitializeDomains(ctx context.Context, config *config.Config, infras *Infras) (*Domains, error) {
@@ -46,6 +47,11 @@ func InitializeDomains(ctx context.Context, config *config.Config, infras *Infra
 	if err != nil {
 		return nil, err
 	}
+
+	domains.OAuth2ConsentDomain = domain.NewOAuth2ConsentDomain(
+		time.Duration(config.Variable.OAuth2.ConsentSessionExpiration)*time.Second,
+		time.Duration(config.Variable.OAuth2.ConsentExpiration)*time.Second,
+	)
 
 	return domains, nil
 }

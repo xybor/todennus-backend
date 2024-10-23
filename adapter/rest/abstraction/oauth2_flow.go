@@ -11,4 +11,6 @@ type OAuth2Usecase interface {
 	Token(ctx context.Context, req *dto.OAuth2TokenRequestDTO) (*dto.OAuth2TokenResponseDTO, error)
 	AuthenticationCallback(ctx context.Context, req *dto.OAuth2AuthenticationCallbackRequestDTO) (*dto.OAuth2AuthenticationCallbackResponseDTO, error)
 	SessionUpdate(ctx context.Context, req *dto.OAuth2SessionUpdateRequestDTO) (*dto.OAuth2SessionUpdateResponseDTO, error)
+	GetConsent(ctx context.Context, req *dto.OAuth2GetConsentRequestDTO) (*dto.OAuth2GetConsentResponseDTO, error)
+	UpdateConsent(ctx context.Context, req *dto.OAuth2UpdateConsentRequestDTO) (*dto.OAUth2UpdateConsentResponseDTO, error)
 }

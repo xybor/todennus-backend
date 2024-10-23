@@ -43,7 +43,7 @@ func (code OAuth2AuthorizationCodeModel) To() *domain.OAuth2AuthorizationCode {
 
 type OAuth2AuthorizationStoreModel struct {
 	ID                  string `json:"-"`
-	HasAuthenticated    bool   `json:"hat"`
+	IsOpen              bool   `json:"iop"`
 	ResponseType        string `json:"res"`
 	ClientID            int64  `json:"cid"`
 	RedirectURI         string `json:"rdr"`
@@ -57,7 +57,7 @@ type OAuth2AuthorizationStoreModel struct {
 func NewOAuth2AuthorizationStore(store *domain.OAuth2AuthorizationStore) *OAuth2AuthorizationStoreModel {
 	return &OAuth2AuthorizationStoreModel{
 		ID:                  store.ID,
-		HasAuthenticated:    store.HasAuthenticated,
+		IsOpen:              store.IsOpen,
 		ResponseType:        store.ResponseType,
 		ClientID:            store.ClientID.Int64(),
 		RedirectURI:         store.RedirectURI,
@@ -72,7 +72,7 @@ func NewOAuth2AuthorizationStore(store *domain.OAuth2AuthorizationStore) *OAuth2
 func (store OAuth2AuthorizationStoreModel) To() *domain.OAuth2AuthorizationStore {
 	return &domain.OAuth2AuthorizationStore{
 		ID:                  store.ID,
-		HasAuthenticated:    store.HasAuthenticated,
+		IsOpen:              store.IsOpen,
 		ResponseType:        store.ResponseType,
 		ClientID:            snowflake.ID(store.ClientID),
 		RedirectURI:         store.RedirectURI,

@@ -1,8 +1,9 @@
-package database
+package gorm
 
 import (
 	"context"
 
+	"github.com/xybor/todennus-backend/infras/database"
 	"github.com/xybor/todennus-backend/infras/database/model"
 	"gorm.io/gorm"
 )
@@ -21,7 +22,7 @@ func (repo *RefreshTokenRepository) Create(
 	accessTokenID int64,
 	seq int,
 ) error {
-	return ConvertError(repo.db.WithContext(ctx).Create(&model.RefreshTokenModel{
+	return database.ConvertError(repo.db.WithContext(ctx).Create(&model.RefreshTokenModel{
 		RefreshTokenID: refreshTokenId,
 		AccessTokenID:  accessTokenID,
 		Seq:            seq,
@@ -41,14 +42,14 @@ func (repo *RefreshTokenRepository) UpdateByRefreshTokenID(
 		})
 
 	if result.RowsAffected == 0 {
-		return ErrRecordNotFound
+		return database.ErrRecordNotFound
 	}
 
-	return ConvertError(result.Error)
+	return database.ConvertError(result.Error)
 }
 
 func (repo *RefreshTokenRepository) DeleteByRefreshTokenID(
 	ctx context.Context, refreshTokenID int64,
 ) error {
-	return ConvertError(repo.db.WithContext(ctx).Delete(&model.RefreshTokenModel{}, refreshTokenID).Error)
+	return database.ConvertError(repo.db.WithContext(ctx).Delete(&model.RefreshTokenModel{}, refreshTokenID).Error)
 }

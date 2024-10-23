@@ -5,7 +5,6 @@ import (
 
 	"github.com/xybor-x/snowflake"
 	"github.com/xybor/x/enum"
-	"github.com/xybor/x/scope"
 	"github.com/xybor/x/xstring"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -31,13 +30,12 @@ const (
 )
 
 type User struct {
-	ID           snowflake.ID
-	DisplayName  string
-	Username     string
-	HashedPass   string
-	Role         enum.Enum[UserRole]
-	AllowedScope scope.Scopes
-	UpdatedAt    time.Time
+	ID          snowflake.ID
+	DisplayName string
+	Username    string
+	HashedPass  string
+	Role        enum.Enum[UserRole]
+	UpdatedAt   time.Time
 }
 
 type UserDomain struct {
@@ -63,12 +61,11 @@ func (domain *UserDomain) Create(username, password string) (*User, error) {
 	}
 
 	return &User{
-		ID:           domain.Snowflake.Generate(),
-		DisplayName:  username,
-		Username:     username,
-		AllowedScope: scope.New(Actions, Resources).AsScopes(),
-		HashedPass:   string(hashedPass),
-		Role:         UserRoleUser,
+		ID:          domain.Snowflake.Generate(),
+		DisplayName: username,
+		Username:    username,
+		HashedPass:  string(hashedPass),
+		Role:        UserRoleUser,
 	}, nil
 }
 

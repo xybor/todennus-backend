@@ -14,8 +14,7 @@ type Resource struct {
 type UserResource struct {
 	*scope.BaseResource
 
-	AllowedScope *scope.BaseResource `resource:"allowed_scope"`
-	Role         *scope.BaseResource `resource:"role"`
+	Role *scope.BaseResource `resource:"role"`
 }
 
 type OAuth2ClientResource struct {

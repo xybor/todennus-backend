@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"html/template"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -22,6 +23,9 @@ func NewOAuth2Adapter(oauth2Usecase abstraction.OAuth2Usecase) *OAuth2Adapter {
 func (a *OAuth2Adapter) OAuth2Router(r chi.Router) {
 	r.Get("/authorize", a.Authorize())
 	r.Post("/token", a.Token())
+
+	r.Get("/consent", a.GetConsentPage())
+	r.Post("/consent", a.UpdateConsent())
 }
 
 func (a *OAuth2Adapter) Authorize() http.HandlerFunc {
@@ -36,7 +40,7 @@ func (a *OAuth2Adapter) Authorize() http.HandlerFunc {
 
 		resp, err := a.oauth2Usecase.Authorize(ctx, req.To())
 		if err != nil {
-			if url, err := dto.NewOAuth2AuthorizeRedirectURIWithError(ctx, &req, err); err != nil {
+			if url, err := dto.NewOAuth2AuthorizeRedirectURIWithError(ctx, req, err); err != nil {
 				response.HandleError(ctx, w, err)
 			} else {
 				response.Redirect(ctx, w, r, url, http.StatusSeeOther)
@@ -45,7 +49,7 @@ func (a *OAuth2Adapter) Authorize() http.HandlerFunc {
 			return
 		}
 
-		redirectURI, err := dto.NewOAuth2AuthorizeRedirectURI(&req, resp)
+		redirectURI, err := dto.NewOAuth2AuthorizeRedirectURI(req, resp)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
@@ -111,6 +115,51 @@ func (a *OAuth2Adapter) SessionUpdate() http.HandlerFunc {
 
 		resp, err := a.oauth2Usecase.SessionUpdate(ctx, req.To())
 		response.NewResponseHandler(ctx, dto.NewOAuth2SessionUpdateRedirectURI, resp, err).
+			Redirect(ctx, w, r, http.StatusSeeOther)
+	}
+}
+
+func (a *OAuth2Adapter) GetConsentPage() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		req, err := xhttp.ParseHTTPRequest[dto.OAuth2GetConsentPageRequestDTO](r)
+		if err != nil {
+			response.HandleError(ctx, w, err)
+			return
+		}
+
+		resp, err := a.oauth2Usecase.GetConsent(ctx, req.To())
+		if err != nil {
+			response.WriteError(ctx, w, http.StatusInternalServerError, err)
+		}
+
+		tmpl, err := template.ParseFiles("template/consent.html")
+		if err != nil {
+			response.WriteError(ctx, w, http.StatusInternalServerError,
+				usecase.ErrServer.Hide(err, "failed-to-parse-template"))
+			return
+		}
+
+		if err = tmpl.Execute(w, dto.NewOAuth2GetConsentPageResponseDTO(resp)); err != nil {
+			response.WriteError(ctx, w, http.StatusInternalServerError,
+				usecase.ErrServer.Hide(err, "failed-to-render-template"))
+		}
+	}
+}
+
+func (a *OAuth2Adapter) UpdateConsent() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		req, err := xhttp.ParseHTTPRequest[dto.OAuth2UpdateConsentRequestDTO](r)
+		if err != nil {
+			response.HandleError(ctx, w, err)
+			return
+		}
+
+		resp, err := a.oauth2Usecase.UpdateConsent(ctx, req.To())
+		response.NewResponseHandler(ctx, dto.NewOAuth2ConsentUpdateRedirectURI, resp, err).
 			Redirect(ctx, w, r, http.StatusSeeOther)
 	}
 }

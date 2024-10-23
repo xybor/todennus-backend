@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/adapter/rest/standard"
@@ -113,6 +114,10 @@ func NewOAuth2AuthorizeRedirectURI(
 		return u.String(), nil
 	}
 
+	if resp.NeedConsent {
+		return fmt.Sprintf("/oauth2/consent?authorization_id=%s", resp.AuthorizationID), nil
+	}
+
 	u, err := url.Parse(req.RedirectURI)
 	if err != nil {
 		return "", xerror.Enrich(usecase.ErrRequestInvalid, "invalid redirect uri").
@@ -214,6 +219,72 @@ func (req OAuth2SessionUpdateRequestDTO) To() *dto.OAuth2SessionUpdateRequestDTO
 }
 
 func NewOAuth2SessionUpdateRedirectURI(resp *dto.OAuth2SessionUpdateResponseDTO) string {
+	q := url.Values{}
+	q.Set("response_type", resp.ResponseType)
+	q.Set("client_id", resp.ClientID.String())
+	q.Set("redirect_uri", resp.RedirectURI)
+	q.Set("scope", resp.Scope)
+
+	if resp.State != "" {
+		q.Set("state", resp.State)
+	}
+
+	if resp.CodeChallenge != "" {
+		q.Set("code_challenge", resp.CodeChallenge)
+	}
+
+	if resp.CodeChallengeMethod != "" {
+		q.Set("code_challenge_method", resp.CodeChallengeMethod)
+	}
+
+	return fmt.Sprintf("/oauth2/authorize?%s", q.Encode())
+}
+
+type OAuth2GetConsentPageRequestDTO struct {
+	AuthorizationID string `query:"authorization_id"`
+}
+
+func (req OAuth2GetConsentPageRequestDTO) To() *dto.OAuth2GetConsentRequestDTO {
+	return &dto.OAuth2GetConsentRequestDTO{
+		AuthorizationID: req.AuthorizationID,
+	}
+}
+
+type OAuth2GetConsentPageResponseDTO struct {
+	ClientName string
+	ClientID   int64
+
+	Scopes []string
+}
+
+func NewOAuth2GetConsentPageResponseDTO(resp *dto.OAuth2GetConsentResponseDTO) *OAuth2GetConsentPageResponseDTO {
+	return &OAuth2GetConsentPageResponseDTO{
+		ClientName: resp.Client.Name,
+		ClientID:   resp.Client.ClientID.Int64(),
+		Scopes:     resp.Scopes,
+	}
+}
+
+type OAuth2UpdateConsentRequestDTO struct {
+	AuthorizationID string `query:"authorization_id"`
+	Consent         string `form:"consent"`
+	UserScope       string `form:"scopes"`
+}
+
+func (req OAuth2UpdateConsentRequestDTO) To() *dto.OAuth2UpdateConsentRequestDTO {
+	accept := false
+	if strings.ToLower(req.Consent) == "accepted" {
+		accept = true
+	}
+
+	return &dto.OAuth2UpdateConsentRequestDTO{
+		Accept:          accept,
+		AuthorizationID: req.AuthorizationID,
+		UserScope:       req.UserScope,
+	}
+}
+
+func NewOAuth2ConsentUpdateRedirectURI(resp *dto.OAUth2UpdateConsentResponseDTO) string {
 	q := url.Values{}
 	q.Set("response_type", resp.ResponseType)
 	q.Set("client_id", resp.ClientID.String())

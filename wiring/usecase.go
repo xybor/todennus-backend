@@ -39,11 +39,13 @@ func InitializeUsecases(
 		domains.UserDomain,
 		domains.OAuth2FlowDomain,
 		domains.OAuth2ClientDomain,
+		domains.OAuth2ConsentDomain,
 		repositories.UserRepository,
 		repositories.RefreshTokenRepository,
 		repositories.OAuth2ClientRepository,
 		repositories.SessionRepository,
 		repositories.OAuth2AuthorizationCodeRepository,
+		repositories.OAuth2ConsentRepository,
 	)
 
 	uc.OAuth2ClientUsecase = usecase.NewOAuth2ClientUsecase(
