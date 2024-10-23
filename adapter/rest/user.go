@@ -62,7 +62,6 @@ func (a *UserRESTAdapter) Register() func(w http.ResponseWriter, r *http.Request
 
 // @Summary Get user by id
 // @Description Get an user information by user id. <br>
-// @Description Require scope `read:user.role` to get role of user.
 // @Tags User
 // @Produce json
 // @Param id path string true "User ID"
@@ -96,7 +95,6 @@ func (a *UserRESTAdapter) GetByID() http.HandlerFunc {
 
 // @Summary Get user by username
 // @Description Get an user information by user username. <br>
-// @Description Require scope `read:user.role` to get role of user.
 // @Tags User
 // @Produce json
 // @Param username path string true "Username"

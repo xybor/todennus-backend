@@ -281,18 +281,13 @@ type OAuth2GetConsentRequestDTO struct {
 
 type OAuth2GetConsentResponseDTO struct {
 	Client *resource.OAuth2Client
-	Scopes []string
+	Scopes scope.Scopes
 }
 
 func NewOAuth2GetConsentResponseDTO(client *domain.OAuth2Client, scope scope.Scopes) *OAuth2GetConsentResponseDTO {
-	scopeStr := []string{}
-	for i := range scope {
-		scopeStr = append(scopeStr, scope[i].String())
-	}
-
 	return &OAuth2GetConsentResponseDTO{
 		Client: resource.NewOAuth2ClientWithoutFilter(client),
-		Scopes: scopeStr,
+		Scopes: scope,
 	}
 }
 

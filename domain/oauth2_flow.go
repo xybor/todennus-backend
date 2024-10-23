@@ -3,6 +3,7 @@ package domain
 import (
 	"crypto/sha256"
 	"encoding/base64"
+	"fmt"
 	"time"
 
 	"github.com/xybor-x/snowflake"
@@ -227,6 +228,14 @@ func (domain *OAuth2FlowDomain) ValidateCodeChallenge(verifier, challenge, metho
 		encoded := base64.RawURLEncoding.EncodeToString(hash[:])
 		return encoded == challenge
 	}
+}
+
+func (domain *OAuth2FlowDomain) ValidateRequestedScope(requestedScope scope.Scopes, client *OAuth2Client) error {
+	if !requestedScope.LessThanOrEqual(client.AllowedScope) {
+		return fmt.Errorf("%w%s", ErrKnown, "the requested scope is exceed the client allowed scope")
+	}
+
+	return nil
 }
 
 func (domain *OAuth2FlowDomain) NewSession(userID snowflake.ID) *Session {

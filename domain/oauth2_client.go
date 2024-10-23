@@ -55,7 +55,7 @@ func (domain *OAuth2ClientDomain) CreateClient(ownerID snowflake.ID, name string
 	}
 
 	secret := ""
-	allowedScope := scope.New(Actions.Read, Resources).AsScopes()
+	allowedScope := ScopeEngine.New(Actions.Read, Resources).AsScopes()
 	hashedSecret := []byte{}
 	if isConfidential {
 		secret = xcrypto.RandString(domain.ClientSecretLength)
@@ -64,7 +64,7 @@ func (domain *OAuth2ClientDomain) CreateClient(ownerID snowflake.ID, name string
 			return nil, "", err
 		}
 
-		allowedScope = scope.New(Actions, Resources).AsScopes()
+		allowedScope = ScopeEngine.New(Actions, Resources).AsScopes()
 	}
 
 	return &OAuth2Client{
