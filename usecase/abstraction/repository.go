@@ -38,8 +38,18 @@ type OAuth2AuthorizationCodeRepository interface {
 
 	SaveAuthorizationStore(ctx context.Context, store *domain.OAuth2AuthorizationStore) error
 	LoadAuthorizationStore(ctx context.Context, id string) (*domain.OAuth2AuthorizationStore, error)
+	DeleteAuthorizationStore(ctx context.Context, id string) error
 
 	SaveAuthenticationResult(ctx context.Context, result *domain.OAuth2AuthenticationResult) error
 	LoadAuthenticationResult(ctx context.Context, id string) (*domain.OAuth2AuthenticationResult, error)
 	DeleteAuthenticationResult(ctx context.Context, id string) error
+}
+
+type OAuth2ConsentRepository interface {
+	SaveResult(ctx context.Context, result *domain.OAuth2ConsentResult) error
+	LoadResult(ctx context.Context, userID, clientID int64) (*domain.OAuth2ConsentResult, error)
+	DeleteResult(ctx context.Context, userID, clientID int64) error
+
+	Upsert(ctx context.Context, consent *domain.OAuth2Consent) error
+	Get(ctx context.Context, userID, clientID int64) (*domain.OAuth2Consent, error)
 }

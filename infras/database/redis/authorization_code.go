@@ -105,6 +105,13 @@ func (repo *OAuth2AuthorizationCodeRepository) LoadAuthorizationStore(
 	return model.To(), nil
 }
 
+func (repo *OAuth2AuthorizationCodeRepository) DeleteAuthorizationStore(
+	ctx context.Context,
+	id string,
+) error {
+	return database.ConvertError(repo.client.Del(ctx, oauth2AuthorizationStoreKey(id)).Err())
+}
+
 func (repo *OAuth2AuthorizationCodeRepository) SaveAuthenticationResult(
 	ctx context.Context,
 	result *domain.OAuth2AuthenticationResult,

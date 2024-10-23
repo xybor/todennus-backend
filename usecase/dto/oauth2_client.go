@@ -18,9 +18,9 @@ type OAuth2ClientCreateResponseDTO struct {
 	ClientSecret string
 }
 
-func NewOAuth2ClientCreateResponseDTO(ctx context.Context, client *domain.OAuth2Client, secret string) *OAuth2ClientCreateResponseDTO {
+func NewOAuth2ClientCreateResponseDTO(client *domain.OAuth2Client, secret string) *OAuth2ClientCreateResponseDTO {
 	return &OAuth2ClientCreateResponseDTO{
-		Client:       resource.NewOAuth2Client(ctx, client, false),
+		Client:       resource.NewOAuth2ClientWithoutFilter(client),
 		ClientSecret: secret,
 	}
 }
@@ -39,7 +39,7 @@ type OAuth2ClientCreateByAdminResponseDTO struct {
 
 func NewOAuth2ClientCreateFirstResponseDTO(ctx context.Context, client *domain.OAuth2Client, secret string) *OAuth2ClientCreateByAdminResponseDTO {
 	return &OAuth2ClientCreateByAdminResponseDTO{
-		Client:       resource.NewOAuth2Client(ctx, client, false),
+		Client:       resource.NewOAuth2ClientWithoutFilter(client),
 		ClientSecret: secret,
 	}
 }
@@ -54,6 +54,6 @@ type OAuth2ClientGetResponseDTO struct {
 
 func NewOAuth2ClientGetResponse(ctx context.Context, client *domain.OAuth2Client) *OAuth2ClientGetResponseDTO {
 	return &OAuth2ClientGetResponseDTO{
-		Client: resource.NewOAuth2Client(ctx, client, true),
+		Client: resource.NewOAuth2Client(ctx, client),
 	}
 }

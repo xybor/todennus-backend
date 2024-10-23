@@ -112,7 +112,7 @@ func (h *ResponseHandler) Redirect(ctx context.Context, w http.ResponseWriter, r
 	h.Map(http.StatusInternalServerError)
 
 	if h.code == -1 {
-		h.code = h.defaultCode
+		h.code = code
 	}
 
 	var redirect string

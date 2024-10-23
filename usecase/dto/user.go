@@ -20,7 +20,7 @@ type UserRegisterResponseDTO struct {
 
 func NewUserRegisterResponseDTO(ctx context.Context, user *domain.User) *UserRegisterResponseDTO {
 	return &UserRegisterResponseDTO{
-		User: resource.NewUser(ctx, user, false),
+		User: resource.NewUserWithoutFilter(user),
 	}
 }
 
@@ -35,7 +35,7 @@ type UserGetByIDResponseDTO struct {
 
 func NewUserGetByIDResponseDTO(ctx context.Context, user *domain.User) *UserGetByIDResponseDTO {
 	return &UserGetByIDResponseDTO{
-		User: resource.NewUser(ctx, user, true),
+		User: resource.NewUser(ctx, user),
 	}
 }
 
@@ -50,7 +50,7 @@ type UserGetByUsernameResponseDTO struct {
 
 func NewUserGetByUsernameResponseDTO(ctx context.Context, user *domain.User) *UserGetByUsernameResponseDTO {
 	return &UserGetByUsernameResponseDTO{
-		User: resource.NewUser(ctx, user, true),
+		User: resource.NewUser(ctx, user),
 	}
 }
 
@@ -66,6 +66,6 @@ type UserValidateCredentialsResponseDTO struct {
 
 func NewUserValidateCredentialsResponseDTO(ctx context.Context, user *domain.User) *UserValidateCredentialsResponseDTO {
 	return &UserValidateCredentialsResponseDTO{
-		User: resource.NewUser(ctx, user, true),
+		User: resource.NewUser(ctx, user),
 	}
 }

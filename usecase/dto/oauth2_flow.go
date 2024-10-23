@@ -5,6 +5,8 @@ import (
 
 	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/domain"
+	"github.com/xybor/todennus-backend/usecase/dto/resource"
+	"github.com/xybor/x/scope"
 	"github.com/xybor/x/token"
 )
 
@@ -197,9 +199,12 @@ type OAuth2AuthorizeRequestDTO struct {
 }
 
 type OAuth2AuthorizeResponseDTO struct {
-	// Directive
+	// Idp
 	IdpURL          string
 	AuthorizationID string
+
+	// Consent
+	NeedConsent bool
 
 	// Authorization Code Flow
 	Code string
@@ -217,6 +222,13 @@ func NewOAuth2AuthorizeResponseWithCode(code string) *OAuth2AuthorizeResponseDTO
 func NewOAuth2AuthorizeResponseRedirectToIdP(url, aid string) *OAuth2AuthorizeResponseDTO {
 	return &OAuth2AuthorizeResponseDTO{
 		IdpURL:          url,
+		AuthorizationID: aid,
+	}
+}
+
+func NewOAuth2AuthorizeResponseRedirectToConsent(aid string) *OAuth2AuthorizeResponseDTO {
+	return &OAuth2AuthorizeResponseDTO{
+		NeedConsent:     true,
 		AuthorizationID: aid,
 	}
 }
@@ -246,20 +258,57 @@ type OAuth2SessionUpdateRequestDTO struct {
 	AuthenticationID string
 }
 
-type OAuth2SessionUpdateResponseDTO struct {
-	ResponseType string
-	ClientID     snowflake.ID
-	RedirectURI  string
-	Scope        string
-	State        string
+// After updating the session, we must redirect user to Authorization Endpoint
+// again. So the response of SessionUpdate is the request of Authorization
+// Endpoint.
+type OAuth2SessionUpdateResponseDTO OAuth2AuthorizeRequestDTO
 
-	// Only for PKCE
-	CodeChallenge       string
-	CodeChallengeMethod string
+func NewOAuth2SessionUpdateResponseDTO(store *domain.OAuth2AuthorizationStore) *OAuth2SessionUpdateResponseDTO {
+	return &OAuth2SessionUpdateResponseDTO{
+		ResponseType:        store.ResponseType,
+		ClientID:            store.ClientID,
+		RedirectURI:         store.RedirectURI,
+		Scope:               store.Scope.String(),
+		State:               store.State,
+		CodeChallenge:       store.CodeChallenge,
+		CodeChallengeMethod: store.CodeChallengeMethod,
+	}
 }
 
-func NewOAuth2LoginUpdateResponseDTO(store *domain.OAuth2AuthorizationStore) *OAuth2SessionUpdateResponseDTO {
-	return &OAuth2SessionUpdateResponseDTO{
+type OAuth2GetConsentRequestDTO struct {
+	AuthorizationID string
+}
+
+type OAuth2GetConsentResponseDTO struct {
+	Client *resource.OAuth2Client
+	Scopes []string
+}
+
+func NewOAuth2GetConsentResponseDTO(client *domain.OAuth2Client, scope scope.Scopes) *OAuth2GetConsentResponseDTO {
+	scopeStr := []string{}
+	for i := range scope {
+		scopeStr = append(scopeStr, scope[i].String())
+	}
+
+	return &OAuth2GetConsentResponseDTO{
+		Client: resource.NewOAuth2ClientWithoutFilter(client),
+		Scopes: scopeStr,
+	}
+}
+
+type OAuth2UpdateConsentRequestDTO struct {
+	AuthorizationID string
+	UserScope       string
+	Accept          bool
+}
+
+// After updating the consent, we must redirect user to Authorization Endpoint
+// again. So the response of UpdateConsent is the request of Authorization
+// Endpoint.
+type OAUth2UpdateConsentResponseDTO OAuth2AuthorizeRequestDTO
+
+func NewOAUth2UpdateConsentResponseDTO(store *domain.OAuth2AuthorizationStore) *OAUth2UpdateConsentResponseDTO {
+	return &OAUth2UpdateConsentResponseDTO{
 		ResponseType:        store.ResponseType,
 		ClientID:            store.ClientID,
 		RedirectURI:         store.RedirectURI,

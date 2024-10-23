@@ -41,7 +41,7 @@ type OAuth2AuthorizationCode struct {
 
 type OAuth2AuthorizationStore struct {
 	ID                  string
-	HasAuthenticated    bool
+	IsOpen              bool
 	ResponseType        string
 	ClientID            snowflake.ID
 	RedirectURI         string
@@ -91,10 +91,10 @@ type OAuth2FlowDomain struct {
 	Snowflake *snowflake.Node
 	Issuer    string
 
-	AuthorizationCodeFlowExpiration time.Duration
-	LoginResultExpiration           time.Duration
-	LoginUpdateExpiration           time.Duration
-	SessionExpiration               time.Duration
+	AuthorizationCodeFlowExpiration  time.Duration
+	AuthenticationCallbackExpiration time.Duration
+	SessionUpdateExpiration          time.Duration
+	SessionExpiration                time.Duration
 
 	AccessTokenExpiration  time.Duration
 	RefreshTokenExpiration time.Duration
@@ -106,8 +106,8 @@ func NewOAuth2FlowDomain(
 	snowflake *snowflake.Node,
 	issuer string,
 	authorizationCodeFlowExpiration time.Duration,
-	loginResultExpiration time.Duration,
-	loginUpdateExpiration time.Duration,
+	authenticationCallbackExpiration time.Duration,
+	sessionUpdateExpiration time.Duration,
 	sessionExpiration time.Duration,
 	accessTokenExpiration time.Duration,
 	refreshTokenExpiration time.Duration,
@@ -117,10 +117,10 @@ func NewOAuth2FlowDomain(
 		Snowflake: snowflake,
 		Issuer:    issuer,
 
-		AuthorizationCodeFlowExpiration: accessTokenExpiration,
-		LoginResultExpiration:           loginResultExpiration,
-		LoginUpdateExpiration:           loginUpdateExpiration,
-		SessionExpiration:               sessionExpiration,
+		AuthorizationCodeFlowExpiration:  accessTokenExpiration,
+		AuthenticationCallbackExpiration: authenticationCallbackExpiration,
+		SessionUpdateExpiration:          sessionUpdateExpiration,
+		SessionExpiration:                sessionExpiration,
 
 		AccessTokenExpiration:  accessTokenExpiration,
 		RefreshTokenExpiration: refreshTokenExpiration,
@@ -153,14 +153,14 @@ func (domain *OAuth2FlowDomain) CreateAuthorizationStore(
 	return &OAuth2AuthorizationStore{
 		ID:                  xcrypto.RandString(32),
 		ResponseType:        respType,
-		HasAuthenticated:    false,
+		IsOpen:              true,
 		Scope:               scope,
 		ClientID:            clientID,
 		RedirectURI:         redirectURI,
 		State:               state,
 		CodeChallenge:       codeChallenge,
 		CodeChallengeMethod: codeChallengeMethod,
-		ExpiresAt:           time.Now().Add(domain.LoginResultExpiration),
+		ExpiresAt:           time.Now().Add(domain.AuthenticationCallbackExpiration),
 	}
 }
 
@@ -175,7 +175,7 @@ func (domain *OAuth2FlowDomain) CreateAuthenticationResultSuccess(
 		AuthorizationID: authID,
 		UserID:          userID,
 		Username:        username,
-		ExpiresAt:       time.Now().Add(domain.LoginUpdateExpiration),
+		ExpiresAt:       time.Now().Add(domain.SessionUpdateExpiration),
 	}
 }
 
@@ -185,7 +185,7 @@ func (domain *OAuth2FlowDomain) CreateAuthenticationResultFailure(authID string,
 		Ok:              false,
 		AuthorizationID: authID,
 		Error:           err,
-		ExpiresAt:       time.Now().Add(domain.LoginUpdateExpiration),
+		ExpiresAt:       time.Now().Add(domain.SessionUpdateExpiration),
 	}
 }
 

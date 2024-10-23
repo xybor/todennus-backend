@@ -18,6 +18,7 @@ FROM scratch
 WORKDIR /
 
 COPY --from=build /todennus /
+COPY --from=build /todennus-backend/template /template
 
 EXPOSE 8080
 

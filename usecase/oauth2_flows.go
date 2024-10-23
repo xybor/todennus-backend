@@ -39,15 +39,17 @@ type OAuth2FlowUsecase struct {
 	idpLoginURL string
 	idpSecret   string
 
-	userDomain         abstraction.UserDomain
-	oauth2ClientDomain abstraction.OAuth2ClientDomain
-	oauth2FlowDomain   abstraction.OAuth2FlowDomain
+	userDomain          abstraction.UserDomain
+	oauth2ClientDomain  abstraction.OAuth2ClientDomain
+	oauth2FlowDomain    abstraction.OAuth2FlowDomain
+	oauth2ConsentDomain abstraction.OAuth2ConsentDomain
 
-	userRepo         abstraction.UserRepository
-	refreshTokenRepo abstraction.RefreshTokenRepository
-	oauth2ClientRepo abstraction.OAuth2ClientRepository
-	sessionRepo      abstraction.SessionRepository
-	oauth2CodeRepo   abstraction.OAuth2AuthorizationCodeRepository
+	userRepo          abstraction.UserRepository
+	refreshTokenRepo  abstraction.RefreshTokenRepository
+	sessionRepo       abstraction.SessionRepository
+	oauth2ClientRepo  abstraction.OAuth2ClientRepository
+	oauth2CodeRepo    abstraction.OAuth2AuthorizationCodeRepository
+	oauth2ConsentRepo abstraction.OAuth2ConsentRepository
 }
 
 func NewOAuth2Usecase(
@@ -57,11 +59,13 @@ func NewOAuth2Usecase(
 	userDomain abstraction.UserDomain,
 	oauth2FlowDomain abstraction.OAuth2FlowDomain,
 	oauth2ClientDomain abstraction.OAuth2ClientDomain,
+	oauth2ConsentDomain abstraction.OAuth2ConsentDomain,
 	userRepo abstraction.UserRepository,
 	refreshTokenRepo abstraction.RefreshTokenRepository,
 	oauth2ClientRepo abstraction.OAuth2ClientRepository,
 	sessionRepo abstraction.SessionRepository,
 	oauth2CodeRepo abstraction.OAuth2AuthorizationCodeRepository,
+	oauth2ConsentRepo abstraction.OAuth2ConsentRepository,
 ) *OAuth2FlowUsecase {
 	return &OAuth2FlowUsecase{
 		tokenEngine: tokenEngine,
@@ -69,15 +73,17 @@ func NewOAuth2Usecase(
 		idpLoginURL: idpLoginURL,
 		idpSecret:   idpSecret,
 
-		userDomain:         userDomain,
-		oauth2FlowDomain:   oauth2FlowDomain,
-		oauth2ClientDomain: oauth2ClientDomain,
+		userDomain:          userDomain,
+		oauth2FlowDomain:    oauth2FlowDomain,
+		oauth2ClientDomain:  oauth2ClientDomain,
+		oauth2ConsentDomain: oauth2ConsentDomain,
 
-		userRepo:         userRepo,
-		refreshTokenRepo: refreshTokenRepo,
-		oauth2ClientRepo: oauth2ClientRepo,
-		sessionRepo:      sessionRepo,
-		oauth2CodeRepo:   oauth2CodeRepo,
+		userRepo:          userRepo,
+		refreshTokenRepo:  refreshTokenRepo,
+		sessionRepo:       sessionRepo,
+		oauth2ClientRepo:  oauth2ClientRepo,
+		oauth2CodeRepo:    oauth2CodeRepo,
+		oauth2ConsentRepo: oauth2ConsentRepo,
 	}
 }
 
@@ -98,14 +104,14 @@ func (usecase *OAuth2FlowUsecase) Authorize(
 		return nil, ErrServer.Hide(err, "failed-to-get-client", "cid", req.ClientID)
 	}
 
-	scope := domain.ScopeEngine.ParseScopes(req.Scope)
-	if !scope.LessThan(client.AllowedScope) {
+	requestedScope := domain.ScopeEngine.ParseScopes(req.Scope)
+	if !requestedScope.LessThan(client.AllowedScope) {
 		return nil, xerror.Enrich(ErrScopeInvalid, "client has not permission to request this scope")
 	}
 
 	switch req.ResponseType {
 	case ResponseTypeCode:
-		return usecase.handleAuthorizeCodeFlow(ctx, req, scope)
+		return usecase.handleAuthorizeCodeFlow(ctx, req, requestedScope)
 	default:
 		return nil, xerror.Enrich(ErrRequestInvalid, "not support response type %s", req.ResponseType)
 	}
@@ -124,16 +130,11 @@ func (usecase *OAuth2FlowUsecase) Token(
 		return nil, ErrServer.Hide(err, "failed-to-get-client", "cid", req.ClientID)
 	}
 
-	requestedScope := domain.ScopeEngine.ParseScopes(req.Scope)
-	if !requestedScope.LessThan(client.AllowedScope) {
-		return nil, xerror.Enrich(ErrScopeInvalid, "client has not permission to request this scope")
-	}
-
 	switch req.GrantType {
 	case GrantTypeAuthorizationCode:
-		return usecase.handleAuthorizationCodeFlow(ctx, req, requestedScope, client)
+		return usecase.handleTokenCodeFlow(ctx, req, client)
 	case GrantTypePassword:
-		return usecase.handleTokenPasswordFlow(ctx, req, requestedScope, client)
+		return usecase.handleTokenPasswordFlow(ctx, req, client)
 	case GrantTypeRefreshToken:
 		return usecase.handleTokenRefreshTokenFlow(ctx, req, client)
 	default:
@@ -158,11 +159,11 @@ func (usecase *OAuth2FlowUsecase) AuthenticationCallback(
 		return nil, ErrServer.Hide(err, "failed-to-load-authorization-store", "aid", req.AuthorizationID)
 	}
 
-	if store.HasAuthenticated {
+	if !store.IsOpen {
 		return nil, xerror.Enrich(ErrRequestInvalid, "callback api closed for this authorization id")
 	}
 
-	store.HasAuthenticated = true
+	store.IsOpen = false
 	if err := usecase.oauth2CodeRepo.SaveAuthorizationStore(ctx, store); err != nil {
 		return nil, ErrServer.Hide(err, "failed-to-update-authorization-store")
 	}
@@ -214,6 +215,10 @@ func (usecase *OAuth2FlowUsecase) SessionUpdate(
 		return nil, ErrServer.Hide(err, "failed-to-load-authorization-store", "aid", authResult.AuthorizationID)
 	}
 
+	if err := usecase.oauth2CodeRepo.DeleteAuthorizationStore(ctx, authResult.AuthorizationID); err != nil {
+		xcontext.Logger(ctx).Warn("failed-to-delete-authorization-store", "aid", authResult.AuthorizationID)
+	}
+
 	var session *domain.Session
 	if authResult.Ok {
 		session = usecase.oauth2FlowDomain.NewSession(authResult.UserID)
@@ -226,31 +231,99 @@ func (usecase *OAuth2FlowUsecase) SessionUpdate(
 		return nil, ErrServer.Hide(err, "failed-to-save-session", "aid", authResult.AuthorizationID)
 	}
 
-	return dto.NewOAuth2LoginUpdateResponseDTO(store), nil
+	return dto.NewOAuth2SessionUpdateResponseDTO(store), nil
+}
+
+func (usecase *OAuth2FlowUsecase) GetConsent(
+	ctx context.Context,
+	req *dto.OAuth2GetConsentRequestDTO,
+) (*dto.OAuth2GetConsentResponseDTO, error) {
+	store, err := usecase.oauth2CodeRepo.LoadAuthorizationStore(ctx, req.AuthorizationID)
+	if err != nil {
+		if errors.Is(err, database.ErrRecordNotFound) {
+			return nil, xerror.Enrich(ErrRequestInvalid, "not found authorization id")
+		}
+
+		return nil, ErrServer.Hide(err, "failed-to-load-authorization-store", "aid", req.AuthorizationID)
+	}
+
+	client, err := usecase.oauth2ClientRepo.GetByID(ctx, store.ClientID.Int64())
+	if err != nil {
+		return nil, ErrServer.Hide(err, "failed-to-load-client", "cid", store.ClientID)
+	}
+
+	return dto.NewOAuth2GetConsentResponseDTO(client, store.Scope), nil
+}
+
+func (usecase *OAuth2FlowUsecase) UpdateConsent(
+	ctx context.Context,
+	req *dto.OAuth2UpdateConsentRequestDTO,
+) (*dto.OAUth2UpdateConsentResponseDTO, error) {
+	store, err := usecase.oauth2CodeRepo.LoadAuthorizationStore(ctx, req.AuthorizationID)
+	if err != nil {
+		if errors.Is(err, database.ErrRecordNotFound) {
+			return nil, xerror.Enrich(ErrRequestInvalid, "not found authorization id %s", req.AuthorizationID)
+		}
+
+		return nil, ErrServer.Hide(err, "failed-to-load-authorization-store", "aid", req.AuthorizationID)
+	}
+
+	if err := usecase.oauth2CodeRepo.DeleteAuthorizationStore(ctx, req.AuthorizationID); err != nil {
+		xcontext.Logger(ctx).Warn("failed-to-delete-authorization-store", "aid", req.AuthorizationID)
+	}
+
+	userID, err := usecase.getAuthenticatedUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var result *domain.OAuth2ConsentResult
+
+	if req.Accept {
+		userScope := domain.ScopeEngine.ParseScopes(req.UserScope)
+		result = usecase.oauth2ConsentDomain.CreateConsentAcceptedResult(userID, store.ClientID, userScope)
+
+		consent := usecase.oauth2ConsentDomain.CreateConsent(userID, store.ClientID, userScope)
+		if err := usecase.oauth2ConsentRepo.Upsert(ctx, consent); err != nil {
+			return nil, ErrServer.Hide(err, "failed-to-create-or-update-consent")
+		}
+	} else {
+		result = usecase.oauth2ConsentDomain.CreateConsentDeniedResult(userID, store.ClientID)
+	}
+
+	if err := usecase.oauth2ConsentRepo.SaveResult(ctx, result); err != nil {
+		return nil, ErrServer.Hide(err, "failed-to-save-consent-result")
+	}
+
+	return dto.NewOAUth2UpdateConsentResponseDTO(store), nil
 }
 
 func (usecase *OAuth2FlowUsecase) handleAuthorizeCodeFlow(
 	ctx context.Context,
 	req *dto.OAuth2AuthorizeRequestDTO,
-	scope scope.Scopes,
+	requestedScope scope.Scopes,
 ) (*dto.OAuth2AuthorizeResponseDTO, error) {
-	userID, storeID, err := usecase.getAuthenticatedUser(ctx, req, scope)
+	userID, err := usecase.getAuthenticatedUser(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if storeID != "" {
-		return dto.NewOAuth2AuthorizeResponseRedirectToIdP(usecase.idpLoginURL, storeID), nil
+	if userID == 0 {
+		store, err := usecase.storeAuthorization(ctx, req, requestedScope)
+		if err != nil {
+			return nil, err
+		}
+
+		return dto.NewOAuth2AuthorizeResponseRedirectToIdP(usecase.idpLoginURL, store.ID), nil
 	}
 
-	user, err := usecase.userRepo.GetByID(ctx, userID.Int64())
-	if err != nil {
-		return nil, ErrServer.Hide(err, "failed-to-get-user", "uid", userID)
+	resp, consentScope, err := usecase.validateConsentResult(ctx, userID.Int64(), req, requestedScope)
+	if err != nil || resp != nil {
+		return resp, err
 	}
 
-	finalScope := scope.Intersect(user.AllowedScope)
 	code := usecase.oauth2FlowDomain.CreateAuthorizationCode(
-		user.ID, req.ClientID, finalScope,
+		userID, req.ClientID, consentScope,
 		req.CodeChallenge, req.CodeChallengeMethod,
 	)
 	if err = usecase.oauth2CodeRepo.SaveAuthorizationCode(ctx, code); err != nil {
@@ -260,10 +333,9 @@ func (usecase *OAuth2FlowUsecase) handleAuthorizeCodeFlow(
 	return dto.NewOAuth2AuthorizeResponseWithCode(code.Code), nil
 }
 
-func (usecase *OAuth2FlowUsecase) handleAuthorizationCodeFlow(
+func (usecase *OAuth2FlowUsecase) handleTokenCodeFlow(
 	ctx context.Context,
 	req *dto.OAuth2TokenRequestDTO,
-	requestedScope scope.Scopes,
 	client *domain.OAuth2Client,
 ) (*dto.OAuth2TokenResponseDTO, error) {
 	code, err := usecase.oauth2CodeRepo.LoadAuthorizationCode(ctx, req.Code)
@@ -297,15 +369,15 @@ func (usecase *OAuth2FlowUsecase) handleAuthorizationCodeFlow(
 		return nil, ErrServer.Hide(err, "failed-to-get-user", "uid", code.UserID)
 	}
 
-	return usecase.completeRegularTokenFlow(ctx, "", requestedScope, user)
+	return usecase.completeRegularTokenFlow(ctx, "", code.Scope, user)
 }
 
 func (usecase *OAuth2FlowUsecase) handleTokenPasswordFlow(
 	ctx context.Context,
 	req *dto.OAuth2TokenRequestDTO,
-	requestedScope scope.Scopes,
 	client *domain.OAuth2Client,
 ) (*dto.OAuth2TokenResponseDTO, error) {
+
 	err := usecase.oauth2ClientDomain.ValidateClient(
 		client, req.ClientID, req.ClientSecret, domain.RequireConfidential)
 	if err != nil {
@@ -328,6 +400,11 @@ func (usecase *OAuth2FlowUsecase) handleTokenPasswordFlow(
 		return nil, errcfg.Event(err, "failed-to-validate-user-credential").
 			EnrichWith(ErrTokenInvalidGrant, "invalid username or password").Error()
 
+	}
+
+	requestedScope := domain.ScopeEngine.ParseScopes(req.Scope)
+	if !requestedScope.LessThan(client.AllowedScope) {
+		return nil, xerror.Enrich(ErrScopeInvalid, "client has not permission to request this scope")
 	}
 
 	return usecase.completeRegularTokenFlow(ctx, "", requestedScope, user)
@@ -430,11 +507,9 @@ func (usecase *OAuth2FlowUsecase) serializeAccessAndRefreshTokens(
 func (usecase *OAuth2FlowUsecase) completeRegularTokenFlow(
 	ctx context.Context,
 	aud string,
-	requestedScope scope.Scopes,
+	scope scope.Scopes,
 	user *domain.User,
 ) (*dto.OAuth2TokenResponseDTO, error) {
-	scope := requestedScope.Intersect(user.AllowedScope)
-
 	accessToken := usecase.oauth2FlowDomain.CreateAccessToken(aud, scope, user)
 	refreshToken := usecase.oauth2FlowDomain.CreateRefreshToken(aud, scope, user.ID)
 
@@ -460,11 +535,7 @@ func (usecase *OAuth2FlowUsecase) completeRegularTokenFlow(
 	}, nil
 }
 
-func (usecase *OAuth2FlowUsecase) getAuthenticatedUser(
-	ctx context.Context,
-	req *dto.OAuth2AuthorizeRequestDTO,
-	scope scope.Scopes,
-) (snowflake.ID, string, error) {
+func (usecase *OAuth2FlowUsecase) getAuthenticatedUser(ctx context.Context) (snowflake.ID, error) {
 	session, err := usecase.sessionRepo.Load(ctx)
 	if err == nil {
 		xcontext.Logger(ctx).Debug("session-state", "state", session.State, "expires_at", session.ExpiresAt)
@@ -473,28 +544,110 @@ func (usecase *OAuth2FlowUsecase) getAuthenticatedUser(
 	}
 
 	if err != nil || session.ExpiresAt.Before(time.Now()) || session.State == domain.SessionStateUnauthenticated {
-		store := usecase.oauth2FlowDomain.CreateAuthorizationStore(
-			req.ResponseType, req.ClientID, scope, req.RedirectURI,
-			req.State, req.CodeChallenge, req.CodeChallengeMethod,
-		)
-
-		if err := usecase.oauth2CodeRepo.SaveAuthorizationStore(ctx, store); err != nil {
-			return 0, "", ErrServer.Hide(err, "failed-to-save-session")
-		}
-
-		return 0, store.ID, nil
+		return 0, nil
 	}
 
 	if session.State == domain.SessionStateFailedAuthentication {
 		session := usecase.oauth2FlowDomain.InvalidateSession(domain.SessionStateUnauthenticated)
 		if err := usecase.sessionRepo.Save(ctx, session); err != nil {
-			xcontext.Logger(ctx).Warn("failed-to-save-token", "err", err)
+			xcontext.Logger(ctx).Warn("failed-to-save-invalidate-session", "err", err)
 		}
 
-		return 0, "", xerror.Enrich(ErrAuthorizationAccessDenied, "the user failed to authenticate")
+		return 0, xerror.Enrich(ErrAuthorizationAccessDenied, "the user failed to authenticate")
 	}
 
-	return session.UserID, "", nil
+	return session.UserID, nil
+}
+
+func (usecase *OAuth2FlowUsecase) storeAuthorization(
+	ctx context.Context,
+	req *dto.OAuth2AuthorizeRequestDTO,
+	scope scope.Scopes,
+) (*domain.OAuth2AuthorizationStore, error) {
+	store := usecase.oauth2FlowDomain.CreateAuthorizationStore(
+		req.ResponseType, req.ClientID, scope, req.RedirectURI,
+		req.State, req.CodeChallenge, req.CodeChallengeMethod,
+	)
+
+	if err := usecase.oauth2CodeRepo.SaveAuthorizationStore(ctx, store); err != nil {
+		return nil, ErrServer.Hide(err, "failed-to-save-session")
+	}
+
+	return store, nil
+}
+
+func (usecase *OAuth2FlowUsecase) validateConsentResult(
+	ctx context.Context,
+	userID int64,
+	req *dto.OAuth2AuthorizeRequestDTO,
+	requestedScope scope.Scopes,
+) (*dto.OAuth2AuthorizeResponseDTO, scope.Scopes, error) {
+	clientID := req.ClientID.Int64()
+	logger := xcontext.Logger(ctx).With("cid", req.ClientID, "uid", userID)
+
+	result, err := usecase.oauth2ConsentRepo.LoadResult(ctx, userID, clientID)
+	if err == nil {
+		if err := usecase.oauth2ConsentRepo.DeleteResult(ctx, userID, clientID); err != nil {
+			logger.Warn("failed-to-delete-failure-consent-result", "err", err)
+		}
+
+		if result.ExpiresAt.Before(time.Now()) {
+			return usecase.redirectToConsentPage(ctx, req, requestedScope)
+		}
+
+		if result.Accepted {
+			if requestedScope.LessThan(result.Scope) {
+				return nil, nil, xerror.Enrich(ErrScopeInvalid,
+					"do not choose more scopes than the requested one")
+			}
+
+			// In case user has just consented with the requested scope (user
+			// can choose less scope than the requested one), we need to return
+			// the scope which user chose rather than the requested scope.
+			return nil, result.Scope, nil
+		}
+
+		return nil, nil, xerror.Enrich(ErrAuthorizationAccessDenied, "user declined to grant access")
+	}
+
+	if !errors.Is(err, database.ErrRecordNotFound) { // unknown error
+		logger.Warn("failed-to-get-consent-record", "err", err)
+		return usecase.redirectToConsentPage(ctx, req, requestedScope)
+	}
+
+	consent, err := usecase.oauth2ConsentRepo.Get(ctx, userID, clientID)
+	if err != nil && !errors.Is(err, database.ErrRecordNotFound) {
+		logger.Critical("failed-to-get-user", "err", err)
+		return usecase.redirectToConsentPage(ctx, req, requestedScope)
+	}
+
+	if errors.Is(err, database.ErrRecordNotFound) {
+		logger.Debug("no-consent")
+		return usecase.redirectToConsentPage(ctx, req, requestedScope)
+	}
+
+	if err := usecase.oauth2ConsentDomain.ValidateConsent(consent, requestedScope); err != nil {
+		logger.Debug("validate-consent-fails", "err", err,
+			"requested_scope", requestedScope, "consent_scope", consent.Scope)
+		return usecase.redirectToConsentPage(ctx, req, requestedScope)
+	}
+
+	// In this case, the requested scope is valid for the previous consented
+	// scope.
+	return nil, requestedScope, nil
+}
+
+func (usecase *OAuth2FlowUsecase) redirectToConsentPage(
+	ctx context.Context,
+	req *dto.OAuth2AuthorizeRequestDTO,
+	requestedScope scope.Scopes,
+) (*dto.OAuth2AuthorizeResponseDTO, scope.Scopes, error) {
+	store, err := usecase.storeAuthorization(ctx, req, requestedScope)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return dto.NewOAuth2AuthorizeResponseRedirectToConsent(store.ID), nil, nil
 }
 
 func (usecase *OAuth2FlowUsecase) getExpiresIn(metadata *domain.OAuth2TokenMedata) int {

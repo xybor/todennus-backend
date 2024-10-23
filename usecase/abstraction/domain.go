@@ -46,3 +46,10 @@ type OAuth2ClientDomain interface {
 		confidentialRequirement domain.ConfidentialRequirementType,
 	) error
 }
+
+type OAuth2ConsentDomain interface {
+	CreateConsentDeniedResult(userID, clientID snowflake.ID) *domain.OAuth2ConsentResult
+	CreateConsentAcceptedResult(userID, clientID snowflake.ID, userScope scope.Scopes) *domain.OAuth2ConsentResult
+	CreateConsent(userID, clientID snowflake.ID, requestedScope scope.Scopes) *domain.OAuth2Consent
+	ValidateConsent(consent *domain.OAuth2Consent, requestScope scope.Scopes) error
+}

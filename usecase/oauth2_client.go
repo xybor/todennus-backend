@@ -60,7 +60,7 @@ func (usecase *OAuth2ClientUsecase) Create(
 		return nil, ErrServer.Hide(err, "failed-to-create-client")
 	}
 
-	return dto.NewOAuth2ClientCreateResponseDTO(ctx, client, secret), nil
+	return dto.NewOAuth2ClientCreateResponseDTO(client, secret), nil
 }
 
 func (usecase *OAuth2ClientUsecase) CreateByAdmin(
