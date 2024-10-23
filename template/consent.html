@@ -101,10 +101,17 @@
         <form id="consent-form" action="/oauth2/consent" method="POST">
             <div class="scopes">
                 {{range .Scopes}}
+                {{if not .Optional}}
                 <label>
-                    <input type="checkbox" name="scopes" value="{{.}}" checked>
-                    {{.}}
+                    <input type="hidden" name="scope" value="{{.Key}}">
+                    {{.Key}} (*required)
                 </label>
+                {{else}}
+                <label>
+                    <input type="checkbox" name="scope" value="{{.Key}}" checked>
+                    {{.Key}}
+                </label>
+                {{end}}
                 {{end}}
             </div>
 

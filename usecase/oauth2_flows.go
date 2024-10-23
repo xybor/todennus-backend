@@ -105,8 +105,8 @@ func (usecase *OAuth2FlowUsecase) Authorize(
 	}
 
 	requestedScope := domain.ScopeEngine.ParseScopes(req.Scope)
-	if !requestedScope.LessThan(client.AllowedScope) {
-		return nil, xerror.Enrich(ErrScopeInvalid, "client has not permission to request this scope")
+	if err := usecase.oauth2FlowDomain.ValidateRequestedScope(requestedScope, client); err != nil {
+		return nil, domainerr.Event(err, "failed-to-validate-requested-scope").Enrich(ErrScopeInvalid).Error()
 	}
 
 	switch req.ResponseType {
@@ -395,16 +395,15 @@ func (usecase *OAuth2FlowUsecase) handleTokenPasswordFlow(
 		return nil, ErrServer.Hide(err, "failed-to-get-user", "username", req.Username)
 	}
 
-	// Validate password.
 	if err = usecase.userDomain.Validate(user.HashedPass, req.Password); err != nil {
-		return nil, errcfg.Event(err, "failed-to-validate-user-credential").
+		return nil, domainerr.Event(err, "failed-to-validate-user-credential").
 			EnrichWith(ErrTokenInvalidGrant, "invalid username or password").Error()
 
 	}
 
 	requestedScope := domain.ScopeEngine.ParseScopes(req.Scope)
-	if !requestedScope.LessThan(client.AllowedScope) {
-		return nil, xerror.Enrich(ErrScopeInvalid, "client has not permission to request this scope")
+	if err := usecase.oauth2FlowDomain.ValidateRequestedScope(requestedScope, client); err != nil {
+		return nil, domainerr.Event(err, "failed-to-validate-requested-scope").Enrich(ErrScopeInvalid).Error()
 	}
 
 	return usecase.completeRegularTokenFlow(ctx, "", requestedScope, user)
@@ -596,9 +595,16 @@ func (usecase *OAuth2FlowUsecase) validateConsentResult(
 		}
 
 		if result.Accepted {
-			if requestedScope.LessThan(result.Scope) {
+			if !result.Scope.LessThanOrEqual(requestedScope) {
 				return nil, nil, xerror.Enrich(ErrScopeInvalid,
-					"do not choose more scopes than the requested one")
+					"user choose more scopes than the request from client")
+			}
+
+			for i := range requestedScope {
+				if !requestedScope[i].IsOptional() && !result.Scope.Contains(requestedScope[i]) {
+					return nil, nil, xerror.Enrich(ErrScopeInvalid,
+						"user denied the required scope %s", requestedScope[i])
+				}
 			}
 
 			// In case user has just consented with the requested scope (user

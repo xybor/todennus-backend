@@ -33,8 +33,6 @@ func (a *OAuth2ClientAdapter) Router(r chi.Router) {
 
 // @Summary Get oauth2 client by id
 // @Description Get OAuth2 Client information by ClientID. <br>
-// @Description Require scope `read:client.allowed_scope` to get the allowed scope. <br>
-// @Description Require scope `read:client.owner` to get Owner ID.
 // @Tags OAuth2 Client
 // @Produce json
 // @Param id path string true "ClientID"
@@ -62,7 +60,7 @@ func (a *OAuth2ClientAdapter) Get() http.HandlerFunc {
 
 // @Summary Create oauth2 client
 // @Description Create an new OAuth2 Client. If the `is_confidential` field is true, a secret is issued. Please carefully store this secret in a confidential place. This secret will never be retrieved by anyway. <br>
-// @Description Require scope `create:client`.
+// @Description Require scope `[todennus]create:client`.
 // @Tags OAuth2 Client
 // @Accept json
 // @Produce json

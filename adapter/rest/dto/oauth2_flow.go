@@ -250,18 +250,31 @@ func (req OAuth2GetConsentPageRequestDTO) To() *dto.OAuth2GetConsentRequestDTO {
 	}
 }
 
+type ConsentPageScope struct {
+	Optional bool
+	Key      string
+}
+
 type OAuth2GetConsentPageResponseDTO struct {
 	ClientName string
 	ClientID   int64
 
-	Scopes []string
+	Scopes []ConsentPageScope
 }
 
 func NewOAuth2GetConsentPageResponseDTO(resp *dto.OAuth2GetConsentResponseDTO) *OAuth2GetConsentPageResponseDTO {
+	scopes := []ConsentPageScope{}
+	for i := range resp.Scopes {
+		scopes = append(scopes, ConsentPageScope{
+			Optional: resp.Scopes[i].IsOptional(),
+			Key:      resp.Scopes[i].String(),
+		})
+	}
+
 	return &OAuth2GetConsentPageResponseDTO{
 		ClientName: resp.Client.Name,
 		ClientID:   resp.Client.ClientID.Int64(),
-		Scopes:     resp.Scopes,
+		Scopes:     scopes,
 	}
 }
 

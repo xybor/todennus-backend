@@ -32,6 +32,7 @@ type OAuth2FlowDomain interface {
 	CreateIDToken(aud string, user *domain.User) *domain.OAuth2IDToken
 
 	ValidateCodeChallenge(verifier, challenge, method string) bool
+	ValidateRequestedScope(requestedScope scope.Scopes, client *domain.OAuth2Client) error
 
 	NewSession(userID snowflake.ID) *domain.Session
 	InvalidateSession(state domain.SessionState) *domain.Session

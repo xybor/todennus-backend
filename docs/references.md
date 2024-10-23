@@ -26,19 +26,32 @@ Authorization: Bearer {ACCESS_TOKEN}
 
 ## Scope
 
+### Todennus (inhouse) scope
+
 Refers [Resources](./resources.md#resources) to know the scope to read a
 particular resource or field.
 
-Refers [API Endpoints](./endpoints.md#api-endpoints) to know the scope which
-each API needs to execute.
+The general form of todennus scope is:
+
+```
+[todennus]action{:resource}
+```
+
+For example:
+
+`[todennus]read`: read everything
+
+`[todennus]read:user`: read user
+
+`[todennus]*`: do anything
 
 A scope can cover another scope. For example:
 
-`read` can cover `read:user`.
+`[todennus]read` can cover `[todennus]read:user`.
 
-`read:user` can cover `read:user.role`.
+`[todennus]read:user` can cover `[todennus]read:user.role`.
 
-`*:user` can cover `read:user` and `write:user`.
+`[todennus]*:user` can cover `[todennus]read:user` and `[todennus]write:user`.
 
 
 | Action   | Description                                                 |
@@ -49,3 +62,17 @@ A scope can cover another scope. For example:
 | `create` | Grant ability to create a resource                          |
 | `update` | Grant ability to update a resource                          |
 | `delete` | Grant ability to delete a resource                          |
+
+### Outside scope
+
+We support use freely define your application scope. The scope is called outside if it violates the general form of todennus scope.
+
+For example:
+
+`read:user`
+
+`read_user`
+
+`write_something`
+
+`[todennus]invalid`

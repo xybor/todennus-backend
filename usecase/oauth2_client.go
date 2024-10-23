@@ -9,7 +9,6 @@ import (
 	"github.com/xybor/todennus-backend/usecase/abstraction"
 	"github.com/xybor/todennus-backend/usecase/dto"
 	"github.com/xybor/x/lock"
-	"github.com/xybor/x/scope"
 	"github.com/xybor/x/xcontext"
 	"github.com/xybor/x/xerror"
 )
@@ -45,7 +44,7 @@ func (usecase *OAuth2ClientUsecase) Create(
 	ctx context.Context,
 	req *dto.OAuth2ClientCreateRequestDTO,
 ) (*dto.OAuth2ClientCreateResponseDTO, error) {
-	requiredScope := scope.New(domain.Actions.Write.Create, domain.Resources.Client)
+	requiredScope := domain.ScopeEngine.New(domain.Actions.Write.Create, domain.Resources.Client)
 	if !xcontext.Scope(ctx).Contains(requiredScope) {
 		return nil, xerror.Enrich(ErrForbidden, "insufficient scope, require %s", requiredScope)
 	}
@@ -53,7 +52,7 @@ func (usecase *OAuth2ClientUsecase) Create(
 	userID := xcontext.RequestUserID(ctx)
 	client, secret, err := usecase.oauth2ClientDomain.CreateClient(userID, req.Name, req.IsConfidential)
 	if err != nil {
-		return nil, errcfg.Event(err, "failed-to-new-client").Enrich(ErrRequestInvalid).Error()
+		return nil, domainerr.Event(err, "failed-to-new-client").Enrich(ErrRequestInvalid).Error()
 	}
 
 	if err = usecase.oauth2ClientRepo.Create(ctx, client); err != nil {
@@ -96,7 +95,7 @@ func (usecase *OAuth2ClientUsecase) CreateByAdmin(
 	}
 
 	if err := usecase.userDomain.Validate(user.HashedPass, req.Password); err != nil {
-		return nil, errcfg.Event(err, "failed-to-validate-user-credentials").
+		return nil, domainerr.Event(err, "failed-to-validate-user-credentials").
 			EnrichWith(ErrUnauthenticated, "invalid username or password").Error()
 	}
 
@@ -106,7 +105,7 @@ func (usecase *OAuth2ClientUsecase) CreateByAdmin(
 
 	client, secret, err := usecase.oauth2ClientDomain.CreateClient(user.ID, req.Name, true)
 	if err != nil {
-		return nil, errcfg.Event(err, "failed-to-new-client").Enrich(ErrRequestInvalid).Error()
+		return nil, domainerr.Event(err, "failed-to-new-client").Enrich(ErrRequestInvalid).Error()
 	}
 
 	if err = usecase.oauth2ClientRepo.Create(ctx, client); err != nil {

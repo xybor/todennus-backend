@@ -49,7 +49,7 @@ func (uc *UserUsecase) Register(
 
 	user, err := uc.userDomain.Create(req.Username, req.Password)
 	if err != nil {
-		return nil, errcfg.Event(err, "failed-to-new-user").Enrich(ErrRequestInvalid).Error()
+		return nil, domainerr.Event(err, "failed-to-new-user").Enrich(ErrRequestInvalid).Error()
 	}
 
 	shouldCreateUser, err := uc.createAdmin(ctx, user)
@@ -116,7 +116,7 @@ func (usecase *UserUsecase) ValidateCredentials(
 	}
 
 	if err := usecase.userDomain.Validate(user.HashedPass, req.Password); err != nil {
-		return nil, errcfg.Event(err, "failed-to-validate-user-credentials").
+		return nil, domainerr.Event(err, "failed-to-validate-user-credentials").
 			EnrichWith(ErrCredentialsInvalid, "invalid username or password").
 			Error()
 	}

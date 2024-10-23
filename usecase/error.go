@@ -28,4 +28,4 @@ var (
 	ErrTokenInvalidGrant         = errors.New("invalid_grant")
 )
 
-var errcfg = xerror.NewWrapperConfigs(ErrServer, domain.ErrKnown)
+var domainerr = xerror.NewWrapperConfigs(ErrServer, domain.ErrKnown)

@@ -5,7 +5,6 @@ import (
 
 	"github.com/xybor-x/snowflake"
 	"github.com/xybor/todennus-backend/domain"
-	"github.com/xybor/x/scope"
 )
 
 type OAuth2Client struct {
@@ -26,7 +25,7 @@ func NewOAuth2Client(ctx context.Context, client *domain.OAuth2Client) *OAuth2Cl
 	Filter(ctx, &usecaseClient.OwnerID).WhenRequestUserNot(client.OwnerUserID)
 	Filter(ctx, &usecaseClient.AllowedScope).
 		WhenRequestUserNot(client.OwnerUserID).
-		WhenNotContainsScope(scope.New(domain.Actions.Read, domain.Resources.Client.AllowedScope))
+		WhenNotContainsScope(domain.ScopeEngine.New(domain.Actions.Read, domain.Resources.Client.AllowedScope))
 
 	return usecaseClient
 }

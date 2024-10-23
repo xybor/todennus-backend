@@ -23,7 +23,7 @@ func (repo *OAuth2ConsentRepository) Upsert(ctx context.Context, consent *domain
 	return database.ConvertError(
 		repo.db.WithContext(ctx).Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "user_id"}, {Name: "client_id"}},
-			DoUpdates: clause.AssignmentColumns([]string{"scope"}),
+			DoUpdates: clause.AssignmentColumns([]string{"scope", "expires_at", "updated_at"}),
 		}).Create(&model).Error,
 	)
 }
