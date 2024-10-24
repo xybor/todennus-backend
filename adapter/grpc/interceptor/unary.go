@@ -19,13 +19,14 @@ func UnaryInterceptor(config *config.Config, infras *wiring.Infras) grpc.UnarySe
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 		ctx = wiring.WithInfras(ctx, infras)
 		ctx = withRequestID(ctx)
+		xcontext.Logger(ctx).Debug("rpc_request", "function", info.FullMethod, "node_id", config.Variable.Server.NodeID)
+
 		ctx, cancel := withTimeout(ctx, config)
 		defer cancel()
 
 		ctx = withAuthenticate(ctx, infras.TokenEngine)
 
 		start := time.Now()
-		xcontext.Logger(ctx).Debug("rpc_request", "function", info.FullMethod, "node_id", config.Variable.Server.NodeID)
 		resp, err := handler(ctx, req)
 		xcontext.Logger(ctx).Debug("rpc_response", "rtt", time.Since(start))
 
