@@ -34,6 +34,10 @@ type UserRegisterResponse struct {
 }
 
 func NewUserRegisterResponse(resp *dto.UserRegisterResponse) *UserRegisterResponse {
+	if resp == nil {
+		return nil
+	}
+
 	return &UserRegisterResponse{
 		User: resource.NewUser(resp.User),
 	}
@@ -59,6 +63,10 @@ type UserGetByIDResponse struct {
 }
 
 func NewUserGetByIDResponse(resp *dto.UserGetByIDResponse) *UserGetByIDResponse {
+	if resp == nil {
+		return nil
+	}
+
 	return &UserGetByIDResponse{
 		User: resource.NewUser(resp.User),
 	}
@@ -80,6 +88,10 @@ type UserGetByUsernameResponse struct {
 }
 
 func NewUserGetByUsernameResponse(resp *dto.UserGetByUsernameResponse) *UserGetByUsernameResponse {
+	if resp == nil {
+		return nil
+	}
+
 	return &UserGetByUsernameResponse{
 		User: resource.NewUser(resp.User),
 	}
@@ -103,6 +115,10 @@ type UserValidateResponse struct {
 }
 
 func NewUserValidateResponse(resp *dto.UserValidateCredentialsResponse) *UserValidateResponse {
+	if resp == nil {
+		return nil
+	}
+
 	return &UserValidateResponse{
 		User: resource.NewUser(resp.User),
 	}

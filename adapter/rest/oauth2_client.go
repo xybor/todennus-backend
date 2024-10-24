@@ -51,7 +51,7 @@ func (a *OAuth2ClientAdapter) Get() http.HandlerFunc {
 		}
 
 		resp, err := a.oauth2ClientUsecase.Get(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewOAuth2ClientGetResponse, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOAuth2ClientGetResponse(resp), err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
 			Map(http.StatusNotFound, usecase.ErrClientInvalid).
 			WriteHTTPResponse(ctx, w)
@@ -79,7 +79,7 @@ func (a *OAuth2ClientAdapter) Create() http.HandlerFunc {
 		}
 
 		resp, err := a.oauth2ClientUsecase.Create(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewOauth2ClientCreateResponse, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOauth2ClientCreateResponse(resp), err).
 			WithDefaultCode(http.StatusCreated).
 			WriteHTTPResponse(ctx, w)
 	}
@@ -109,7 +109,7 @@ func (a *OAuth2ClientAdapter) CreateByAdmin() http.HandlerFunc {
 		}
 
 		resp, err := a.oauth2ClientUsecase.CreateByAdmin(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewOauth2ClientCreateFirstResponse, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOauth2ClientCreateFirstResponse(resp), err).
 			Map(http.StatusForbidden, usecase.ErrForbidden).
 			Map(http.StatusNotFound, usecase.ErrNotFound).
 			Map(http.StatusUnauthorized, usecase.ErrUnauthenticated).

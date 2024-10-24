@@ -4,7 +4,7 @@
 // - protoc             v3.6.1
 // source: user.proto
 
-package user
+package service
 
 import (
 	context "context"
@@ -20,16 +20,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	User_Validate_FullMethodName = "/todennus.proto.api.user.User/Validate"
+	User_Validate_FullMethodName = "/todennus.proto.service.User/Validate"
 )
 
 // UserClient is the client API for User service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// The greeter service definition.
 type UserClient interface {
-	// Sends a greeting
 	Validate(ctx context.Context, in *dto.UserValidateRequest, opts ...grpc.CallOption) (*dto.UserValidateResponse, error)
 }
 
@@ -54,10 +51,7 @@ func (c *userClient) Validate(ctx context.Context, in *dto.UserValidateRequest, 
 // UserServer is the server API for User service.
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility.
-//
-// The greeter service definition.
 type UserServer interface {
-	// Sends a greeting
 	Validate(context.Context, *dto.UserValidateRequest) (*dto.UserValidateResponse, error)
 	mustEmbedUnimplementedUserServer()
 }
@@ -115,7 +109,7 @@ func _User_Validate_Handler(srv interface{}, ctx context.Context, dec func(inter
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var User_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "todennus.proto.api.user.User",
+	ServiceName: "todennus.proto.service.User",
 	HandlerType: (*UserServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

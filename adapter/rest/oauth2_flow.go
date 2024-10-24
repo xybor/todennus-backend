@@ -99,7 +99,7 @@ func (a *OAuth2Adapter) Token() http.HandlerFunc {
 		}
 
 		resp, err := a.oauth2Usecase.Token(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewOAuth2TokenResponse, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOAuth2TokenResponse(resp), err).
 			Map(http.StatusBadRequest,
 				usecase.ErrRequestInvalid, usecase.ErrClientInvalid,
 				usecase.ErrScopeInvalid, usecase.ErrTokenInvalidGrant,
@@ -137,7 +137,7 @@ func (a *OAuth2Adapter) AuthenticationCallback() http.HandlerFunc {
 		}
 
 		resp, err := a.oauth2Usecase.AuthenticationCallback(ctx, usecaseReq)
-		response.NewResponseHandler(ctx, dto.NewOAuth2AuthenticationCallbackResponse, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOAuth2AuthenticationCallbackResponse(resp), err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
 			Map(http.StatusNotFound, usecase.ErrNotFound).
 			Map(http.StatusUnauthorized, usecase.ErrUnauthenticated).
@@ -164,7 +164,7 @@ func (a *OAuth2Adapter) SessionUpdate() http.HandlerFunc {
 		}
 
 		resp, err := a.oauth2Usecase.SessionUpdate(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewOAuth2SessionUpdateRedirectURI, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOAuth2SessionUpdateRedirectURI(resp), err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
 			Redirect(ctx, w, r, http.StatusSeeOther)
 	}
@@ -232,7 +232,7 @@ func (a *OAuth2Adapter) UpdateConsent() http.HandlerFunc {
 		}
 
 		resp, err := a.oauth2Usecase.UpdateConsent(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewOAuth2ConsentUpdateRedirectURI, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOAuth2ConsentUpdateRedirectURI(resp), err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid, usecase.ErrAuthorizationAccessDenied).
 			Redirect(ctx, w, r, http.StatusSeeOther)
 	}

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/xybor/todennus-backend/adapter/common"
 	"github.com/xybor/todennus-backend/usecase"
-	ucdto "github.com/xybor/todennus-backend/usecase/dto"
 	"github.com/xybor/todennus-backend/wiring"
 	config "github.com/xybor/todennus-config"
 	"github.com/xybor/x/token"
@@ -15,18 +15,14 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-func UnarySetupContext(config *config.Config, infras *wiring.Infras) grpc.UnaryServerInterceptor {
+func UnaryInterceptor(config *config.Config, infras *wiring.Infras) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 		ctx = wiring.WithInfras(ctx, infras)
-		ctx = xcontext.WithRequestID(ctx, xcrypto.RandString(16))
-
-		logger := xcontext.Logger(ctx).With("request_id", xcontext.RequestID(ctx))
-		ctx = xcontext.WithLogger(ctx, logger)
-		ctx = context.WithoutCancel(ctx)
-
-		timeout := time.Duration(config.Variable.Server.RequestTimeout) * time.Millisecond
-		ctx, cancel := context.WithTimeoutCause(ctx, timeout, usecase.ErrServerTimeout)
+		ctx = withRequestID(ctx)
+		ctx, cancel := withTimeout(ctx, config)
 		defer cancel()
+
+		ctx = withAuthenticate(ctx, infras.TokenEngine)
 
 		start := time.Now()
 		xcontext.Logger(ctx).Debug("rpc_request", "function", info.FullMethod, "node_id", config.Variable.Server.NodeID)
@@ -37,37 +33,31 @@ func UnarySetupContext(config *config.Config, infras *wiring.Infras) grpc.UnaryS
 	}
 }
 
-func UnaryAuthenticate(engine token.Engine) grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-		md, ok := metadata.FromIncomingContext(ctx)
-		if ok {
-			authorization := md["authorization"]
-			if len(authorization) == 2 {
-				tokenType, token := authorization[0], authorization[1]
-				if engine.Type() == tokenType {
-					accessToken := ucdto.OAuth2AccessToken{}
+func withRequestID(ctx context.Context) context.Context {
+	ctx = xcontext.WithRequestID(ctx, xcrypto.RandString(16))
+	logger := xcontext.Logger(ctx).With("request_id", xcontext.RequestID(ctx))
+	ctx = xcontext.WithLogger(ctx, logger)
+	return ctx
+}
 
-					ok, err := engine.Validate(ctx, token, &accessToken)
-					if err != nil {
-						xcontext.Logger(ctx).Debug("failed-to-parse-token", "err", err)
-					} else if ok {
-						domainAccessToken, err := accessToken.To()
-						if err != nil {
-							xcontext.Logger(ctx).Warn("failed-to-convert-to-domain-token", "err", err)
-						} else {
-							ctx = xcontext.WithRequestUserID(ctx, domainAccessToken.Metadata.Subject)
-							ctx = xcontext.WithScope(ctx, domainAccessToken.Scope)
+func withTimeout(ctx context.Context, config *config.Config) (context.Context, context.CancelFunc) {
+	ctx = context.WithoutCancel(ctx)
+	timeout := time.Duration(config.Variable.Server.RequestTimeout) * time.Millisecond
+	return context.WithTimeoutCause(ctx, timeout, usecase.ErrServerTimeout)
+}
 
-							xcontext.Logger(ctx).Debug("auth-info",
-								"user-id", domainAccessToken.Metadata.Subject,
-								"scope", domainAccessToken.Scope.String(),
-							)
-						}
-					}
-				}
-			}
-		}
-
-		return handler(ctx, req)
+func withAuthenticate(ctx context.Context, engine token.Engine) context.Context {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		xcontext.Logger(ctx).Debug("not-found-metadata")
+		return ctx
 	}
+
+	authorization := md["authorization"]
+	if len(authorization) != 1 {
+		xcontext.Logger(ctx).Debug("invalid-or-not-found-authorization-metadata")
+		return ctx
+	}
+
+	return common.WithAuthenticate(ctx, authorization[0], engine)
 }

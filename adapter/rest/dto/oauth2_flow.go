@@ -64,6 +64,10 @@ type OAuth2TokenResponse struct {
 }
 
 func NewOAuth2TokenResponse(resp *dto.OAuth2TokenResponse) *OAuth2TokenResponse {
+	if resp == nil {
+		return nil
+	}
+
 	return &OAuth2TokenResponse{
 		AccessToken:  resp.AccessToken,
 		TokenType:    resp.TokenType,
@@ -203,6 +207,10 @@ type OAuth2AuthenticationCallbackResponse struct {
 }
 
 func NewOAuth2AuthenticationCallbackResponse(resp *dto.OAuth2AuthenticationCallbackResponse) *OAuth2AuthenticationCallbackResponse {
+	if resp == nil {
+		return nil
+	}
+
 	return &OAuth2AuthenticationCallbackResponse{
 		AuthenticationID: resp.AuthenticationID,
 	}
@@ -219,6 +227,10 @@ func (req OAuth2SessionUpdateRequest) To() *dto.OAuth2SessionUpdateRequest {
 }
 
 func NewOAuth2SessionUpdateRedirectURI(resp *dto.OAuth2SessionUpdateResponse) string {
+	if resp == nil {
+		return ""
+	}
+
 	q := url.Values{}
 	q.Set("response_type", resp.ResponseType)
 	q.Set("client_id", resp.ClientID.String())
@@ -298,6 +310,10 @@ func (req OAuth2UpdateConsentRequest) To() *dto.OAuth2UpdateConsentRequest {
 }
 
 func NewOAuth2ConsentUpdateRedirectURI(resp *dto.OAUth2UpdateConsentResponse) string {
+	if resp == nil {
+		return ""
+	}
+
 	q := url.Values{}
 	q.Set("response_type", resp.ResponseType)
 	q.Set("client_id", resp.ClientID.String())

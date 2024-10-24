@@ -11,7 +11,7 @@ require (
 	github.com/xybor-x/snowflake v1.0.0
 	github.com/xybor/todennus-config v1.4.1
 	github.com/xybor/todennus-migration v1.1.0
-	github.com/xybor/x v1.11.0
+	github.com/xybor/x v1.11.1
 	golang.org/x/crypto v0.28.0
 	google.golang.org/grpc v1.67.1
 	google.golang.org/protobuf v1.35.1

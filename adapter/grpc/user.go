@@ -5,14 +5,16 @@ import (
 
 	"github.com/xybor/todennus-backend/adapter/abstraction"
 	"github.com/xybor/todennus-backend/adapter/grpc/conversion"
-	pb "github.com/xybor/todennus-backend/adapter/grpc/gen"
+	service "github.com/xybor/todennus-backend/adapter/grpc/gen"
 	pbdto "github.com/xybor/todennus-backend/adapter/grpc/gen/dto"
+	"github.com/xybor/todennus-backend/usecase"
+	"google.golang.org/grpc/codes"
 )
 
-var _ pb.UserServer = (*UserServer)(nil)
+var _ service.UserServer = (*UserServer)(nil)
 
 type UserServer struct {
-	pb.UnimplementedUserServer
+	service.UnimplementedUserServer
 
 	userUsecase abstraction.UserUsecase
 }
@@ -26,9 +28,9 @@ func NewUserServer(userUsecase abstraction.UserUsecase) *UserServer {
 func (s *UserServer) Validate(ctx context.Context, req *pbdto.UserValidateRequest) (*pbdto.UserValidateResponse, error) {
 	ucreq := conversion.NewUsecaseUserValidateRequest(req)
 	resp, err := s.userUsecase.ValidateCredentials(ctx, ucreq)
-	if err != nil {
-		return nil, conversion.ReduceError(ctx, err)
-	}
 
-	return conversion.NewPbUserValidateResponse(resp), nil
+	return conversion.NewResponseHandler(ctx, conversion.NewPbUserValidateResponse(resp), err).
+		Map(codes.InvalidArgument, usecase.ErrRequestInvalid).
+		Map(codes.PermissionDenied, usecase.ErrCredentialsInvalid).
+		Map(codes.NotFound, usecase.ErrNotFound).Finalize(ctx)
 }

@@ -52,7 +52,7 @@ func (a *UserRESTAdapter) Register() func(w http.ResponseWriter, r *http.Request
 		}
 
 		user, err := a.userUsecase.Register(ctx, request.To())
-		response.NewResponseHandler(ctx, dto.NewUserRegisterResponse, user, err).
+		response.NewResponseHandler(ctx, dto.NewUserRegisterResponse(user), err).
 			WithDefaultCode(http.StatusCreated).
 			Map(http.StatusConflict, usecase.ErrDuplicated).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
@@ -67,6 +67,7 @@ func (a *UserRESTAdapter) Register() func(w http.ResponseWriter, r *http.Request
 // @Param id path string true "User ID"
 // @Success 200 {object} standard.SwaggerSuccessResponse[dto.UserGetByIDResponse] "Get user successfully"
 // @Failure 400 {object} standard.SwaggerBadRequestErrorResponse "Bad request"
+// @Failure 401 {object} standard.SwaggerUnauthorizedErrorResponse "Invalid credentials"
 // @Failure 404 {object} standard.SwaggerNotFoundErrorResponse "Not found"
 // @Router /users/{user_id} [get]
 func (a *UserRESTAdapter) GetByID() http.HandlerFunc {
@@ -86,8 +87,9 @@ func (a *UserRESTAdapter) GetByID() http.HandlerFunc {
 		}
 
 		resp, err := a.userUsecase.GetByID(ctx, ucReq)
-		response.NewResponseHandler(ctx, dto.NewUserGetByIDResponse, resp, err).
+		response.NewResponseHandler(ctx, dto.NewUserGetByIDResponse(resp), err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
+			Map(http.StatusUnauthorized, usecase.ErrCredentialsInvalid).
 			Map(http.StatusNotFound, usecase.ErrNotFound).
 			WriteHTTPResponse(ctx, w)
 	}
@@ -113,7 +115,7 @@ func (a *UserRESTAdapter) GetByUsername() http.HandlerFunc {
 		}
 
 		resp, err := a.userUsecase.GetByUsername(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewUserGetByUsernameResponse, resp, err).
+		response.NewResponseHandler(ctx, dto.NewUserGetByUsernameResponse(resp), err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
 			Map(http.StatusNotFound, usecase.ErrNotFound).
 			WriteHTTPResponse(ctx, w)
@@ -141,7 +143,7 @@ func (a *UserRESTAdapter) Validate() http.HandlerFunc {
 		}
 
 		resp, err := a.userUsecase.ValidateCredentials(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewUserValidateResponse, resp, err).
+		response.NewResponseHandler(ctx, dto.NewUserValidateResponse(resp), err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
 			Map(http.StatusUnauthorized, usecase.ErrCredentialsInvalid).
 			WriteHTTPResponse(ctx, w)

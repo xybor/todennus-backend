@@ -14,6 +14,10 @@ func NewUsecaseUserValidateRequest(req *pbdto.UserValidateRequest) *ucdto.UserVa
 }
 
 func NewPbUserValidateResponse(resp *ucdto.UserValidateCredentialsResponse) *pbdto.UserValidateResponse {
+	if resp == nil {
+		return nil
+	}
+
 	return &pbdto.UserValidateResponse{
 		User: &resource.User{
 			Id:          resp.User.ID.Int64(),

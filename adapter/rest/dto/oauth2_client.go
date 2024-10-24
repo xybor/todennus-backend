@@ -24,6 +24,10 @@ type OAuth2ClientCreateResponse struct {
 }
 
 func NewOauth2ClientCreateResponse(resp *dto.OAuth2ClientCreateResponse) *OAuth2ClientCreateResponse {
+	if resp == nil {
+		return nil
+	}
+
 	return &OAuth2ClientCreateResponse{
 		OAuth2Client: resource.NewOAuth2Client(resp.Client),
 		ClientSecret: resp.ClientSecret,
@@ -50,6 +54,10 @@ type OAuth2ClientCreateFirstResponse struct {
 }
 
 func NewOauth2ClientCreateFirstResponse(resp *dto.OAuth2ClientCreateByAdminResponse) *OAuth2ClientCreateFirstResponse {
+	if resp == nil {
+		return nil
+	}
+
 	return &OAuth2ClientCreateFirstResponse{
 		OAuth2Client: resource.NewOAuth2Client(resp.Client),
 		ClientSecret: resp.ClientSecret,
@@ -76,6 +84,10 @@ type OAuth2ClientGetResponse struct {
 }
 
 func NewOAuth2ClientGetResponse(resp *dto.OAuth2ClientGetResponse) *OAuth2ClientGetResponse {
+	if resp == nil {
+		return nil
+	}
+
 	return &OAuth2ClientGetResponse{
 		OAuth2Client: resource.NewOAuth2Client(resp.Client),
 	}
