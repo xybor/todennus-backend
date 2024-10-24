@@ -15,6 +15,7 @@ An Identity, OpenID Connect, and OAuth2 Provider.
 - Architecture: Clean architecture, Domain Driven Development.
 - Database: [gorm](https://github.com/go-gorm/gorm), [go-migrate](https://github.com/golang-migrate/migrate), [postgreSQL](https://www.postgresql.org/), [redis](https://redis.io/).
 - Mux: [go-chi](https://github.com/go-chi/chi).
+- RPC: [gRPC](https://grpc.io/).
 - Docs: [swaggo](https://github.com/swaggo/swag).
 - Container: [Docker](https://www.docker.com/).
 - Deployment: [Docker compose](https://docs.docker.com/compose/).
