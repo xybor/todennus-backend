@@ -46,19 +46,19 @@ func NewResponse(data any) *Response {
 }
 
 func NewErrorResponse(ctx context.Context, err error) *Response {
-	var serviceErr xerror.RichError
-	if errors.As(err, &serviceErr) {
-		if serviceErr.Detail() != nil {
-			attrs := []any{"err", serviceErr.Detail()}
-			attrs = append(attrs, serviceErr.Attributes()...)
+	var richError xerror.RichError
+	if errors.As(err, &richError) {
+		if richError.Detail() != nil {
+			attrs := []any{"err", richError.Detail()}
+			attrs = append(attrs, richError.Attributes()...)
 			if errors.Is(err, usecase.ErrServer) {
-				xcontext.Logger(ctx).Warn(serviceErr.Event(), attrs...)
+				xcontext.Logger(ctx).Warn(richError.Event(), attrs...)
 			} else {
-				xcontext.Logger(ctx).Debug(serviceErr.Event(), attrs...)
+				xcontext.Logger(ctx).Debug(richError.Event(), attrs...)
 			}
 		}
 
-		return NewErrorResponseWithMessage(ctx, serviceErr.Code().Error(), serviceErr.Description())
+		return NewErrorResponseWithMessage(ctx, richError.Code().Error(), richError.Description())
 	}
 
 	xcontext.Logger(ctx).Critical("internal-error", "err", err)

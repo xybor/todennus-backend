@@ -21,7 +21,6 @@ COPY --from=build /todennus /
 COPY --from=build /todennus-backend/template /template
 COPY --from=build /todennus-backend/docs /docs
 
-EXPOSE 8080
-EXPOSE 8083
+EXPOSE 8080 8081 8083
 
 ENTRYPOINT [ "/todennus", "--env", ""]

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/xybor/todennus-backend/adapter/rest/abstraction"
+	"github.com/xybor/todennus-backend/adapter/abstraction"
 	"github.com/xybor/todennus-backend/usecase"
 	config "github.com/xybor/todennus-config"
 	"github.com/xybor/x/lock"

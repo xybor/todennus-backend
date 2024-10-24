@@ -158,7 +158,7 @@ func (token *OAuth2IDToken) To() (*domain.OAuth2IDToken, error) {
 	}, nil
 }
 
-type OAuth2TokenRequestDTO struct {
+type OAuth2TokenRequest struct {
 	GrantType string
 
 	ClientID     snowflake.ID
@@ -178,7 +178,7 @@ type OAuth2TokenRequestDTO struct {
 	RefreshToken string
 }
 
-type OAuth2TokenResponseDTO struct {
+type OAuth2TokenResponse struct {
 	AccessToken  string
 	TokenType    string
 	ExpiresIn    int
@@ -186,7 +186,7 @@ type OAuth2TokenResponseDTO struct {
 	Scope        string
 }
 
-type OAuth2AuthorizeRequestDTO struct {
+type OAuth2AuthorizeRequest struct {
 	ResponseType string
 	ClientID     snowflake.ID
 	RedirectURI  string
@@ -198,7 +198,7 @@ type OAuth2AuthorizeRequestDTO struct {
 	CodeChallengeMethod string
 }
 
-type OAuth2AuthorizeResponseDTO struct {
+type OAuth2AuthorizeResponse struct {
 	// Idp
 	IdpURL          string
 	AuthorizationID string
@@ -215,33 +215,33 @@ type OAuth2AuthorizeResponseDTO struct {
 	ExpiresIn   int
 }
 
-func NewOAuth2AuthorizeResponseWithCode(code string) *OAuth2AuthorizeResponseDTO {
-	return &OAuth2AuthorizeResponseDTO{Code: code}
+func NewOAuth2AuthorizeResponseWithCode(code string) *OAuth2AuthorizeResponse {
+	return &OAuth2AuthorizeResponse{Code: code}
 }
 
-func NewOAuth2AuthorizeResponseRedirectToIdP(url, aid string) *OAuth2AuthorizeResponseDTO {
-	return &OAuth2AuthorizeResponseDTO{
+func NewOAuth2AuthorizeResponseRedirectToIdP(url, aid string) *OAuth2AuthorizeResponse {
+	return &OAuth2AuthorizeResponse{
 		IdpURL:          url,
 		AuthorizationID: aid,
 	}
 }
 
-func NewOAuth2AuthorizeResponseRedirectToConsent(aid string) *OAuth2AuthorizeResponseDTO {
-	return &OAuth2AuthorizeResponseDTO{
+func NewOAuth2AuthorizeResponseRedirectToConsent(aid string) *OAuth2AuthorizeResponse {
+	return &OAuth2AuthorizeResponse{
 		NeedConsent:     true,
 		AuthorizationID: aid,
 	}
 }
 
-func NewOAuth2AuthorizeResponseWithToken(token, tokenType string, expiration time.Duration) *OAuth2AuthorizeResponseDTO {
-	return &OAuth2AuthorizeResponseDTO{
+func NewOAuth2AuthorizeResponseWithToken(token, tokenType string, expiration time.Duration) *OAuth2AuthorizeResponse {
+	return &OAuth2AuthorizeResponse{
 		AccessToken: token,
 		TokenType:   tokenType,
 		ExpiresIn:   int(expiration / time.Second),
 	}
 }
 
-type OAuth2AuthenticationCallbackRequestDTO struct {
+type OAuth2AuthenticationCallbackRequest struct {
 	Secret          string
 	AuthorizationID string
 	Success         bool
@@ -250,21 +250,21 @@ type OAuth2AuthenticationCallbackRequestDTO struct {
 	Username        string
 }
 
-type OAuth2AuthenticationCallbackResponseDTO struct {
+type OAuth2AuthenticationCallbackResponse struct {
 	AuthenticationID string
 }
 
-type OAuth2SessionUpdateRequestDTO struct {
+type OAuth2SessionUpdateRequest struct {
 	AuthenticationID string
 }
 
 // After updating the session, we must redirect user to Authorization Endpoint
 // again. So the response of SessionUpdate is the request of Authorization
 // Endpoint.
-type OAuth2SessionUpdateResponseDTO OAuth2AuthorizeRequestDTO
+type OAuth2SessionUpdateResponse OAuth2AuthorizeRequest
 
-func NewOAuth2SessionUpdateResponseDTO(store *domain.OAuth2AuthorizationStore) *OAuth2SessionUpdateResponseDTO {
-	return &OAuth2SessionUpdateResponseDTO{
+func NewOAuth2SessionUpdateResponse(store *domain.OAuth2AuthorizationStore) *OAuth2SessionUpdateResponse {
+	return &OAuth2SessionUpdateResponse{
 		ResponseType:        store.ResponseType,
 		ClientID:            store.ClientID,
 		RedirectURI:         store.RedirectURI,
@@ -275,23 +275,23 @@ func NewOAuth2SessionUpdateResponseDTO(store *domain.OAuth2AuthorizationStore) *
 	}
 }
 
-type OAuth2GetConsentRequestDTO struct {
+type OAuth2GetConsentRequest struct {
 	AuthorizationID string
 }
 
-type OAuth2GetConsentResponseDTO struct {
+type OAuth2GetConsentResponse struct {
 	Client *resource.OAuth2Client
 	Scopes scope.Scopes
 }
 
-func NewOAuth2GetConsentResponseDTO(client *domain.OAuth2Client, scope scope.Scopes) *OAuth2GetConsentResponseDTO {
-	return &OAuth2GetConsentResponseDTO{
+func NewOAuth2GetConsentResponse(client *domain.OAuth2Client, scope scope.Scopes) *OAuth2GetConsentResponse {
+	return &OAuth2GetConsentResponse{
 		Client: resource.NewOAuth2ClientWithoutFilter(client),
 		Scopes: scope,
 	}
 }
 
-type OAuth2UpdateConsentRequestDTO struct {
+type OAuth2UpdateConsentRequest struct {
 	AuthorizationID string
 	UserScope       string
 	Accept          bool
@@ -300,10 +300,10 @@ type OAuth2UpdateConsentRequestDTO struct {
 // After updating the consent, we must redirect user to Authorization Endpoint
 // again. So the response of UpdateConsent is the request of Authorization
 // Endpoint.
-type OAUth2UpdateConsentResponseDTO OAuth2AuthorizeRequestDTO
+type OAUth2UpdateConsentResponse OAuth2AuthorizeRequest
 
-func NewOAUth2UpdateConsentResponseDTO(store *domain.OAuth2AuthorizationStore) *OAUth2UpdateConsentResponseDTO {
-	return &OAUth2UpdateConsentResponseDTO{
+func NewOAUth2UpdateConsentResponse(store *domain.OAuth2AuthorizationStore) *OAUth2UpdateConsentResponse {
+	return &OAUth2UpdateConsentResponse{
 		ResponseType:        store.ResponseType,
 		ClientID:            store.ClientID,
 		RedirectURI:         store.RedirectURI,

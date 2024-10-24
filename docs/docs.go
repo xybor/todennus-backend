@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.OAuth2AuthenticationCallbackRequestDTO"
+                            "$ref": "#/definitions/dto.OAuth2AuthenticationCallbackRequest"
                         }
                     }
                 ],
@@ -43,7 +43,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully accept the result",
                         "schema": {
-                            "$ref": "#/definitions/dto.OAuth2AuthenticationCallbackResponseDTO"
+                            "$ref": "#/definitions/dto.OAuth2AuthenticationCallbackResponse"
                         }
                     },
                     "400": {
@@ -254,7 +254,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully generated access token",
                         "schema": {
-                            "$ref": "#/definitions/dto.OAuth2TokenResponseDTO"
+                            "$ref": "#/definitions/dto.OAuth2TokenResponse"
                         }
                     },
                     "400": {
@@ -286,7 +286,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.OAuth2ClientCreateRequestDTO"
+                            "$ref": "#/definitions/dto.OAuth2ClientCreateRequest"
                         }
                     }
                 ],
@@ -294,7 +294,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Create client successfully",
                         "schema": {
-                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateResponseDTO"
+                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateResponse"
                         }
                     },
                     "400": {
@@ -326,7 +326,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.OAuth2ClientCreateFirstRequestDTO"
+                            "$ref": "#/definitions/dto.OAuth2ClientCreateFirstRequest"
                         }
                     }
                 ],
@@ -334,7 +334,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Create client successfully",
                         "schema": {
-                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateFirstResponseDTO"
+                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateFirstResponse"
                         }
                     },
                     "400": {
@@ -387,7 +387,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Get client successfully",
                         "schema": {
-                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientGetResponseDTO"
+                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientGetResponse"
                         }
                     },
                     "400": {
@@ -454,7 +454,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UserRegisterRequestDTO"
+                            "$ref": "#/definitions/dto.UserRegisterRequest"
                         }
                     }
                 ],
@@ -462,7 +462,7 @@ const docTemplate = `{
                     "201": {
                         "description": "User registered successfully",
                         "schema": {
-                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_UserRegisterResponseDTO"
+                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_UserRegisterResponse"
                         }
                     },
                     "400": {
@@ -503,7 +503,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Get user successfully",
                         "schema": {
-                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_UserGetByUsernameResponseDTO"
+                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_UserGetByUsernameResponse"
                         }
                     },
                     "400": {
@@ -541,7 +541,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UserValidateRequestDTO"
+                            "$ref": "#/definitions/dto.UserValidateRequest"
                         }
                     }
                 ],
@@ -549,7 +549,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Validate successfully",
                         "schema": {
-                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_UserValidateResponseDTO"
+                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_UserValidateResponse"
                         }
                     },
                     "400": {
@@ -590,7 +590,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Get user successfully",
                         "schema": {
-                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_UserGetByIDResponseDTO"
+                            "$ref": "#/definitions/standard.SwaggerSuccessResponse-dto_UserGetByIDResponse"
                         }
                     },
                     "400": {
@@ -610,7 +610,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.OAuth2AuthenticationCallbackRequestDTO": {
+        "dto.OAuth2AuthenticationCallbackRequest": {
             "type": "object",
             "properties": {
                 "authorization_id": {
@@ -639,7 +639,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.OAuth2AuthenticationCallbackResponseDTO": {
+        "dto.OAuth2AuthenticationCallbackResponse": {
             "type": "object",
             "properties": {
                 "authentication_id": {
@@ -648,7 +648,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.OAuth2ClientCreateFirstRequestDTO": {
+        "dto.OAuth2ClientCreateFirstRequest": {
             "type": "object",
             "properties": {
                 "name": {
@@ -665,7 +665,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.OAuth2ClientCreateFirstResponseDTO": {
+        "dto.OAuth2ClientCreateFirstResponse": {
             "type": "object",
             "properties": {
                 "allowed_scope": {
@@ -690,7 +690,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.OAuth2ClientCreateRequestDTO": {
+        "dto.OAuth2ClientCreateRequest": {
             "type": "object",
             "properties": {
                 "is_confidential": {
@@ -703,7 +703,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.OAuth2ClientCreateResponseDTO": {
+        "dto.OAuth2ClientCreateResponse": {
             "type": "object",
             "properties": {
                 "allowed_scope": {
@@ -728,7 +728,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.OAuth2ClientGetResponseDTO": {
+        "dto.OAuth2ClientGetResponse": {
             "type": "object",
             "properties": {
                 "allowed_scope": {
@@ -749,7 +749,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.OAuth2TokenResponseDTO": {
+        "dto.OAuth2TokenResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -769,7 +769,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserGetByIDResponseDTO": {
+        "dto.UserGetByIDResponse": {
             "type": "object",
             "properties": {
                 "display_name": {
@@ -790,7 +790,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserGetByUsernameResponseDTO": {
+        "dto.UserGetByUsernameResponse": {
             "type": "object",
             "properties": {
                 "display_name": {
@@ -811,7 +811,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserRegisterRequestDTO": {
+        "dto.UserRegisterRequest": {
             "type": "object",
             "properties": {
                 "password": {
@@ -824,7 +824,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserRegisterResponseDTO": {
+        "dto.UserRegisterResponse": {
             "type": "object",
             "properties": {
                 "display_name": {
@@ -845,7 +845,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserValidateRequestDTO": {
+        "dto.UserValidateRequest": {
             "type": "object",
             "properties": {
                 "password": {
@@ -858,7 +858,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserValidateResponseDTO": {
+        "dto.UserValidateResponse": {
             "type": "object",
             "properties": {
                 "display_name": {
@@ -992,11 +992,11 @@ const docTemplate = `{
                 }
             }
         },
-        "standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateFirstResponseDTO": {
+        "standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateFirstResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.OAuth2ClientCreateFirstResponseDTO"
+                    "$ref": "#/definitions/dto.OAuth2ClientCreateFirstResponse"
                 },
                 "status": {
                     "type": "string",
@@ -1004,11 +1004,11 @@ const docTemplate = `{
                 }
             }
         },
-        "standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateResponseDTO": {
+        "standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.OAuth2ClientCreateResponseDTO"
+                    "$ref": "#/definitions/dto.OAuth2ClientCreateResponse"
                 },
                 "status": {
                     "type": "string",
@@ -1016,11 +1016,11 @@ const docTemplate = `{
                 }
             }
         },
-        "standard.SwaggerSuccessResponse-dto_OAuth2ClientGetResponseDTO": {
+        "standard.SwaggerSuccessResponse-dto_OAuth2ClientGetResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.OAuth2ClientGetResponseDTO"
+                    "$ref": "#/definitions/dto.OAuth2ClientGetResponse"
                 },
                 "status": {
                     "type": "string",
@@ -1028,11 +1028,11 @@ const docTemplate = `{
                 }
             }
         },
-        "standard.SwaggerSuccessResponse-dto_UserGetByIDResponseDTO": {
+        "standard.SwaggerSuccessResponse-dto_UserGetByIDResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.UserGetByIDResponseDTO"
+                    "$ref": "#/definitions/dto.UserGetByIDResponse"
                 },
                 "status": {
                     "type": "string",
@@ -1040,11 +1040,11 @@ const docTemplate = `{
                 }
             }
         },
-        "standard.SwaggerSuccessResponse-dto_UserGetByUsernameResponseDTO": {
+        "standard.SwaggerSuccessResponse-dto_UserGetByUsernameResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.UserGetByUsernameResponseDTO"
+                    "$ref": "#/definitions/dto.UserGetByUsernameResponse"
                 },
                 "status": {
                     "type": "string",
@@ -1052,11 +1052,11 @@ const docTemplate = `{
                 }
             }
         },
-        "standard.SwaggerSuccessResponse-dto_UserRegisterResponseDTO": {
+        "standard.SwaggerSuccessResponse-dto_UserRegisterResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.UserRegisterResponseDTO"
+                    "$ref": "#/definitions/dto.UserRegisterResponse"
                 },
                 "status": {
                     "type": "string",
@@ -1064,11 +1064,11 @@ const docTemplate = `{
                 }
             }
         },
-        "standard.SwaggerSuccessResponse-dto_UserValidateResponseDTO": {
+        "standard.SwaggerSuccessResponse-dto_UserValidateResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.UserValidateResponseDTO"
+                    "$ref": "#/definitions/dto.UserValidateResponse"
                 },
                 "status": {
                     "type": "string",

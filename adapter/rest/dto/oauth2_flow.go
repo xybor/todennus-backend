@@ -16,7 +16,7 @@ import (
 	"github.com/xybor/x/xhttp"
 )
 
-type OAuth2TokenRequestDTO struct {
+type OAuth2TokenRequest struct {
 	GrantType string `form:"grant_type"`
 
 	ClientID     int64  `form:"client_id"`
@@ -36,8 +36,8 @@ type OAuth2TokenRequestDTO struct {
 	RefreshToken string `form:"refresh_token"`
 }
 
-func (req OAuth2TokenRequestDTO) To() *dto.OAuth2TokenRequestDTO {
-	return &dto.OAuth2TokenRequestDTO{
+func (req OAuth2TokenRequest) To() *dto.OAuth2TokenRequest {
+	return &dto.OAuth2TokenRequest{
 		GrantType: req.GrantType,
 
 		ClientID:     snowflake.ID(req.ClientID),
@@ -55,7 +55,7 @@ func (req OAuth2TokenRequestDTO) To() *dto.OAuth2TokenRequestDTO {
 	}
 }
 
-type OAuth2TokenResponseDTO struct {
+type OAuth2TokenResponse struct {
 	AccessToken  string `json:"access_token"`
 	TokenType    string `json:"token_type"`
 	ExpiresIn    int    `json:"expires_in"`
@@ -63,8 +63,12 @@ type OAuth2TokenResponseDTO struct {
 	Scope        string `json:"scope,omitempty"`
 }
 
-func NewOAuth2TokenResponseDTO(resp *dto.OAuth2TokenResponseDTO) *OAuth2TokenResponseDTO {
-	return &OAuth2TokenResponseDTO{
+func NewOAuth2TokenResponse(resp *dto.OAuth2TokenResponse) *OAuth2TokenResponse {
+	if resp == nil {
+		return nil
+	}
+
+	return &OAuth2TokenResponse{
 		AccessToken:  resp.AccessToken,
 		TokenType:    resp.TokenType,
 		ExpiresIn:    resp.ExpiresIn,
@@ -73,7 +77,7 @@ func NewOAuth2TokenResponseDTO(resp *dto.OAuth2TokenResponseDTO) *OAuth2TokenRes
 	}
 }
 
-type OAuth2AuthorizeRequestDTO struct {
+type OAuth2AuthorizeRequest struct {
 	ResponseType string `query:"response_type"`
 	ClientID     int64  `query:"client_id"`
 	RedirectURI  string `query:"redirect_uri"`
@@ -85,8 +89,8 @@ type OAuth2AuthorizeRequestDTO struct {
 	CodeChallengeMethod string `query:"code_challenge_method"`
 }
 
-func (req OAuth2AuthorizeRequestDTO) To() *dto.OAuth2AuthorizeRequestDTO {
-	return &dto.OAuth2AuthorizeRequestDTO{
+func (req OAuth2AuthorizeRequest) To() *dto.OAuth2AuthorizeRequest {
+	return &dto.OAuth2AuthorizeRequest{
 		ResponseType:        req.ResponseType,
 		ClientID:            snowflake.ID(req.ClientID),
 		RedirectURI:         req.RedirectURI,
@@ -98,8 +102,8 @@ func (req OAuth2AuthorizeRequestDTO) To() *dto.OAuth2AuthorizeRequestDTO {
 }
 
 func NewOAuth2AuthorizeRedirectURI(
-	req *OAuth2AuthorizeRequestDTO,
-	resp *dto.OAuth2AuthorizeResponseDTO,
+	req *OAuth2AuthorizeRequest,
+	resp *dto.OAuth2AuthorizeResponse,
 ) (string, error) {
 	if resp.IdpURL != "" {
 		u, err := url.Parse(resp.IdpURL)
@@ -149,7 +153,7 @@ func NewOAuth2AuthorizeRedirectURI(
 
 func NewOAuth2AuthorizeRedirectURIWithError(
 	ctx context.Context,
-	req *OAuth2AuthorizeRequestDTO,
+	req *OAuth2AuthorizeRequest,
 	err error,
 ) (string, error) {
 	u, uerr := xhttp.ParseURL(req.RedirectURI)
@@ -172,7 +176,7 @@ func NewOAuth2AuthorizeRedirectURIWithError(
 	return u.String(), nil
 }
 
-type OAuth2AuthenticationCallbackRequestDTO struct {
+type OAuth2AuthenticationCallbackRequest struct {
 	IdPSecret       string `json:"idp_secret" example:"Sde3kl..."`
 	AuthorizationID string `json:"authorization_id" example:"djG4l..."`
 	Success         bool   `json:"success" example:"true"`
@@ -181,14 +185,14 @@ type OAuth2AuthenticationCallbackRequestDTO struct {
 	Error           string `json:"error" example:""`
 }
 
-func (req OAuth2AuthenticationCallbackRequestDTO) To() (*dto.OAuth2AuthenticationCallbackRequestDTO, error) {
+func (req OAuth2AuthenticationCallbackRequest) To() (*dto.OAuth2AuthenticationCallbackRequest, error) {
 	uid, err := snowflake.ParseString(req.UserID)
 	if err != nil {
 		return nil, xerror.Enrich(usecase.ErrRequestInvalid, "invalid user id").
 			Hide(err, "invalid-user-id", "uid", req.UserID)
 	}
 
-	return &dto.OAuth2AuthenticationCallbackRequestDTO{
+	return &dto.OAuth2AuthenticationCallbackRequest{
 		Secret:          req.IdPSecret,
 		Success:         req.Success,
 		AuthorizationID: req.AuthorizationID,
@@ -198,27 +202,35 @@ func (req OAuth2AuthenticationCallbackRequestDTO) To() (*dto.OAuth2Authenticatio
 	}, nil
 }
 
-type OAuth2AuthenticationCallbackResponseDTO struct {
+type OAuth2AuthenticationCallbackResponse struct {
 	AuthenticationID string `json:"authentication_id" example:"hlqWe..."`
 }
 
-func NewOAuth2AuthenticationCallbackResponseDTO(resp *dto.OAuth2AuthenticationCallbackResponseDTO) *OAuth2AuthenticationCallbackResponseDTO {
-	return &OAuth2AuthenticationCallbackResponseDTO{
+func NewOAuth2AuthenticationCallbackResponse(resp *dto.OAuth2AuthenticationCallbackResponse) *OAuth2AuthenticationCallbackResponse {
+	if resp == nil {
+		return nil
+	}
+
+	return &OAuth2AuthenticationCallbackResponse{
 		AuthenticationID: resp.AuthenticationID,
 	}
 }
 
-type OAuth2SessionUpdateRequestDTO struct {
+type OAuth2SessionUpdateRequest struct {
 	AuthenticationID string `query:"authentication_id"`
 }
 
-func (req OAuth2SessionUpdateRequestDTO) To() *dto.OAuth2SessionUpdateRequestDTO {
-	return &dto.OAuth2SessionUpdateRequestDTO{
+func (req OAuth2SessionUpdateRequest) To() *dto.OAuth2SessionUpdateRequest {
+	return &dto.OAuth2SessionUpdateRequest{
 		AuthenticationID: req.AuthenticationID,
 	}
 }
 
-func NewOAuth2SessionUpdateRedirectURI(resp *dto.OAuth2SessionUpdateResponseDTO) string {
+func NewOAuth2SessionUpdateRedirectURI(resp *dto.OAuth2SessionUpdateResponse) string {
+	if resp == nil {
+		return ""
+	}
+
 	q := url.Values{}
 	q.Set("response_type", resp.ResponseType)
 	q.Set("client_id", resp.ClientID.String())
@@ -240,12 +252,12 @@ func NewOAuth2SessionUpdateRedirectURI(resp *dto.OAuth2SessionUpdateResponseDTO)
 	return fmt.Sprintf("/oauth2/authorize?%s", q.Encode())
 }
 
-type OAuth2GetConsentPageRequestDTO struct {
+type OAuth2GetConsentPageRequest struct {
 	AuthorizationID string `query:"authorization_id"`
 }
 
-func (req OAuth2GetConsentPageRequestDTO) To() *dto.OAuth2GetConsentRequestDTO {
-	return &dto.OAuth2GetConsentRequestDTO{
+func (req OAuth2GetConsentPageRequest) To() *dto.OAuth2GetConsentRequest {
+	return &dto.OAuth2GetConsentRequest{
 		AuthorizationID: req.AuthorizationID,
 	}
 }
@@ -255,14 +267,14 @@ type ConsentPageScope struct {
 	Key      string
 }
 
-type OAuth2GetConsentPageResponseDTO struct {
+type OAuth2GetConsentPageResponse struct {
 	ClientName string
 	ClientID   int64
 
 	Scopes []ConsentPageScope
 }
 
-func NewOAuth2GetConsentPageResponseDTO(resp *dto.OAuth2GetConsentResponseDTO) *OAuth2GetConsentPageResponseDTO {
+func NewOAuth2GetConsentPageResponse(resp *dto.OAuth2GetConsentResponse) *OAuth2GetConsentPageResponse {
 	scopes := []ConsentPageScope{}
 	for i := range resp.Scopes {
 		scopes = append(scopes, ConsentPageScope{
@@ -271,33 +283,37 @@ func NewOAuth2GetConsentPageResponseDTO(resp *dto.OAuth2GetConsentResponseDTO) *
 		})
 	}
 
-	return &OAuth2GetConsentPageResponseDTO{
+	return &OAuth2GetConsentPageResponse{
 		ClientName: resp.Client.Name,
 		ClientID:   resp.Client.ClientID.Int64(),
 		Scopes:     scopes,
 	}
 }
 
-type OAuth2UpdateConsentRequestDTO struct {
+type OAuth2UpdateConsentRequest struct {
 	AuthorizationID string `query:"authorization_id"`
 	Consent         string `form:"consent"`
 	UserScope       string `form:"scope"`
 }
 
-func (req OAuth2UpdateConsentRequestDTO) To() *dto.OAuth2UpdateConsentRequestDTO {
+func (req OAuth2UpdateConsentRequest) To() *dto.OAuth2UpdateConsentRequest {
 	accept := false
 	if strings.ToLower(req.Consent) == "accepted" {
 		accept = true
 	}
 
-	return &dto.OAuth2UpdateConsentRequestDTO{
+	return &dto.OAuth2UpdateConsentRequest{
 		Accept:          accept,
 		AuthorizationID: req.AuthorizationID,
 		UserScope:       req.UserScope,
 	}
 }
 
-func NewOAuth2ConsentUpdateRedirectURI(resp *dto.OAUth2UpdateConsentResponseDTO) string {
+func NewOAuth2ConsentUpdateRedirectURI(resp *dto.OAUth2UpdateConsentResponse) string {
+	if resp == nil {
+		return ""
+	}
+
 	q := url.Values{}
 	q.Set("response_type", resp.ResponseType)
 	q.Set("client_id", resp.ClientID.String())

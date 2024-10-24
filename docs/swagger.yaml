@@ -1,5 +1,5 @@
 definitions:
-  dto.OAuth2AuthenticationCallbackRequestDTO:
+  dto.OAuth2AuthenticationCallbackRequest:
     properties:
       authorization_id:
         example: djG4l...
@@ -20,13 +20,13 @@ definitions:
         example: huykingsofm
         type: string
     type: object
-  dto.OAuth2AuthenticationCallbackResponseDTO:
+  dto.OAuth2AuthenticationCallbackResponse:
     properties:
       authentication_id:
         example: hlqWe...
         type: string
     type: object
-  dto.OAuth2ClientCreateFirstRequestDTO:
+  dto.OAuth2ClientCreateFirstRequest:
     properties:
       name:
         example: First Client
@@ -38,7 +38,7 @@ definitions:
         example: huykingsofm
         type: string
     type: object
-  dto.OAuth2ClientCreateFirstResponseDTO:
+  dto.OAuth2ClientCreateFirstResponse:
     properties:
       allowed_scope:
         example: read:user
@@ -56,7 +56,7 @@ definitions:
         example: "330559330522759168"
         type: string
     type: object
-  dto.OAuth2ClientCreateRequestDTO:
+  dto.OAuth2ClientCreateRequest:
     properties:
       is_confidential:
         example: true
@@ -65,7 +65,7 @@ definitions:
         example: Example Client
         type: string
     type: object
-  dto.OAuth2ClientCreateResponseDTO:
+  dto.OAuth2ClientCreateResponse:
     properties:
       allowed_scope:
         example: read:user
@@ -83,7 +83,7 @@ definitions:
         example: "330559330522759168"
         type: string
     type: object
-  dto.OAuth2ClientGetResponseDTO:
+  dto.OAuth2ClientGetResponse:
     properties:
       allowed_scope:
         example: read:user
@@ -98,7 +98,7 @@ definitions:
         example: "330559330522759168"
         type: string
     type: object
-  dto.OAuth2TokenResponseDTO:
+  dto.OAuth2TokenResponse:
     properties:
       access_token:
         type: string
@@ -111,7 +111,7 @@ definitions:
       token_type:
         type: string
     type: object
-  dto.UserGetByIDResponseDTO:
+  dto.UserGetByIDResponse:
     properties:
       display_name:
         example: Huy Le Ngoc
@@ -126,7 +126,7 @@ definitions:
         example: huykingsofm
         type: string
     type: object
-  dto.UserGetByUsernameResponseDTO:
+  dto.UserGetByUsernameResponse:
     properties:
       display_name:
         example: Huy Le Ngoc
@@ -141,7 +141,7 @@ definitions:
         example: huykingsofm
         type: string
     type: object
-  dto.UserRegisterRequestDTO:
+  dto.UserRegisterRequest:
     properties:
       password:
         example: s3Cr3tP@ssW0rD
@@ -150,7 +150,7 @@ definitions:
         example: huykingsofm
         type: string
     type: object
-  dto.UserRegisterResponseDTO:
+  dto.UserRegisterResponse:
     properties:
       display_name:
         example: Huy Le Ngoc
@@ -165,7 +165,7 @@ definitions:
         example: huykingsofm
         type: string
     type: object
-  dto.UserValidateRequestDTO:
+  dto.UserValidateRequest:
     properties:
       password:
         example: s3Cr3tP@ssW0rD
@@ -174,7 +174,7 @@ definitions:
         example: huykingsofm
         type: string
     type: object
-  dto.UserValidateResponseDTO:
+  dto.UserValidateResponse:
     properties:
       display_name:
         example: Huy Le Ngoc
@@ -195,10 +195,10 @@ definitions:
         example: invalid_request
         type: string
       error_description:
-        example: 'invalid field: require string but got int'
+        example: "invalid field: require string but got int"
         type: string
       metadata:
-        $ref: '#/definitions/standard.SwaggerMetadata'
+        $ref: "#/definitions/standard.SwaggerMetadata"
       status:
         example: error
         type: string
@@ -212,7 +212,7 @@ definitions:
         example: something has already existed
         type: string
       metadata:
-        $ref: '#/definitions/standard.SwaggerMetadata'
+        $ref: "#/definitions/standard.SwaggerMetadata"
       status:
         example: error
         type: string
@@ -226,7 +226,7 @@ definitions:
         example: not enough permission to access
         type: string
       metadata:
-        $ref: '#/definitions/standard.SwaggerMetadata'
+        $ref: "#/definitions/standard.SwaggerMetadata"
       status:
         example: error
         type: string
@@ -240,7 +240,7 @@ definitions:
         example: username or password is invalid
         type: string
       metadata:
-        $ref: '#/definitions/standard.SwaggerMetadata'
+        $ref: "#/definitions/standard.SwaggerMetadata"
       status:
         example: error
         type: string
@@ -263,63 +263,63 @@ definitions:
         example: not found user with id 323979471029873
         type: string
       metadata:
-        $ref: '#/definitions/standard.SwaggerMetadata'
+        $ref: "#/definitions/standard.SwaggerMetadata"
       status:
         example: error
         type: string
     type: object
-  standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateFirstResponseDTO:
+  standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateFirstResponse:
     properties:
       data:
-        $ref: '#/definitions/dto.OAuth2ClientCreateFirstResponseDTO'
+        $ref: "#/definitions/dto.OAuth2ClientCreateFirstResponse"
       status:
         example: success
         type: string
     type: object
-  standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateResponseDTO:
+  standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateResponse:
     properties:
       data:
-        $ref: '#/definitions/dto.OAuth2ClientCreateResponseDTO'
+        $ref: "#/definitions/dto.OAuth2ClientCreateResponse"
       status:
         example: success
         type: string
     type: object
-  standard.SwaggerSuccessResponse-dto_OAuth2ClientGetResponseDTO:
+  standard.SwaggerSuccessResponse-dto_OAuth2ClientGetResponse:
     properties:
       data:
-        $ref: '#/definitions/dto.OAuth2ClientGetResponseDTO'
+        $ref: "#/definitions/dto.OAuth2ClientGetResponse"
       status:
         example: success
         type: string
     type: object
-  standard.SwaggerSuccessResponse-dto_UserGetByIDResponseDTO:
+  standard.SwaggerSuccessResponse-dto_UserGetByIDResponse:
     properties:
       data:
-        $ref: '#/definitions/dto.UserGetByIDResponseDTO'
+        $ref: "#/definitions/dto.UserGetByIDResponse"
       status:
         example: success
         type: string
     type: object
-  standard.SwaggerSuccessResponse-dto_UserGetByUsernameResponseDTO:
+  standard.SwaggerSuccessResponse-dto_UserGetByUsernameResponse:
     properties:
       data:
-        $ref: '#/definitions/dto.UserGetByUsernameResponseDTO'
+        $ref: "#/definitions/dto.UserGetByUsernameResponse"
       status:
         example: success
         type: string
     type: object
-  standard.SwaggerSuccessResponse-dto_UserRegisterResponseDTO:
+  standard.SwaggerSuccessResponse-dto_UserRegisterResponse:
     properties:
       data:
-        $ref: '#/definitions/dto.UserRegisterResponseDTO'
+        $ref: "#/definitions/dto.UserRegisterResponse"
       status:
         example: success
         type: string
     type: object
-  standard.SwaggerSuccessResponse-dto_UserValidateResponseDTO:
+  standard.SwaggerSuccessResponse-dto_UserValidateResponse:
     properties:
       data:
-        $ref: '#/definitions/dto.UserValidateResponseDTO'
+        $ref: "#/definitions/dto.UserValidateResponse"
       status:
         example: success
         type: string
@@ -333,7 +333,7 @@ definitions:
         example: require authentication
         type: string
       metadata:
-        $ref: '#/definitions/standard.SwaggerMetadata'
+        $ref: "#/definitions/standard.SwaggerMetadata"
       status:
         example: error
         type: string
@@ -347,88 +347,91 @@ paths:
   /auth/callback:
     post:
       consumes:
-      - application/json
+        - application/json
       description: |-
         This endpoint is called by the IdP after it validated the user.
         It notifies to the server about the authentication result (success or failure) and the inforamtion of user.
       parameters:
-      - description: Authentication result
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.OAuth2AuthenticationCallbackRequestDTO'
+        - description: Authentication result
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/dto.OAuth2AuthenticationCallbackRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: Successfully accept the result
           schema:
-            $ref: '#/definitions/dto.OAuth2AuthenticationCallbackResponseDTO'
+            $ref: "#/definitions/dto.OAuth2AuthenticationCallbackResponse"
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+            $ref: "#/definitions/standard.SwaggerBadRequestErrorResponse"
         "401":
           description: Not found
           schema:
-            $ref: '#/definitions/standard.SwaggerNotFoundErrorResponse'
+            $ref: "#/definitions/standard.SwaggerNotFoundErrorResponse"
       summary: Authentication Callback Endpoint
       tags:
-      - OAuth2
+        - OAuth2
   /oauth2/authorize:
     get:
       description: |-
         The authorization endpoint is used to interact with the resource owner and obtain an authorization grant.
         This is the entry point for starting an OAuth2 flow, such as Authorization Code or Implicit.
       parameters:
-      - description: The type of response requested, typically 'code' or 'token'.
-        in: query
-        name: response_type
-        required: true
-        type: string
-      - description: The client ID of the application making the authorization request.
-        in: query
-        name: client_id
-        required: true
-        type: string
-      - description: The URI to which the response will be sent after the authorization.
-        in: query
-        name: redirect_uri
-        required: true
-        type: string
-      - description: The scope of the access request. It defines the level of access
-          the application is requesting.
-        in: query
-        name: scope
-        type: string
-      - description: An opaque value used by the client to maintain state between
-          the request and callback.
-        in: query
-        name: state
-        type: string
+        - description: The type of response requested, typically 'code' or 'token'.
+          in: query
+          name: response_type
+          required: true
+          type: string
+        - description: The client ID of the application making the authorization request.
+          in: query
+          name: client_id
+          required: true
+          type: string
+        - description: The URI to which the response will be sent after the authorization.
+          in: query
+          name: redirect_uri
+          required: true
+          type: string
+        - description:
+            The scope of the access request. It defines the level of access
+            the application is requesting.
+          in: query
+          name: scope
+          type: string
+        - description:
+            An opaque value used by the client to maintain state between
+            the request and callback.
+          in: query
+          name: state
+          type: string
       responses:
         "303":
           description: Redirect to client application with authorization code or error
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+            $ref: "#/definitions/standard.SwaggerBadRequestErrorResponse"
       summary: OAuth2 Authorization Endpoint
       tags:
-      - OAuth2
+        - OAuth2
   /oauth2/consent:
     get:
-      description: This endpoint serves a consent page when the server needs the user
+      description:
+        This endpoint serves a consent page when the server needs the user
         consent for client.
       parameters:
-      - description: Authorization ID
-        in: query
-        name: authorization_id
-        required: true
-        type: string
+        - description: Authorization ID
+          in: query
+          name: authorization_id
+          required: true
+          type: string
       produces:
-      - text/html
+        - text/html
       responses:
         "200":
           description: Consent page rendered successfully
@@ -437,122 +440,127 @@ paths:
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+            $ref: "#/definitions/standard.SwaggerBadRequestErrorResponse"
       summary: Consent page
       tags:
-      - OAuth2
+        - OAuth2
     post:
-      description: This endpoint updates the consent result of user then redirect
+      description:
+        This endpoint updates the consent result of user then redirect
         back to the oauth2 authorization endpoint.
       parameters:
-      - description: Authorization ID
-        in: query
-        name: authorization_id
-        required: true
-        type: string
-      - description: The consent result (accepted or denied)
-        in: formData
-        name: consent
-        type: string
-      - description: The accepted scopes of user (usually less than the requested
-          scope).
-        in: formData
-        name: scope
-        type: string
+        - description: Authorization ID
+          in: query
+          name: authorization_id
+          required: true
+          type: string
+        - description: The consent result (accepted or denied)
+          in: formData
+          name: consent
+          type: string
+        - description:
+            The accepted scopes of user (usually less than the requested
+            scope).
+          in: formData
+          name: scope
+          type: string
       responses:
         "303":
           description: Redirect back to oauth2 authorization endpoint
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+            $ref: "#/definitions/standard.SwaggerBadRequestErrorResponse"
       summary: Update consent
       tags:
-      - OAuth2
+        - OAuth2
   /oauth2/token:
     post:
       consumes:
-      - application/x-www-form-urlencoded
+        - application/x-www-form-urlencoded
       description: |-
         The token endpoint is used to exchange an authorization code, client credentials, or refresh token for an access token and optionally a refresh token.
         This is part of the OAuth2 flow to grant access tokens to clients.
       parameters:
-      - description: The OAuth2 grant type (authorization_code, client_credentials,
-          refresh_token)
-        in: formData
-        name: grant_type
-        required: true
-        type: string
-      - description: The authorization code received from the authorize endpoint (required
-          for authorization_code grant type)
-        in: formData
-        name: code
-        type: string
-      - description: The redirect URI used in the authorization request (required
-          for authorization_code grant type)
-        in: formData
-        name: redirect_uri
-        type: string
-      - description: The client ID of the application
-        in: formData
-        name: client_id
-        required: true
-        type: string
-      - description: The client secret of the application
-        in: formData
-        name: client_secret
-        required: true
-        type: string
-      - description: The refresh token (required for refresh_token grant type)
-        in: formData
-        name: refresh_token
-        type: string
-      - description: The scope of the access request (optional, space-separated)
-        in: formData
-        name: scope
-        type: string
+        - description:
+            The OAuth2 grant type (authorization_code, client_credentials,
+            refresh_token)
+          in: formData
+          name: grant_type
+          required: true
+          type: string
+        - description:
+            The authorization code received from the authorize endpoint (required
+            for authorization_code grant type)
+          in: formData
+          name: code
+          type: string
+        - description:
+            The redirect URI used in the authorization request (required
+            for authorization_code grant type)
+          in: formData
+          name: redirect_uri
+          type: string
+        - description: The client ID of the application
+          in: formData
+          name: client_id
+          required: true
+          type: string
+        - description: The client secret of the application
+          in: formData
+          name: client_secret
+          required: true
+          type: string
+        - description: The refresh token (required for refresh_token grant type)
+          in: formData
+          name: refresh_token
+          type: string
+        - description: The scope of the access request (optional, space-separated)
+          in: formData
+          name: scope
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: Successfully generated access token
           schema:
-            $ref: '#/definitions/dto.OAuth2TokenResponseDTO'
+            $ref: "#/definitions/dto.OAuth2TokenResponse"
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+            $ref: "#/definitions/standard.SwaggerBadRequestErrorResponse"
       summary: OAuth2 Token Endpoint
       tags:
-      - OAuth2
+        - OAuth2
   /oauth2_clients:
     post:
       consumes:
-      - application/json
+        - application/json
       description: |-
         Create an new OAuth2 Client. If the `is_confidential` field is true, a secret is issued. Please carefully store this secret in a confidential place. This secret will never be retrieved by anyway. <br>
         Require scope `create:client`.
       parameters:
-      - description: Client Information
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.OAuth2ClientCreateRequestDTO'
+        - description: Client Information
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/dto.OAuth2ClientCreateRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Create client successfully
           schema:
-            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateResponseDTO'
+            $ref: "#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateResponse"
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+            $ref: "#/definitions/standard.SwaggerBadRequestErrorResponse"
       summary: Create oauth2 client
       tags:
-      - OAuth2 Client
+        - OAuth2 Client
   /oauth2_clients/{client_id}:
     get:
       description: |-
@@ -560,206 +568,206 @@ paths:
         Require scope `read:client.allowed_scope` to get the allowed scope. <br>
         Require scope `read:client.owner` to get Owner ID.
       parameters:
-      - description: ClientID
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: ClientID
+          in: path
+          name: id
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: Get client successfully
           schema:
-            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientGetResponseDTO'
+            $ref: "#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientGetResponse"
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+            $ref: "#/definitions/standard.SwaggerBadRequestErrorResponse"
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/standard.SwaggerNotFoundErrorResponse'
+            $ref: "#/definitions/standard.SwaggerNotFoundErrorResponse"
       summary: Get oauth2 client by id
       tags:
-      - OAuth2 Client
+        - OAuth2 Client
   /oauth2_clients/first:
     post:
       consumes:
-      - application/json
+        - application/json
       description: |-
         Create the first OAuth2 Client (always a confidential Client). <br>
         Why this API? When todennus is started, there is no existed Client, we don't have any flow to authenticate a user (all authentication flows require a Client). This API is only valid if there is no existing Client and the user is administrator.
       parameters:
-      - description: Client Information
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.OAuth2ClientCreateFirstRequestDTO'
+        - description: Client Information
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/dto.OAuth2ClientCreateFirstRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Create client successfully
           schema:
-            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateFirstResponseDTO'
+            $ref: "#/definitions/standard.SwaggerSuccessResponse-dto_OAuth2ClientCreateFirstResponse"
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+            $ref: "#/definitions/standard.SwaggerBadRequestErrorResponse"
         "401":
           description: unauthorized
           schema:
-            $ref: '#/definitions/standard.SwaggerUnauthorizedErrorResponse'
+            $ref: "#/definitions/standard.SwaggerUnauthorizedErrorResponse"
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/standard.SwaggerForbiddenErrorResponse'
+            $ref: "#/definitions/standard.SwaggerForbiddenErrorResponse"
         "404":
           description: API not found
           schema:
-            $ref: '#/definitions/standard.SwaggerNotFoundErrorResponse'
+            $ref: "#/definitions/standard.SwaggerNotFoundErrorResponse"
       summary: Create the first oauth2 client
       tags:
-      - OAuth2 Client
+        - OAuth2 Client
   /session/update:
     get:
       description: |-
         The user will be redirected to this endpoint by the IdP after it sends the authentication result to the server. <br>
         This endpoint updates the user session state to `authenticated`, `unauthenticated`, or `failed authentication`.
       parameters:
-      - description: Authentication id
-        in: query
-        name: authentication_id
-        required: true
-        type: string
+        - description: Authentication id
+          in: query
+          name: authentication_id
+          required: true
+          type: string
       responses:
         "303":
           description: Redirect back to oauth2 authorization endpoint
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+            $ref: "#/definitions/standard.SwaggerBadRequestErrorResponse"
       summary: Session Update Endpoint
       tags:
-      - OAuth2
+        - OAuth2
   /users:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Register a new user by providing username and password
       parameters:
-      - description: User registration data
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UserRegisterRequestDTO'
+        - description: User registration data
+          in: body
+          name: user
+          required: true
+          schema:
+            $ref: "#/definitions/dto.UserRegisterRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: User registered successfully
           schema:
-            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_UserRegisterResponseDTO'
+            $ref: "#/definitions/standard.SwaggerSuccessResponse-dto_UserRegisterResponse"
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+            $ref: "#/definitions/standard.SwaggerBadRequestErrorResponse"
         "409":
           description: Duplicated
           schema:
-            $ref: '#/definitions/standard.SwaggerDuplicatedErrorResponse'
+            $ref: "#/definitions/standard.SwaggerDuplicatedErrorResponse"
       summary: Register a new user
       tags:
-      - User
+        - User
   /users/{user_id}:
     get:
       description: |-
         Get an user information by user id. <br>
         Require scope `read:user.role` to get role of user.
       parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: User ID
+          in: path
+          name: id
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: Get user successfully
           schema:
-            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_UserGetByIDResponseDTO'
+            $ref: "#/definitions/standard.SwaggerSuccessResponse-dto_UserGetByIDResponse"
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+            $ref: "#/definitions/standard.SwaggerBadRequestErrorResponse"
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/standard.SwaggerNotFoundErrorResponse'
+            $ref: "#/definitions/standard.SwaggerNotFoundErrorResponse"
       summary: Get user by id
       tags:
-      - User
+        - User
   /users/username/{username}:
     get:
       description: |-
         Get an user information by user username. <br>
         Require scope `read:user.role` to get role of user.
       parameters:
-      - description: Username
-        in: path
-        name: username
-        required: true
-        type: string
+        - description: Username
+          in: path
+          name: username
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: Get user successfully
           schema:
-            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_UserGetByUsernameResponseDTO'
+            $ref: "#/definitions/standard.SwaggerSuccessResponse-dto_UserGetByUsernameResponse"
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+            $ref: "#/definitions/standard.SwaggerBadRequestErrorResponse"
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/standard.SwaggerNotFoundErrorResponse'
+            $ref: "#/definitions/standard.SwaggerNotFoundErrorResponse"
       summary: Get user by username
       tags:
-      - User
+        - User
   /users/validate:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Validate the user credentials and returns the user information.
       parameters:
-      - description: Validation data
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UserValidateRequestDTO'
+        - description: Validation data
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/dto.UserValidateRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: Validate successfully
           schema:
-            $ref: '#/definitions/standard.SwaggerSuccessResponse-dto_UserValidateResponseDTO'
+            $ref: "#/definitions/standard.SwaggerSuccessResponse-dto_UserValidateResponse"
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/standard.SwaggerBadRequestErrorResponse'
+            $ref: "#/definitions/standard.SwaggerBadRequestErrorResponse"
         "401":
           description: Invalid credentials
           schema:
-            $ref: '#/definitions/standard.SwaggerInvalidCredentialsErrorResponse'
+            $ref: "#/definitions/standard.SwaggerInvalidCredentialsErrorResponse"
       summary: Validate user credentials
       tags:
-      - User
+        - User
 swagger: "2.0"

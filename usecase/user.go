@@ -36,8 +36,8 @@ func NewUserUsecase(
 
 func (uc *UserUsecase) Register(
 	ctx context.Context,
-	req *dto.UserRegisterRequestDTO,
-) (*dto.UserRegisterResponseDTO, error) {
+	req *dto.UserRegisterRequest,
+) (*dto.UserRegisterResponse, error) {
 	_, err := uc.userRepo.GetByUsername(ctx, req.Username)
 	if err == nil {
 		return nil, xerror.Enrich(ErrDuplicated, "username %s has already existed", req.Username)
@@ -63,13 +63,13 @@ func (uc *UserUsecase) Register(
 		}
 	}
 
-	return dto.NewUserRegisterResponseDTO(ctx, user), nil
+	return dto.NewUserRegisterResponse(ctx, user), nil
 }
 
 func (usecase *UserUsecase) GetByID(
 	ctx context.Context,
-	req *dto.UserGetByIDRequestDTO,
-) (*dto.UserGetByIDResponseDTO, error) {
+	req *dto.UserGetByIDRequest,
+) (*dto.UserGetByIDResponse, error) {
 	if req.UserID == 0 {
 		return nil, xerror.Enrich(ErrClientInvalid, "require user id")
 	}
@@ -83,13 +83,13 @@ func (usecase *UserUsecase) GetByID(
 		return nil, ErrServer.Hide(err, "failed-to-get-user", "uid", req.UserID)
 	}
 
-	return dto.NewUserGetByIDResponseDTO(ctx, user), nil
+	return dto.NewUserGetByIDResponse(ctx, user), nil
 }
 
 func (usecase *UserUsecase) GetByUsername(
 	ctx context.Context,
-	req *dto.UserGetByUsernameRequestDTO,
-) (*dto.UserGetByUsernameResponseDTO, error) {
+	req *dto.UserGetByUsernameRequest,
+) (*dto.UserGetByUsernameResponse, error) {
 	user, err := usecase.userRepo.GetByUsername(ctx, req.Username)
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
@@ -99,13 +99,13 @@ func (usecase *UserUsecase) GetByUsername(
 		return nil, ErrServer.Hide(err, "failed-to-get-user", "username", req.Username)
 	}
 
-	return dto.NewUserGetByUsernameResponseDTO(ctx, user), nil
+	return dto.NewUserGetByUsernameResponse(ctx, user), nil
 }
 
 func (usecase *UserUsecase) ValidateCredentials(
 	ctx context.Context,
-	req *dto.UserValidateCredentialsRequestDTO,
-) (*dto.UserValidateCredentialsResponseDTO, error) {
+	req *dto.UserValidateCredentialsRequest,
+) (*dto.UserValidateCredentialsResponse, error) {
 	user, err := usecase.userRepo.GetByUsername(ctx, req.Username)
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
@@ -122,7 +122,7 @@ func (usecase *UserUsecase) ValidateCredentials(
 	}
 
 	ctx = xcontext.WithRequestUserID(ctx, user.ID)
-	return dto.NewUserValidateCredentialsResponseDTO(ctx, user), nil
+	return dto.NewUserValidateCredentialsResponse(ctx, user), nil
 }
 
 func (uc *UserUsecase) createAdmin(

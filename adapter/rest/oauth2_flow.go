@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/xybor/todennus-backend/adapter/rest/abstraction"
+	"github.com/xybor/todennus-backend/adapter/abstraction"
 	"github.com/xybor/todennus-backend/adapter/rest/dto"
 	"github.com/xybor/todennus-backend/adapter/rest/response"
 	"github.com/xybor/todennus-backend/usecase"
@@ -45,7 +45,7 @@ func (a *OAuth2Adapter) Authorize() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseHTTPRequest[dto.OAuth2AuthorizeRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.OAuth2AuthorizeRequest](r)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
@@ -85,21 +85,21 @@ func (a *OAuth2Adapter) Authorize() http.HandlerFunc {
 // @Param client_secret formData string true "The client secret of the application"
 // @Param refresh_token formData string false "The refresh token (required for refresh_token grant type)"
 // @Param scope formData string false "The scope of the access request (optional, space-separated)"
-// @Success 200 {object} dto.OAuth2TokenResponseDTO "Successfully generated access token"
+// @Success 200 {object} dto.OAuth2TokenResponse "Successfully generated access token"
 // @Failure 400 {object} standard.SwaggerBadRequestErrorResponse "Bad request"
 // @Router /oauth2/token [post]
 func (a *OAuth2Adapter) Token() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseHTTPRequest[dto.OAuth2TokenRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.OAuth2TokenRequest](r)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
 		}
 
 		resp, err := a.oauth2Usecase.Token(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewOAuth2TokenResponseDTO, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOAuth2TokenResponse(resp), err).
 			Map(http.StatusBadRequest,
 				usecase.ErrRequestInvalid, usecase.ErrClientInvalid,
 				usecase.ErrScopeInvalid, usecase.ErrTokenInvalidGrant,
@@ -114,8 +114,8 @@ func (a *OAuth2Adapter) Token() http.HandlerFunc {
 // @Tags OAuth2
 // @Accept json
 // @Produce json
-// @Param body body dto.OAuth2AuthenticationCallbackRequestDTO true "Authentication result"
-// @Success 200 {object} dto.OAuth2AuthenticationCallbackResponseDTO "Successfully accept the result"
+// @Param body body dto.OAuth2AuthenticationCallbackRequest true "Authentication result"
+// @Success 200 {object} dto.OAuth2AuthenticationCallbackResponse "Successfully accept the result"
 // @Failure 400 {object} standard.SwaggerBadRequestErrorResponse "Bad request"
 // @Failure 401 {object} standard.SwaggerUnauthorizedErrorResponse "Unauthorized"
 // @Failure 401 {object} standard.SwaggerNotFoundErrorResponse "Not found"
@@ -124,7 +124,7 @@ func (a *OAuth2Adapter) AuthenticationCallback() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseHTTPRequest[dto.OAuth2AuthenticationCallbackRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.OAuth2AuthenticationCallbackRequest](r)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
@@ -137,7 +137,7 @@ func (a *OAuth2Adapter) AuthenticationCallback() http.HandlerFunc {
 		}
 
 		resp, err := a.oauth2Usecase.AuthenticationCallback(ctx, usecaseReq)
-		response.NewResponseHandler(ctx, dto.NewOAuth2AuthenticationCallbackResponseDTO, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOAuth2AuthenticationCallbackResponse(resp), err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
 			Map(http.StatusNotFound, usecase.ErrNotFound).
 			Map(http.StatusUnauthorized, usecase.ErrUnauthenticated).
@@ -157,14 +157,14 @@ func (a *OAuth2Adapter) SessionUpdate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseHTTPRequest[dto.OAuth2SessionUpdateRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.OAuth2SessionUpdateRequest](r)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
 		}
 
 		resp, err := a.oauth2Usecase.SessionUpdate(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewOAuth2SessionUpdateRedirectURI, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOAuth2SessionUpdateRedirectURI(resp), err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
 			Redirect(ctx, w, r, http.StatusSeeOther)
 	}
@@ -182,7 +182,7 @@ func (a *OAuth2Adapter) GetConsentPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseHTTPRequest[dto.OAuth2GetConsentPageRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.OAuth2GetConsentPageRequest](r)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
@@ -205,7 +205,7 @@ func (a *OAuth2Adapter) GetConsentPage() http.HandlerFunc {
 			return
 		}
 
-		if err = tmpl.Execute(w, dto.NewOAuth2GetConsentPageResponseDTO(resp)); err != nil {
+		if err = tmpl.Execute(w, dto.NewOAuth2GetConsentPageResponse(resp)); err != nil {
 			response.WriteError(ctx, w, http.StatusInternalServerError,
 				usecase.ErrServer.Hide(err, "failed-to-render-template"))
 		}
@@ -225,14 +225,14 @@ func (a *OAuth2Adapter) UpdateConsent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseHTTPRequest[dto.OAuth2UpdateConsentRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.OAuth2UpdateConsentRequest](r)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
 		}
 
 		resp, err := a.oauth2Usecase.UpdateConsent(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewOAuth2ConsentUpdateRedirectURI, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOAuth2ConsentUpdateRedirectURI(resp), err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid, usecase.ErrAuthorizationAccessDenied).
 			Redirect(ctx, w, r, http.StatusSeeOther)
 	}

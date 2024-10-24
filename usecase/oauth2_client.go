@@ -42,8 +42,8 @@ func NewOAuth2ClientUsecase(
 
 func (usecase *OAuth2ClientUsecase) Create(
 	ctx context.Context,
-	req *dto.OAuth2ClientCreateRequestDTO,
-) (*dto.OAuth2ClientCreateResponseDTO, error) {
+	req *dto.OAuth2ClientCreateRequest,
+) (*dto.OAuth2ClientCreateResponse, error) {
 	requiredScope := domain.ScopeEngine.New(domain.Actions.Write.Create, domain.Resources.Client)
 	if !xcontext.Scope(ctx).Contains(requiredScope) {
 		return nil, xerror.Enrich(ErrForbidden, "insufficient scope, require %s", requiredScope)
@@ -59,13 +59,13 @@ func (usecase *OAuth2ClientUsecase) Create(
 		return nil, ErrServer.Hide(err, "failed-to-create-client")
 	}
 
-	return dto.NewOAuth2ClientCreateResponseDTO(client, secret), nil
+	return dto.NewOAuth2ClientCreateResponse(client, secret), nil
 }
 
 func (usecase *OAuth2ClientUsecase) CreateByAdmin(
 	ctx context.Context,
-	req *dto.OAuth2ClientCreateFirstRequestDTO,
-) (*dto.OAuth2ClientCreateByAdminResponseDTO, error) {
+	req *dto.OAuth2ClientCreateFirstRequest,
+) (*dto.OAuth2ClientCreateByAdminResponse, error) {
 	if !usecase.isNoClient {
 		return nil, xerror.Enrich(ErrNotFound, "this api is only openned for creating the first client")
 	}
@@ -113,13 +113,13 @@ func (usecase *OAuth2ClientUsecase) CreateByAdmin(
 	}
 
 	usecase.isNoClient = false
-	return dto.NewOAuth2ClientCreateFirstResponseDTO(ctx, client, secret), nil
+	return dto.NewOAuth2ClientCreateFirstResponse(ctx, client, secret), nil
 }
 
 func (usecase *OAuth2ClientUsecase) Get(
 	ctx context.Context,
-	req *dto.OAuth2ClientGetRequestDTO,
-) (*dto.OAuth2ClientGetResponseDTO, error) {
+	req *dto.OAuth2ClientGetRequest,
+) (*dto.OAuth2ClientGetResponse, error) {
 	client, err := usecase.oauth2ClientRepo.GetByID(ctx, req.ClientID.Int64())
 	if err != nil {
 		if errors.Is(err, database.ErrRecordNotFound) {
