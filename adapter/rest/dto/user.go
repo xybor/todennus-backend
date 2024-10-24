@@ -17,93 +17,93 @@ func ParseUserID(meID snowflake.ID, s string) (snowflake.ID, error) {
 }
 
 // Register
-type UserRegisterRequestDTO struct {
+type UserRegisterRequest struct {
 	Username string `json:"username" example:"huykingsofm"`
 	Password string `json:"password" example:"s3Cr3tP@ssW0rD"`
 }
 
-func (req UserRegisterRequestDTO) To() *dto.UserRegisterRequestDTO {
-	return &dto.UserRegisterRequestDTO{
+func (req UserRegisterRequest) To() *dto.UserRegisterRequest {
+	return &dto.UserRegisterRequest{
 		Username: req.Username,
 		Password: req.Password,
 	}
 }
 
-type UserRegisterResponseDTO struct {
+type UserRegisterResponse struct {
 	*resource.User
 }
 
-func NewUserRegisterResponseDTO(resp *dto.UserRegisterResponseDTO) *UserRegisterResponseDTO {
-	return &UserRegisterResponseDTO{
+func NewUserRegisterResponse(resp *dto.UserRegisterResponse) *UserRegisterResponse {
+	return &UserRegisterResponse{
 		User: resource.NewUser(resp.User),
 	}
 }
 
 // GetByID
-type UserGetByIDRequestDTO struct {
+type UserGetByIDRequest struct {
 	UserID string `param:"user_id"`
 }
 
-func (req UserGetByIDRequestDTO) To(meID snowflake.ID) (*dto.UserGetByIDRequestDTO, error) {
+func (req UserGetByIDRequest) To(meID snowflake.ID) (*dto.UserGetByIDRequest, error) {
 	userID, err := ParseUserID(meID, req.UserID)
 	if err != nil {
 		return nil, xerror.Enrich(usecase.ErrRequestInvalid, "user id is invalid").
 			Hide(err, "failed-to-parse-user-id", "uid", req.UserID)
 	}
 
-	return &dto.UserGetByIDRequestDTO{UserID: userID}, nil
+	return &dto.UserGetByIDRequest{UserID: userID}, nil
 }
 
-type UserGetByIDResponseDTO struct {
+type UserGetByIDResponse struct {
 	*resource.User
 }
 
-func NewUserGetByIDResponseDTO(resp *dto.UserGetByIDResponseDTO) *UserGetByIDResponseDTO {
-	return &UserGetByIDResponseDTO{
+func NewUserGetByIDResponse(resp *dto.UserGetByIDResponse) *UserGetByIDResponse {
+	return &UserGetByIDResponse{
 		User: resource.NewUser(resp.User),
 	}
 }
 
 // GetByUsername
-type UserGetByUsernameRequestDTO struct {
+type UserGetByUsernameRequest struct {
 	Username string `param:"username"`
 }
 
-func (req UserGetByUsernameRequestDTO) To() *dto.UserGetByUsernameRequestDTO {
-	return &dto.UserGetByUsernameRequestDTO{
+func (req UserGetByUsernameRequest) To() *dto.UserGetByUsernameRequest {
+	return &dto.UserGetByUsernameRequest{
 		Username: req.Username,
 	}
 }
 
-type UserGetByUsernameResponseDTO struct {
+type UserGetByUsernameResponse struct {
 	*resource.User
 }
 
-func NewUserGetByUsernameResponseDTO(resp *dto.UserGetByUsernameResponseDTO) *UserGetByUsernameResponseDTO {
-	return &UserGetByUsernameResponseDTO{
+func NewUserGetByUsernameResponse(resp *dto.UserGetByUsernameResponse) *UserGetByUsernameResponse {
+	return &UserGetByUsernameResponse{
 		User: resource.NewUser(resp.User),
 	}
 }
 
 // Validate
-type UserValidateRequestDTO struct {
+type UserValidateRequest struct {
 	Username string `json:"username" example:"huykingsofm"`
 	Password string `json:"password" example:"s3Cr3tP@ssW0rD"`
 }
 
-func (req UserValidateRequestDTO) To() *dto.UserValidateCredentialsRequestDTO {
-	return &dto.UserValidateCredentialsRequestDTO{
+func (req UserValidateRequest) To() *dto.UserValidateCredentialsRequest {
+	return &dto.UserValidateCredentialsRequest{
 		Username: req.Username,
 		Password: req.Password,
 	}
 }
 
-type UserValidateResponseDTO struct {
+type UserValidateResponse struct {
 	*resource.User
 }
 
-func NewUserValidateResponseDTO(resp *dto.UserValidateCredentialsResponseDTO) *UserValidateResponseDTO {
-	return &UserValidateResponseDTO{
+func NewUserValidateResponse(resp *dto.UserValidateCredentialsResponse) *UserValidateResponse {
+	return &UserValidateResponse{
 		User: resource.NewUser(resp.User),
 	}
 }

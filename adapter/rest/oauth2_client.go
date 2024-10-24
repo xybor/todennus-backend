@@ -6,7 +6,7 @@ import (
 	_ "github.com/xybor/todennus-backend/adapter/rest/standard"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/xybor/todennus-backend/adapter/rest/abstraction"
+	"github.com/xybor/todennus-backend/adapter/abstraction"
 	"github.com/xybor/todennus-backend/adapter/rest/dto"
 	"github.com/xybor/todennus-backend/adapter/rest/middleware"
 	"github.com/xybor/todennus-backend/adapter/rest/response"
@@ -36,7 +36,7 @@ func (a *OAuth2ClientAdapter) Router(r chi.Router) {
 // @Tags OAuth2 Client
 // @Produce json
 // @Param id path string true "ClientID"
-// @Success 200 {object} standard.SwaggerSuccessResponse[dto.OAuth2ClientGetResponseDTO] "Get client successfully"
+// @Success 200 {object} standard.SwaggerSuccessResponse[dto.OAuth2ClientGetResponse] "Get client successfully"
 // @Failure 400 {object} standard.SwaggerBadRequestErrorResponse "Bad request"
 // @Failure 404 {object} standard.SwaggerNotFoundErrorResponse "Not found"
 // @Router /oauth2_clients/{client_id} [get]
@@ -44,14 +44,14 @@ func (a *OAuth2ClientAdapter) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseHTTPRequest[dto.OAuth2ClientGetRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.OAuth2ClientGetRequest](r)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
 		}
 
 		resp, err := a.oauth2ClientUsecase.Get(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewOAuth2ClientGetResponseDTO, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOAuth2ClientGetResponse, resp, err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
 			Map(http.StatusNotFound, usecase.ErrClientInvalid).
 			WriteHTTPResponse(ctx, w)
@@ -64,22 +64,22 @@ func (a *OAuth2ClientAdapter) Get() http.HandlerFunc {
 // @Tags OAuth2 Client
 // @Accept json
 // @Produce json
-// @Param body body dto.OAuth2ClientCreateRequestDTO true "Client Information"
-// @Success 201 {object} standard.SwaggerSuccessResponse[dto.OAuth2ClientCreateResponseDTO] "Create client successfully"
+// @Param body body dto.OAuth2ClientCreateRequest true "Client Information"
+// @Success 201 {object} standard.SwaggerSuccessResponse[dto.OAuth2ClientCreateResponse] "Create client successfully"
 // @Failure 400 {object} standard.SwaggerBadRequestErrorResponse "Bad request"
 // @Router /oauth2_clients [post]
 func (a *OAuth2ClientAdapter) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseHTTPRequest[dto.OAuth2ClientCreateRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.OAuth2ClientCreateRequest](r)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
 		}
 
 		resp, err := a.oauth2ClientUsecase.Create(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewOauth2ClientCreateResponseDTO, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOauth2ClientCreateResponse, resp, err).
 			WithDefaultCode(http.StatusCreated).
 			WriteHTTPResponse(ctx, w)
 	}
@@ -91,8 +91,8 @@ func (a *OAuth2ClientAdapter) Create() http.HandlerFunc {
 // @Tags OAuth2 Client
 // @Accept json
 // @Produce json
-// @Param body body dto.OAuth2ClientCreateFirstRequestDTO true "Client Information"
-// @Success 201 {object} standard.SwaggerSuccessResponse[dto.OAuth2ClientCreateFirstResponseDTO] "Create client successfully"
+// @Param body body dto.OAuth2ClientCreateFirstRequest true "Client Information"
+// @Success 201 {object} standard.SwaggerSuccessResponse[dto.OAuth2ClientCreateFirstResponse] "Create client successfully"
 // @Failure 400 {object} standard.SwaggerBadRequestErrorResponse "Bad request"
 // @Failure 401 {object} standard.SwaggerUnauthorizedErrorResponse "unauthorized"
 // @Failure 403 {object} standard.SwaggerForbiddenErrorResponse "Forbidden"
@@ -102,14 +102,14 @@ func (a *OAuth2ClientAdapter) CreateByAdmin() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseHTTPRequest[dto.OAuth2ClientCreateFirstRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.OAuth2ClientCreateFirstRequest](r)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
 		}
 
 		resp, err := a.oauth2ClientUsecase.CreateByAdmin(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewOauth2ClientCreateFirstResponseDTO, resp, err).
+		response.NewResponseHandler(ctx, dto.NewOauth2ClientCreateFirstResponse, resp, err).
 			Map(http.StatusForbidden, usecase.ErrForbidden).
 			Map(http.StatusNotFound, usecase.ErrNotFound).
 			Map(http.StatusUnauthorized, usecase.ErrUnauthenticated).

@@ -6,77 +6,77 @@ import (
 	"github.com/xybor/todennus-backend/usecase/dto"
 )
 
-type OAuth2ClientCreateRequestDTO struct {
+type OAuth2ClientCreateRequest struct {
 	Name           string `json:"name" example:"Example Client"`
 	IsConfidential bool   `json:"is_confidential" example:"true"`
 }
 
-func (req OAuth2ClientCreateRequestDTO) To() *dto.OAuth2ClientCreateRequestDTO {
-	return &dto.OAuth2ClientCreateRequestDTO{
+func (req OAuth2ClientCreateRequest) To() *dto.OAuth2ClientCreateRequest {
+	return &dto.OAuth2ClientCreateRequest{
 		Name:           req.Name,
 		IsConfidential: req.IsConfidential,
 	}
 }
 
-type OAuth2ClientCreateResponseDTO struct {
+type OAuth2ClientCreateResponse struct {
 	*resource.OAuth2Client
 	ClientSecret string `json:"client_secret" example:"ElBacv..."`
 }
 
-func NewOauth2ClientCreateResponseDTO(resp *dto.OAuth2ClientCreateResponseDTO) *OAuth2ClientCreateResponseDTO {
-	return &OAuth2ClientCreateResponseDTO{
+func NewOauth2ClientCreateResponse(resp *dto.OAuth2ClientCreateResponse) *OAuth2ClientCreateResponse {
+	return &OAuth2ClientCreateResponse{
 		OAuth2Client: resource.NewOAuth2Client(resp.Client),
 		ClientSecret: resp.ClientSecret,
 	}
 }
 
-type OAuth2ClientCreateFirstRequestDTO struct {
+type OAuth2ClientCreateFirstRequest struct {
 	Username string `json:"username" example:"huykingsofm"`
 	Password string `json:"password" example:"s3Cr3tP@ssW0rD"`
 	Name     string `json:"name" example:"First Client"`
 }
 
-func (req *OAuth2ClientCreateFirstRequestDTO) To() *dto.OAuth2ClientCreateFirstRequestDTO {
-	return &dto.OAuth2ClientCreateFirstRequestDTO{
+func (req *OAuth2ClientCreateFirstRequest) To() *dto.OAuth2ClientCreateFirstRequest {
+	return &dto.OAuth2ClientCreateFirstRequest{
 		Username: req.Username,
 		Password: req.Password,
 		Name:     req.Name,
 	}
 }
 
-type OAuth2ClientCreateFirstResponseDTO struct {
+type OAuth2ClientCreateFirstResponse struct {
 	*resource.OAuth2Client
 	ClientSecret string `json:"client_secret" example:"ElBacv..."`
 }
 
-func NewOauth2ClientCreateFirstResponseDTO(resp *dto.OAuth2ClientCreateByAdminResponseDTO) *OAuth2ClientCreateFirstResponseDTO {
-	return &OAuth2ClientCreateFirstResponseDTO{
+func NewOauth2ClientCreateFirstResponse(resp *dto.OAuth2ClientCreateByAdminResponse) *OAuth2ClientCreateFirstResponse {
+	return &OAuth2ClientCreateFirstResponse{
 		OAuth2Client: resource.NewOAuth2Client(resp.Client),
 		ClientSecret: resp.ClientSecret,
 	}
 }
 
-type OAuth2ClientGetRequestDTO struct {
+type OAuth2ClientGetRequest struct {
 	ClientID string `param:"client_id"`
 }
 
-func (req *OAuth2ClientGetRequestDTO) To() *dto.OAuth2ClientGetRequestDTO {
+func (req *OAuth2ClientGetRequest) To() *dto.OAuth2ClientGetRequest {
 	clientID, err := snowflake.ParseString(req.ClientID)
 	if err != nil {
 		clientID = 0
 	}
 
-	return &dto.OAuth2ClientGetRequestDTO{
+	return &dto.OAuth2ClientGetRequest{
 		ClientID: clientID,
 	}
 }
 
-type OAuth2ClientGetResponseDTO struct {
+type OAuth2ClientGetResponse struct {
 	*resource.OAuth2Client
 }
 
-func NewOAuth2ClientGetResponseDTO(resp *dto.OAuth2ClientGetResponseDTO) *OAuth2ClientGetResponseDTO {
-	return &OAuth2ClientGetResponseDTO{
+func NewOAuth2ClientGetResponse(resp *dto.OAuth2ClientGetResponse) *OAuth2ClientGetResponse {
+	return &OAuth2ClientGetResponse{
 		OAuth2Client: resource.NewOAuth2Client(resp.Client),
 	}
 }

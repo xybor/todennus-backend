@@ -9,63 +9,63 @@ import (
 )
 
 // Register
-type UserRegisterRequestDTO struct {
+type UserRegisterRequest struct {
 	Username string
 	Password string
 }
 
-type UserRegisterResponseDTO struct {
+type UserRegisterResponse struct {
 	User *resource.User
 }
 
-func NewUserRegisterResponseDTO(ctx context.Context, user *domain.User) *UserRegisterResponseDTO {
-	return &UserRegisterResponseDTO{
+func NewUserRegisterResponse(ctx context.Context, user *domain.User) *UserRegisterResponse {
+	return &UserRegisterResponse{
 		User: resource.NewUserWithoutFilter(user),
 	}
 }
 
 // GetByID
-type UserGetByIDRequestDTO struct {
+type UserGetByIDRequest struct {
 	UserID snowflake.ID
 }
 
-type UserGetByIDResponseDTO struct {
+type UserGetByIDResponse struct {
 	User *resource.User
 }
 
-func NewUserGetByIDResponseDTO(ctx context.Context, user *domain.User) *UserGetByIDResponseDTO {
-	return &UserGetByIDResponseDTO{
+func NewUserGetByIDResponse(ctx context.Context, user *domain.User) *UserGetByIDResponse {
+	return &UserGetByIDResponse{
 		User: resource.NewUser(ctx, user),
 	}
 }
 
 // GetByUsername
-type UserGetByUsernameRequestDTO struct {
+type UserGetByUsernameRequest struct {
 	Username string
 }
 
-type UserGetByUsernameResponseDTO struct {
+type UserGetByUsernameResponse struct {
 	User *resource.User
 }
 
-func NewUserGetByUsernameResponseDTO(ctx context.Context, user *domain.User) *UserGetByUsernameResponseDTO {
-	return &UserGetByUsernameResponseDTO{
+func NewUserGetByUsernameResponse(ctx context.Context, user *domain.User) *UserGetByUsernameResponse {
+	return &UserGetByUsernameResponse{
 		User: resource.NewUser(ctx, user),
 	}
 }
 
 // Validate
-type UserValidateCredentialsRequestDTO struct {
+type UserValidateCredentialsRequest struct {
 	Username string
 	Password string
 }
 
-type UserValidateCredentialsResponseDTO struct {
+type UserValidateCredentialsResponse struct {
 	User *resource.User
 }
 
-func NewUserValidateCredentialsResponseDTO(ctx context.Context, user *domain.User) *UserValidateCredentialsResponseDTO {
-	return &UserValidateCredentialsResponseDTO{
+func NewUserValidateCredentialsResponse(ctx context.Context, user *domain.User) *UserValidateCredentialsResponse {
+	return &UserValidateCredentialsResponse{
 		User: resource.NewUser(ctx, user),
 	}
 }

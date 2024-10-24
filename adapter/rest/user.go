@@ -6,7 +6,7 @@ import (
 	_ "github.com/xybor/todennus-backend/adapter/rest/standard"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/xybor/todennus-backend/adapter/rest/abstraction"
+	"github.com/xybor/todennus-backend/adapter/abstraction"
 	"github.com/xybor/todennus-backend/adapter/rest/dto"
 	"github.com/xybor/todennus-backend/adapter/rest/middleware"
 	"github.com/xybor/todennus-backend/adapter/rest/response"
@@ -36,8 +36,8 @@ func (a *UserRESTAdapter) Router(r chi.Router) {
 // @Tags User
 // @Accept json
 // @Produce json
-// @Param user body dto.UserRegisterRequestDTO true "User registration data"
-// @Success 201 {object} standard.SwaggerSuccessResponse[dto.UserRegisterResponseDTO] "User registered successfully"
+// @Param user body dto.UserRegisterRequest true "User registration data"
+// @Success 201 {object} standard.SwaggerSuccessResponse[dto.UserRegisterResponse] "User registered successfully"
 // @Failure 400 {object} standard.SwaggerBadRequestErrorResponse "Bad request"
 // @Failure 409 {object} standard.SwaggerDuplicatedErrorResponse "Duplicated"
 // @Router /users [post]
@@ -45,14 +45,14 @@ func (a *UserRESTAdapter) Register() func(w http.ResponseWriter, r *http.Request
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		request, err := xhttp.ParseHTTPRequest[dto.UserRegisterRequestDTO](r)
+		request, err := xhttp.ParseHTTPRequest[dto.UserRegisterRequest](r)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
 		}
 
 		user, err := a.userUsecase.Register(ctx, request.To())
-		response.NewResponseHandler(ctx, dto.NewUserRegisterResponseDTO, user, err).
+		response.NewResponseHandler(ctx, dto.NewUserRegisterResponse, user, err).
 			WithDefaultCode(http.StatusCreated).
 			Map(http.StatusConflict, usecase.ErrDuplicated).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
@@ -65,7 +65,7 @@ func (a *UserRESTAdapter) Register() func(w http.ResponseWriter, r *http.Request
 // @Tags User
 // @Produce json
 // @Param id path string true "User ID"
-// @Success 200 {object} standard.SwaggerSuccessResponse[dto.UserGetByIDResponseDTO] "Get user successfully"
+// @Success 200 {object} standard.SwaggerSuccessResponse[dto.UserGetByIDResponse] "Get user successfully"
 // @Failure 400 {object} standard.SwaggerBadRequestErrorResponse "Bad request"
 // @Failure 404 {object} standard.SwaggerNotFoundErrorResponse "Not found"
 // @Router /users/{user_id} [get]
@@ -73,7 +73,7 @@ func (a *UserRESTAdapter) GetByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseHTTPRequest[dto.UserGetByIDRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.UserGetByIDRequest](r)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
@@ -86,7 +86,7 @@ func (a *UserRESTAdapter) GetByID() http.HandlerFunc {
 		}
 
 		resp, err := a.userUsecase.GetByID(ctx, ucReq)
-		response.NewResponseHandler(ctx, dto.NewUserGetByIDResponseDTO, resp, err).
+		response.NewResponseHandler(ctx, dto.NewUserGetByIDResponse, resp, err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
 			Map(http.StatusNotFound, usecase.ErrNotFound).
 			WriteHTTPResponse(ctx, w)
@@ -98,7 +98,7 @@ func (a *UserRESTAdapter) GetByID() http.HandlerFunc {
 // @Tags User
 // @Produce json
 // @Param username path string true "Username"
-// @Success 200 {object} standard.SwaggerSuccessResponse[dto.UserGetByUsernameResponseDTO] "Get user successfully"
+// @Success 200 {object} standard.SwaggerSuccessResponse[dto.UserGetByUsernameResponse] "Get user successfully"
 // @Failure 400 {object} standard.SwaggerBadRequestErrorResponse "Bad request"
 // @Failure 404 {object} standard.SwaggerNotFoundErrorResponse "Not found"
 // @Router /users/username/{username} [get]
@@ -106,14 +106,14 @@ func (a *UserRESTAdapter) GetByUsername() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseHTTPRequest[dto.UserGetByUsernameRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.UserGetByUsernameRequest](r)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
 		}
 
 		resp, err := a.userUsecase.GetByUsername(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewUserGetByUsernameResponseDTO, resp, err).
+		response.NewResponseHandler(ctx, dto.NewUserGetByUsernameResponse, resp, err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
 			Map(http.StatusNotFound, usecase.ErrNotFound).
 			WriteHTTPResponse(ctx, w)
@@ -125,8 +125,8 @@ func (a *UserRESTAdapter) GetByUsername() http.HandlerFunc {
 // @Tags User
 // @Accept json
 // @Produce json
-// @Param body body dto.UserValidateRequestDTO true "Validation data"
-// @Success 200 {object} standard.SwaggerSuccessResponse[dto.UserValidateResponseDTO] "Validate successfully"
+// @Param body body dto.UserValidateRequest true "Validation data"
+// @Success 200 {object} standard.SwaggerSuccessResponse[dto.UserValidateResponse] "Validate successfully"
 // @Failure 400 {object} standard.SwaggerBadRequestErrorResponse "Bad request"
 // @Failure 401 {object} standard.SwaggerInvalidCredentialsErrorResponse "Invalid credentials"
 // @Router /users/validate [post]
@@ -134,14 +134,14 @@ func (a *UserRESTAdapter) Validate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		req, err := xhttp.ParseHTTPRequest[dto.UserValidateRequestDTO](r)
+		req, err := xhttp.ParseHTTPRequest[dto.UserValidateRequest](r)
 		if err != nil {
 			response.HandleError(ctx, w, err)
 			return
 		}
 
 		resp, err := a.userUsecase.ValidateCredentials(ctx, req.To())
-		response.NewResponseHandler(ctx, dto.NewUserValidateResponseDTO, resp, err).
+		response.NewResponseHandler(ctx, dto.NewUserValidateResponse, resp, err).
 			Map(http.StatusBadRequest, usecase.ErrRequestInvalid).
 			Map(http.StatusUnauthorized, usecase.ErrCredentialsInvalid).
 			WriteHTTPResponse(ctx, w)
